@@ -1,0 +1,155 @@
+{
+  "rodape": "Migração SDK → Ponte 5.1",
+  "trilha": true,
+  "cenas": [
+    {
+      "id": "abertura", "tipo": "abertura",
+      "fala": "Migração do SDK ProvedorA para a Ponte cinco ponto um. O resumo do que foi feito, de como está, e dos próximos passos.",
+      "etiqueta": "ACME  ·  PROCESSOS",
+      "titulo": "Migração do SDK ProvedorA",
+      "destaque": "para a Ponte 5.1",
+      "subtitulo": "Relatório de entrega   ·   PBI 1001 e PBI 1002   ·   novembro de 2026"
+    },
+    {
+      "id": "manchete", "tipo": "manchete", "capitulo": "Resultado",
+      "fala": "A migração terminou. O robô de processos não usa mais o SDK da ProvedorA. Toda a comunicação com o provedor passa agora pela API Ponte cinco ponto um. Quinze das dezesseis tarefas estão prontas, com testes e validação no sandbox.",
+      "titulo": {"texto": "A migração terminou.", "quando": "A migração"},
+      "subtitulo": {"texto": "O robô de processos não usa mais o SDK da ProvedorA.", "quando": "O robô"},
+      "selo": {"texto": "Tudo passa pela Acme.API.Ponte 5.1", "quando": "Toda"},
+      "progresso": {"feito": 15, "total": 16, "rotulo": "tarefas prontas", "obs": "T16 em andamento", "quando": "Quinze"}
+    },
+    {
+      "id": "antes_depois", "tipo": "antes_depois", "capitulo": "Antes e depois", "titulo": "Dois caminhos viraram um",
+      "fala": "Antes, o robô falava com a ProvedorA por dois caminhos: o SDK embutido, com pacotes vulneráveis, e chamadas à Ponte, cada uma com o seu próprio login. Agora, robô e portal passam por um caminho só. A Ponte escolhe a API da ProvedorA por configuração: ProvedorA vê seis, Extended, ou ProvedorB, em modo simulado.",
+      "antes": {
+        "rotulo": "ANTES", "quando": "Antes",
+        "camadas": [
+          [{"id": "robo", "titulo": "1-RoboProcessos", "sub": "7 robôs"}, {"id": "portal", "titulo": "Portal (front)", "sub": "documento"}],
+          [{"id": "sdk", "titulo": "SDK ProvedorA 7.0", "sub": "pacotes vulneráveis", "tipo": "ruim", "quando": "o SDK"},
+           {"id": "ponte", "titulo": "Ponte", "sub": "rotas antigas", "quando": "chamadas"}],
+          [{"titulo": "ProvedorA V6", "quando": ["chamadas", 0.9]}]
+        ],
+        "setas_extra": [{"de": "robo", "para": "ponte", "rotulo": "login próprio por chamada"}]
+      },
+      "agora": {
+        "rotulo": "AGORA", "quando": "Agora",
+        "camadas": [
+          [{"titulo": "1-RoboProcessos", "sub": "sem SDK, token único"}, {"titulo": "Portal (front)", "sub": "documento"}],
+          [{"titulo": "Acme.API.Ponte 5.1", "sub": "api/{dominio}/{acao}  ·  gwId + apiProvedorA", "tipo": "destaque", "quando": "caminho só"}],
+          [{"titulo": "ProvedorA V6", "quando": "ProvedorA"}, {"titulo": "Extended", "quando": "Extended"}, {"titulo": "ProvedorB (mock)", "quando": "ProvedorB"}]
+        ],
+        "nota": {"texto": "a configuração do robô escolhe a API (padrão V6)", "quando": "por configuração"}
+      },
+      "riscar": ["sdk"]
+    },
+    {
+      "id": "numeros", "tipo": "numeros", "capitulo": "Em números", "titulo": "Em números",
+      "fala": "Em números. Na Ponte, trinta e um commits, vinte e duas operações, e duzentos e setenta e nove testes unitários. No robô, dezoito commits, cento e quarenta e cinco arquivos, e duzentos e cinquenta e três testes. Antes, eram só um.",
+      "cartoes": [
+        {"titulo": "Acme.API.Ponte 5.1", "sub": "PBI 1001", "quando": "Na Ponte",
+         "stats": [{"valor": 31, "rotulo": "commits", "quando": "trinta e um"}, {"valor": 22, "rotulo": "operações", "quando": "vinte e duas"},
+                   {"valor": 279, "rotulo": "testes unitários", "quando": "duzentos e setenta"}]},
+        {"titulo": "1-RoboProcessos + front", "sub": "PBI 1002", "quando": "No robô",
+         "stats": [{"valor": 18, "rotulo": "commits", "quando": "dezoito"}, {"valor": 145, "rotulo": "arquivos", "quando": "cento e quarenta"},
+                   {"valor": 253, "rotulo": "testes unitários", "quando": "duzentos e cinquenta"}],
+         "selo": {"texto": "antes: 1 teste", "quando": "Antes, eram"}}
+      ],
+      "nota": {"texto": "No robô, saíram ProvedorA-Core 1.5.7 e ProvedorA-ProvedorA 7.0.0, e com eles RestSharp 106 e log4net 2.0.8", "quando": ["Antes, eram", 1.0]}
+    },
+    {
+      "id": "ponte", "tipo": "lista", "capitulo": "Ponte 5.1", "titulo": "Ponte 5.1: o que mudou",
+      "fala": "Na Ponte, as rotas foram padronizadas por domínio, e as vinte rotas antigas continuam funcionando. Cada operação existe em vê seis e em Extended, e o que o provedor não oferece responde quinhentos e um. A resposta da ProvedorA volta como veio, e os pacotes vulneráveis foram corrigidos.",
+      "digitando": "POST api/chargeback/reverter",
+      "itens": [
+        {"titulo": "Rotas padronizadas", "detalhe": "api/{dominio}/{acao}  ·  8 controllers por domínio  ·  20 rotas antigas mantidas", "quando": "as rotas foram"},
+        {"titulo": "V6 e Extended lado a lado", "detalhe": "a flag apiProvedorA escolhe a API  ·  501 quando ela não oferece a operação", "quando": "Cada operação"},
+        {"titulo": "Resposta como a ProvedorA enviou", "detalhe": "claimDetail, transactionSummary, clearingDetail  ·  200 com mensagem quando vem sem dados", "quando": "A resposta"},
+        {"titulo": "Pacotes vulneráveis corrigidos", "detalhe": "RestSharp 110 → 114  ·  Pkcs 8 → 10  ·  nenhum vulnerável, inclusive transitivo", "quando": "os pacotes"}
+      ]
+    },
+    {
+      "id": "robo", "tipo": "grade", "capitulo": "Robô e front", "titulo": "Robô e front: só a tradução mudou",
+      "fala": "No robô, nenhuma regra de negócio mudou. Só a tradução. Health check, pesquisa de transação, disputa, chargeback, fraude, clearing, detalhes, encerramento, reversão, e as seis chamadas que já existiam, todas passam pela Ponte, com um único token reaproveitado. No portal Double Check, o documento de reapresentação usa a rota nova.",
+      "intro": {"texto": "Nenhuma regra de negócio mudou.", "quando": "nenhuma regra"},
+      "intro_destaque": "Mesmas tabelas, status e tentativas.",
+      "itens": [
+        {"nome": "Health check", "sub": "ponte/disponibilidade", "quando": "Health"},
+        {"nome": "Pesquisa de transação", "sub": "transacao/pesquisar", "quando": "pesquisa"},
+        {"nome": "Criar disputa", "sub": "disputa/criar", "quando": "disputa,"},
+        {"nome": "Criar chargeback", "sub": "chargeback/criar", "quando": "chargeback,"},
+        {"nome": "Enviar fraude", "sub": "fraude/enviar", "quando": "fraude"},
+        {"nome": "Consultar clearing", "sub": "transacao/clearing", "quando": "clearing"},
+        {"nome": "Detalhes da disputa", "sub": "disputa/detalhes", "quando": "detalhes"},
+        {"nome": "Encerrar disputa", "sub": "disputa/encerrar", "quando": "encerramento"},
+        {"nome": "Reverter chargeback", "sub": "chargeback/reverter", "quando": "reversão"},
+        {"nome": "Atualizar chargeback", "sub": "chargeback/atualizar", "quando": ["reversão", 0.45]},
+        {"nome": "6 chamadas HTTP", "sub": "filas · pré-arbitragem · UI", "quando": "seis chamadas"},
+        {"nome": "Documento (front)", "sub": "chargeback/documento", "quando": "documento"}
+      ],
+      "selos": [
+        {"texto": "1 token JWT reaproveitado por todas as threads", "quando": "único token"},
+        {"texto": "Portal MeuProjeto: api/chargeback/documento", "quando": ["documento", 0.6]}
+      ]
+    },
+    {
+      "id": "testes", "tipo": "aneis", "capitulo": "Testes", "titulo": "Testes: tudo verde",
+      "fala": "Os testes. As duas suítes estão verdes e não dependem da ProvedorA: usam servidores falsos e respostas reais do sandbox. E a suíte de integração, com o token e o cliente reais do robô, passou doze de doze, já sem o SDK.",
+      "aneis": [
+        {"titulo": "Acme.API.Ponte 5.1", "valor": 279, "rotulo": "testes aprovados", "quando": "As duas suítes",
+         "nota": {"texto": "rotas · roteamento · V6 e Extended · OAuth · IoC", "quando": "servidores falsos"}},
+        {"titulo": "1-RoboProcessos", "valor": 253, "rotulo": "testes aprovados", "quando": ["As duas suítes", 0.5],
+         "nota": {"texto": "token · tradução · tentativas · rejeição · sondas", "quando": "servidores falsos"}}
+      ],
+      "selo": {"texto": "Integração real no sandbox: 12 de 12  ·  já sem o SDK", "quando": "doze de doze"}
+    },
+    {
+      "id": "sandbox", "tipo": "terminal", "capitulo": "Sandbox", "titulo": "Validação no sandbox ProvedorA",
+      "fala": "No sandbox, cada operação foi chamada de verdade. Criar disputa, chargeback e fraude devolveram os identificadores. Encerrar, reverter e atualizar foram aceitos. E no Extended, o encerramento devolve quinhentos e um, que o robô registra como falha, conforme a regra.",
+      "barra": "IntegracaoPonteTests  ·  Ponte 5.1 local → sandbox ProvedorA",
+      "comando": "dotnet test --filter IntegracaoPonteTests",
+      "quando_inicio": ["Criar disputa", -0.2], "quando_fim": "E no Extended",
+      "linhas": [
+        {"chamada": "POST api/disputa/criar", "api": "V6", "status": "200", "resultado": "claimId devolvido"},
+        {"chamada": "POST api/chargeback/criar", "api": "V6", "status": "200", "resultado": "chargebackId devolvido"},
+        {"chamada": "POST api/fraude/enviar", "api": "V6", "status": "200", "resultado": "fraudeId 300000021197"},
+        {"chamada": "POST api/transacao/pesquisar", "api": "V6", "status": "200", "resultado": "mesmo clearing que o SDK escolhia"},
+        {"chamada": "POST api/disputa/detalhes", "api": "V6", "status": "200", "resultado": "chargebackType em texto"},
+        {"chamada": "PUT  api/disputa/encerrar", "api": "V6", "status": "200", "resultado": "encerramento aceito"},
+        {"chamada": "POST api/chargeback/reverter", "api": "V6", "status": "200", "resultado": "reversão aceita"},
+        {"chamada": "PUT  api/chargeback/atualizar", "api": "V6", "status": "200", "resultado": "atualização aceita"},
+        {"chamada": "PUT  api/disputa/encerrar", "api": "Extended", "status": "501", "resultado": "RN-9: robô registra como falha"}
+      ],
+      "rodape": {"texto": "12 de 12 aprovados  ·  nenhuma chamada direta à ProvedorA", "quando": "regra"}
+    },
+    {
+      "id": "decisoes", "tipo": "antes_agora", "capitulo": "Decisões", "titulo": "Falhas que o SDK tratava mal",
+      "fala": "Algumas falhas que o SDK tratava mal foram corrigidas. Erro de rede agora conta como tentativa, em vez de derrubar a sonda. Sucesso sem identificador vira falha. E a data da fraude ganhou o zero à esquerda, que a ProvedorA exigia.",
+      "rotulos": ["ANTES (SDK)", "AGORA (PONTE)"],
+      "itens": [
+        {"rotulo": "Erro de rede ou timeout", "antes": "derrubava a sonda", "agora": "conta como tentativa", "quando": "Erro de rede"},
+        {"rotulo": "Sucesso sem identificador", "antes": "seguia com id vazio", "agora": "vira falha, com mensagem", "quando": "Sucesso sem"},
+        {"rotulo": "Data da fraude", "antes": "2026-11-3 (recusada)", "agora": "2026-11-03", "quando": "E a data"}
+      ]
+    },
+    {
+      "id": "proximos", "tipo": "linha_tempo", "capitulo": "Próximos passos", "titulo": "Próximos passos",
+      "fala": "Próximos passos: concluir a validação integrada de ponta a ponta no sistema, publicar as versões, e depois, a fase do Extended no robô.",
+      "itens": [
+        {"titulo": "Validação integrada", "sub": "ponta a ponta no sistema (T16)", "quando": "concluir", "atual": true, "tag": "em andamento"},
+        {"titulo": "Publicar as versões", "sub": "Ponte, robô e portal", "quando": "publicar"},
+        {"titulo": "Fase Extended", "sub": "tradução no robô", "quando": "Extended"}
+      ],
+      "nota": {"texto": "Depois: refatoração do robô e um contrato único de resposta para V6, Extended e ProvedorB", "quando": ["Extended", 1.0]}
+    },
+    {
+      "id": "encerramento", "tipo": "encerramento",
+      "fala": "SDK fora. Ponte no centro. Migração concluída.",
+      "linhas": [
+        {"texto": "SDK fora.", "quando": "SDK"},
+        {"texto": "Ponte no centro.", "quando": "Ponte", "destaque": true},
+        {"texto": "Migração concluída.", "quando": "Migração"}
+      ],
+      "rodape": "Acme  ·  Processos   —   PBI 1001  ·  PBI 1002"
+    }
+  ]
+}

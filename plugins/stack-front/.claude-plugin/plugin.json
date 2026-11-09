@@ -1,0 +1,7 @@
+{
+  "name": "stack-front",
+  "version": "0.1.0",
+  "description": "Convenções de front-end para o fluxo: lint, testes, build e verificação visual no navegador (desktop e mobile).",
+  "author": { "name": "Gabriel Nunes Campos" },
+  "keywords": ["frontend", "react", "angular", "javascript"]
+}

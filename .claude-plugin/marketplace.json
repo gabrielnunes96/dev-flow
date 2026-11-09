@@ -1,0 +1,59 @@
+{
+  "name": "dev-flow",
+  "owner": { "name": "Gabriel Nunes Campos" },
+  "metadata": {
+    "description": "Fluxo de desenvolvimento automatizado do time: da demanda à especificação funcional e técnica, plano, implementação task a task, revisão, validação, PR e CI/CD.",
+    "version": "0.1.1"
+  },
+  "plugins": [
+    {
+      "name": "fluxo",
+      "source": "./plugins/fluxo",
+      "description": "Núcleo do processo: demanda → funcional → técnica → plano → tasks → PR, com portões humanos, guard de segurança e validação local.",
+      "version": "0.1.1",
+      "category": "development"
+    },
+    {
+      "name": "azure-boards",
+      "source": "./plugins/azure-boards",
+      "description": "Sincroniza o plano da demanda com o Azure Boards (PBI e tasks, estados, descrição do card) via MCP do Azure DevOps.",
+      "version": "0.1.0",
+      "category": "development"
+    },
+    {
+      "name": "azure-pipelines",
+      "source": "./plugins/azure-pipelines",
+      "description": "Gera e ajusta pipelines YAML do Azure DevOps (build, testes, publicação, deploy com aprovação) e diagnostica execuções.",
+      "version": "0.1.0",
+      "category": "development"
+    },
+    {
+      "name": "stack-dotnet",
+      "source": "./plugins/stack-dotnet",
+      "description": "Convenções de .NET para o fluxo: build/teste, testes de contrato com a API em memória, pacotes vulneráveis e SDKs gerados.",
+      "version": "0.1.0",
+      "category": "development"
+    },
+    {
+      "name": "stack-sql",
+      "source": "./plugins/stack-sql",
+      "description": "Convenções de scripts SQL Server para o fluxo: idempotência, rollback pareado, transação, lote e validação em base de desenvolvimento.",
+      "version": "0.1.0",
+      "category": "development"
+    },
+    {
+      "name": "stack-front",
+      "source": "./plugins/stack-front",
+      "description": "Convenções de front-end para o fluxo: lint, testes, build e verificação visual no navegador (desktop e mobile).",
+      "version": "0.1.0",
+      "category": "development"
+    },
+    {
+      "name": "video",
+      "source": "./plugins/video",
+      "description": "Vídeo-resumo animado e narrado de uma entrega a partir de um roteiro JSON: cenas sincronizadas com a fala, transições, trilha e efeitos.",
+      "version": "0.1.0",
+      "category": "productivity"
+    }
+  ]
+}

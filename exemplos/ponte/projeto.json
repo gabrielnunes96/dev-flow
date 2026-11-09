@@ -1,0 +1,115 @@
+{
+  "nome": "Acme.API.Ponte",
+  "descricao": "Ponte genérica entre o MeuProjeto e as APIs de chargeback dos provedores (ProvedorA V6 e ProvedorA Extended; ProvedorB em mock).",
+  "stacks": [
+    "dotnet"
+  ],
+  "idioma": "pt-BR",
+  "docs": ".claude/local/demandas",
+  "convencoes": [
+    "CLAUDE.md",
+    ".claude/rules/*.md"
+  ],
+  "rastreador": {
+    "tipo": "azure-boards",
+    "org": "https://dev.azure.com/minha-organizacao",
+    "projeto": "MeuProjeto",
+    "area": "MeuProjeto\\Equipe",
+    "iteracao": "MeuProjeto\\Sprint 12",
+    "responsavel": "fulano@exemplo.com",
+    "item_raiz": 1001,
+    "protegidos": [
+      1003
+    ],
+    "estados": {
+      "a_fazer": "To Do",
+      "andamento": "In Progress",
+      "feito": "Done"
+    },
+    "modelo_card": ".claude/local/cards/1004-final.html"
+  },
+  "comandos": {
+    "restaurar": "dotnet restore Acme.API.Ponte.sln",
+    "build": "dotnet build Acme.API.Ponte.sln --no-restore -v q -nologo -clp:ErrorsOnly",
+    "teste": "dotnet test tests/Acme.Ponte.ProvedorAExtended.Tests/Acme.Ponte.ProvedorAExtended.Tests.csproj",
+    "vulnerabilidades": "dotnet list Acme.API.Ponte.sln package --vulnerable --include-transitive",
+    "regerar_sdk_extended": "bash 4-infrastructure/Master/Acme.ProvedorAExtended/gerar-sdk.sh"
+  },
+  "servico": {
+    "executar": [
+      "dotnet",
+      "run",
+      "--no-build",
+      "--project",
+      "1-presentation/Acme.API.Ponte",
+      "--launch-profile",
+      "API_Ponte_SandBox"
+    ],
+    "healthcheck": "http://localhost:5009/healthcheck",
+    "processos": [
+      "Acme*"
+    ],
+    "log": ".claude/local/api.log"
+  },
+  "validacao": {
+    "tipo": "http",
+    "base_url": "http://localhost:5009",
+    "token": {
+      "script": "fluxo:token_login.py",
+      "config": ".claude/local/sandbox.json",
+      "arquivo": ".claude/local/token.txt"
+    },
+    "dados": ".claude/rules/sandbox-provedora.md",
+    "casos_obrigatorios": [
+      "V6 sucesso",
+      "Extended sucesso",
+      "ProvedorB 501",
+      "400 de validação"
+    ],
+    "mascarar": [
+      "(?i)\"consumerKey\"\\s*:\\s*\"[^\"]+\""
+    ]
+  },
+  "git": {
+    "branch_base": "master",
+    "commit_por_task": true,
+    "push": "humano",
+    "formato_commit": "{mensagem} (#{id})",
+    "escopo_add": "-A -- .",
+    "nao_versionar": [
+      "CLAUDE.md",
+      ".claude/",
+      "dispute-provedora-extended/"
+    ]
+  },
+  "protecao": {
+    "textos_proibidos": [
+      {
+        "regex": "(?<![\\w.])5\\-Acme\\.API\\.Ponte",
+        "motivo": "o diretório 3.3-Processos/5-Acme.API.Ponte (sem .1) está na lista de exclusão."
+      }
+    ],
+    "diretorios_proibidos": [
+      "../5-Acme.API.Ponte"
+    ],
+    "gerados": [
+      {
+        "regex": "[\\\\/](Acme\\.ProvedorA[\\\\/](Api|Client|Model)|Acme\\.ProvedorAExtended[\\\\/](Api|Client|Model)|Acme\\.ProvedorB[\\\\/]Connected Services)[\\\\/]",
+        "excecoes": [
+          "ApiClient.Custom.cs"
+        ],
+        "motivo": "SDK gerado não se edita à mão; altere a spec/script e regere (exceção registrada no CLAUDE.md)."
+      }
+    ],
+    "segredos": {
+      "arquivos": [
+        ".claude/local/token.txt"
+      ],
+      "scripts_permitidos": "(token_login|http_lote|token|chamar)\\.py"
+    }
+  },
+  "pare_e_pergunte": [
+    "tarefa que exige algo fora do que o 1-RoboProcessos usa (card 1005)",
+    "sandbox falhando sem causa clara na Ponte"
+  ]
+}

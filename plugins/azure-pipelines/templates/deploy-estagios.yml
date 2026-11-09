@@ -1,0 +1,32 @@
+# Estágios de deploy por ambiente. Inclua depois do estágio CI:
+#   - template: deploy-estagios.yml
+#     parameters: { artefato: api }
+# Aprovação manual de produção: configure em Pipelines > Environments > prd > Approvals and checks (não fica no YAML).
+# Segredos: variable group por ambiente (ex.: meuprojeto-dev, meuprojeto-hml, meuprojeto-prd), nunca no YAML.
+parameters:
+  - name: artefato
+    type: string
+  - name: ambientes
+    type: object
+    default: [dev, hml, prd]
+
+stages:
+  - ${{ each ambiente in parameters.ambientes }}:
+      - stage: deploy_${{ ambiente }}
+        displayName: Deploy ${{ ambiente }}
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+        variables:
+          - group: meuprojeto-${{ ambiente }}
+        jobs:
+          - deployment: deploy
+            environment: ${{ ambiente }}
+            strategy:
+              runOnce:
+                deploy:
+                  steps:
+                    - download: current
+                      artifact: ${{ parameters.artefato }}
+                    - script: echo "Substitua pelo passo de deploy (AzureWebApp@1, Kubernetes, SqlAzureDacpacDeployment@1, sqlcmd...)"
+                      displayName: Implantar
+                    - script: echo "Substitua pelo smoke test (healthcheck do ambiente)"
+                      displayName: Smoke test

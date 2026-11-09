@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Perfil do projeto para o plugin fluxo (.claude/projeto.json)",
+  "description": "Contrato entre o processo genérico do plugin e um projeto. Tudo o que é específico do projeto (comandos, rastreador, validação, proteções) fica aqui; as skills não têm nada fixo.",
+  "type": "object",
+  "required": ["nome", "stacks"],
+  "properties": {
+    "nome": { "type": "string", "description": "Nome do projeto." },
+    "descricao": { "type": "string" },
+    "stacks": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "enum": ["dotnet", "sql", "front", "node", "python", "outra"] },
+      "description": "Define quais skills de stack (plugins stack-*) o ciclo da task carrega."
+    },
+    "idioma": { "type": "string", "default": "pt-BR" },
+    "docs": {
+      "type": "string",
+      "default": "docs/demandas",
+      "description": "Onde ficam as especificações (01-funcional.md, 02-tecnica.md, 03-plano.md, tarefas.json). Use .claude/local/demandas se o projeto não versiona especificações."
+    },
+    "convencoes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": ["CLAUDE.md", ".claude/rules/*.md"],
+      "description": "Arquivos que o revisor e a técnica leem como convenções do projeto."
+    },
+    "rastreador": {
+      "type": "object",
+      "properties": {
+        "tipo": { "enum": ["local", "azure-boards"], "default": "local" },
+        "org": { "type": "string", "description": "Ex.: https://dev.azure.com/minha-organizacao" },
+        "projeto": { "type": "string" },
+        "area": { "type": "string" },
+        "iteracao": { "type": "string" },
+        "responsavel": { "type": "string" },
+        "item_raiz": { "type": ["integer", "null"], "description": "PBI/Feature ao qual o escopo está limitado." },
+        "protegidos": { "type": "array", "items": { "type": "integer" }, "description": "Itens que só o usuário move/edita." },
+        "estados": {
+          "type": "object",
+          "properties": {
+            "a_fazer": { "type": "string", "default": "To Do" },
+            "andamento": { "type": "string", "default": "In Progress" },
+            "feito": { "type": "string", "default": "Done" }
+          }
+        },
+        "modelo_card": { "type": "string", "description": "HTML de referência para a descrição do card." }
+      }
+    },
+    "comandos": {
+      "type": "object",
+      "description": "Comandos de shell, executados a partir da raiz do projeto.",
+      "properties": {
+        "restaurar": { "type": "string" },
+        "build": { "type": "string" },
+        "teste": { "type": "string" },
+        "lint": { "type": "string" },
+        "vulnerabilidades": { "type": "string" }
+      },
+      "additionalProperties": { "type": "string" }
+    },
+    "servico": {
+      "type": "object",
+      "description": "Como subir a aplicação local para validação (scripts/servico.py).",
+      "properties": {
+        "executar": { "type": ["array", "string"] },
+        "healthcheck": { "type": "string" },
+        "processos": { "type": "array", "items": { "type": "string" } },
+        "log": { "type": "string" },
+        "espera_segundos": { "type": "integer" }
+      }
+    },
+    "validacao": {
+      "type": "object",
+      "properties": {
+        "tipo": { "enum": ["http", "sql", "navegador", "comando", "nenhuma"] },
+        "base_url": { "type": "string" },
+        "token": {
+          "type": "object",
+          "properties": {
+            "script": { "type": "string", "description": "Script que gera/renova o token. Prefixo fluxo: = script do plugin (ex.: fluxo:token_login.py); sem prefixo = caminho relativo à raiz do projeto." },
+            "config": { "type": "string", "description": "JSON local com loginUrl, loginCertSha1, username." },
+            "arquivo": { "type": "string", "description": "Onde o token é gravado; o guard bloqueia a leitura dele pelo chat." }
+          }
+        },
+        "dados": { "type": "string", "description": "Arquivo com dados de teste e comportamentos conhecidos do ambiente." },
+        "casos_obrigatorios": { "type": "array", "items": { "type": "string" }, "description": "Casos que toda task valida (ex.: sucesso por variante, 400 de validação)." },
+        "mascarar": { "type": "array", "items": { "type": "string" }, "description": "Regex mascaradas na saída da validação." },
+        "comando": { "type": "string", "description": "Para tipo comando/sql: comando que executa a validação." }
+      }
+    },
+    "git": {
+      "type": "object",
+      "properties": {
+        "branch_base": { "type": "string", "default": "main" },
+        "commit_por_task": { "type": "boolean", "default": true },
+        "push": { "enum": ["humano", "permitido"], "default": "humano" },
+        "formato_commit": { "type": "string", "default": "{mensagem} (#{id})" },
+        "coautor": { "type": "string" },
+        "escopo_add": { "type": "string", "default": "-A -- .", "description": "Argumentos do git add." },
+        "nao_versionar": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "protecao": {
+      "type": "object",
+      "description": "Lido pelo hook guard.py.",
+      "properties": {
+        "textos_proibidos": {
+          "type": "array",
+          "items": { "type": "object", "required": ["regex"], "properties": { "regex": { "type": "string" }, "motivo": { "type": "string" } } }
+        },
+        "diretorios_proibidos": { "type": "array", "items": { "type": "string" } },
+        "gerados": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["regex"],
+            "properties": { "regex": { "type": "string" }, "excecoes": { "type": "array", "items": { "type": "string" } }, "motivo": { "type": "string" } }
+          }
+        },
+        "segredos": {
+          "type": "object",
+          "properties": { "arquivos": { "type": "array", "items": { "type": "string" } }, "scripts_permitidos": { "type": "string" } }
+        },
+        "segredos_extras": {
+          "type": "array",
+          "items": { "type": "object", "required": ["regex"], "properties": { "regex": { "type": "string" }, "motivo": { "type": "string" } } }
+        }
+      }
+    },
+    "pare_e_pergunte": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Situações específicas do projeto em que o ciclo para e pergunta ao usuário."
+    }
+  }
+}

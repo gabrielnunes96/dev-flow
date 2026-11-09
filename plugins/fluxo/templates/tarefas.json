@@ -1,0 +1,33 @@
+{
+  "demanda": "exemplo-slug",
+  "titulo": "Título da demanda",
+  "item_raiz": null,
+  "tarefas": [
+    {
+      "id": "T1",
+      "titulo": "Criar tabela e script de rollback",
+      "descricao": "O que fazer, em 2-4 frases, com os nomes reais da técnica.",
+      "repo": ".",
+      "stack": "sql",
+      "depende_de": [],
+      "criterios": ["CA-1"],
+      "validacao": "script aplicado e revertido na base de desenvolvimento",
+      "estado": "a_fazer",
+      "wi": null,
+      "commit": null
+    },
+    {
+      "id": "T2",
+      "titulo": "Expor a consulta em api/exemplo/consultar",
+      "descricao": "",
+      "repo": ".",
+      "stack": "dotnet",
+      "depende_de": ["T1"],
+      "criterios": ["CA-1", "CA-2"],
+      "validacao": "200 com dados, 400 sem campo obrigatório",
+      "estado": "a_fazer",
+      "wi": null,
+      "commit": null
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "name": "azure-boards",
+  "version": "0.1.0",
+  "description": "Sincroniza o plano da demanda (tarefas.json) com o Azure Boards: item raiz, tasks, estados e descrição do card.",
+  "author": { "name": "Gabriel Nunes Campos" },
+  "keywords": ["azure-devops", "boards", "work-items"]
+}

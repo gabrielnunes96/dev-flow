@@ -1,0 +1,29 @@
+# CI do próprio marketplace: testes dos scripts e validação dos manifestos.
+trigger:
+  branches:
+    include: [main]
+
+pr:
+  branches:
+    include: [main]
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: "3.12"
+
+  - script: python -m unittest discover -s tests -v
+    displayName: Testes dos scripts
+
+  - task: NodeTool@0
+    inputs:
+      versionSpec: 22.x
+
+  - script: |
+      npm install -g @anthropic-ai/claude-code
+      claude plugin validate . --strict
+      for p in plugins/*; do claude plugin validate "$p" --strict; done
+    displayName: Validar marketplace e plugins

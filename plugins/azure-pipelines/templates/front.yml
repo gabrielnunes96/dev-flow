@@ -1,0 +1,54 @@
+# CI de um front-end (npm). Ajuste pasta, nodeVersion e scripts ao package.json do projeto.
+trigger:
+  branches:
+    include: [main]
+  paths:
+    include: [web/*]
+
+pr:
+  branches:
+    include: [main]
+  paths:
+    include: [web/*]
+
+variables:
+  pasta: web
+  nodeVersion: 22.x
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: $(nodeVersion)
+
+  - task: Cache@2
+    inputs:
+      key: npm | "$(Agent.OS)" | $(pasta)/package-lock.json
+      path: $(Pipeline.Workspace)/.npm
+    displayName: Cache do npm
+
+  - script: npm ci --cache $(Pipeline.Workspace)/.npm
+    workingDirectory: $(pasta)
+    displayName: Instalar
+
+  - script: npm run lint
+    workingDirectory: $(pasta)
+    displayName: Lint
+
+  - script: npm test -- --ci
+    workingDirectory: $(pasta)
+    displayName: Testes
+
+  - script: npm audit --audit-level=high --omit=dev
+    workingDirectory: $(pasta)
+    displayName: Pacotes vulneráveis
+
+  - script: npm run build
+    workingDirectory: $(pasta)
+    displayName: Build
+
+  - publish: $(pasta)/dist
+    artifact: web
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))

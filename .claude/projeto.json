@@ -1,0 +1,22 @@
+{
+  "nome": "dev-flow",
+  "descricao": "Marketplace de plugins do Claude Code com o fluxo de desenvolvimento do time.",
+  "stacks": ["python"],
+  "idioma": "pt-BR",
+  "docs": "docs/demandas",
+  "convencoes": ["CLAUDE.md"],
+  "rastreador": { "tipo": "local" },
+  "comandos": {
+    "teste": "python -m unittest discover -s tests",
+    "validar_plugins": "claude plugin validate ."
+  },
+  "validacao": { "tipo": "comando", "comando": "claude plugin validate . && python -m unittest discover -s tests" },
+  "git": {
+    "branch_base": "main",
+    "commit_por_task": true,
+    "push": "humano",
+    "formato_commit": "{mensagem} ({id})",
+    "coautor": "Claude Opus 5.5 <noreply@anthropic.com>"
+  },
+  "protecao": {}
+}

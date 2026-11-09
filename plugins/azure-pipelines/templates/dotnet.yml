@@ -1,0 +1,60 @@
+# CI de um projeto .NET. Ajuste solucao, dotnetVersion e trigger.paths ao projeto.
+trigger:
+  branches:
+    include: [main]
+  paths:
+    include: [src/MeuProjeto/*]
+
+pr:
+  branches:
+    include: [main]
+  paths:
+    include: [src/MeuProjeto/*]
+
+variables:
+  solucao: src/MeuProjeto/MeuProjeto.sln
+  configuracao: Release
+  dotnetVersion: 10.0.x
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: CI
+    jobs:
+      - job: build_teste
+        steps:
+          - task: UseDotNet@2
+            inputs:
+              packageType: sdk
+              version: $(dotnetVersion)
+
+          - script: dotnet restore "$(solucao)"
+            displayName: Restaurar
+
+          - script: dotnet build "$(solucao)" --no-restore -c $(configuracao) -warnaserror:NU1902,NU1903,NU1904
+            displayName: Compilar (pacote vulnerável quebra o build)
+
+          - script: dotnet test "$(solucao)" --no-build -c $(configuracao) --logger trx --results-directory $(Agent.TempDirectory)/testes
+            displayName: Testes
+
+          - task: PublishTestResults@2
+            condition: always()
+            inputs:
+              testResultsFormat: VSTest
+              testResultsFiles: $(Agent.TempDirectory)/testes/*.trx
+
+          - script: |
+              dotnet list "$(solucao)" package --vulnerable --include-transitive | tee vulneraveis.txt
+              ! grep -q "has the following vulnerable packages" vulneraveis.txt
+            displayName: Pacotes vulneráveis (inclui transitivos)
+
+          - script: dotnet publish src/MeuProjeto/MeuProjeto.Api -c $(configuracao) --no-build -o $(Build.ArtifactStagingDirectory)/api
+            displayName: Publicar
+            condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+
+          - publish: $(Build.ArtifactStagingDirectory)/api
+            artifact: api
+            condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+
+  # Deploy: ver deploy-estagios.yml (incluir como template quando houver ambiente).

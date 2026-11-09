@@ -1,0 +1,7 @@
+{
+  "name": "azure-pipelines",
+  "version": "0.1.0",
+  "description": "Gera e ajusta pipelines YAML do Azure DevOps (build, testes, publicação, deploy com aprovação) e diagnostica execuções.",
+  "author": { "name": "Gabriel Nunes Campos" },
+  "keywords": ["azure-devops", "pipelines", "ci", "cd"]
+}

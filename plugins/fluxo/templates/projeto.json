@@ -1,0 +1,61 @@
+{
+  "nome": "MeuProjeto.Api",
+  "descricao": "Uma frase sobre o projeto.",
+  "stacks": [
+    "dotnet"
+  ],
+  "idioma": "pt-BR",
+  "docs": "docs/demandas",
+  "convencoes": [
+    "CLAUDE.md",
+    ".claude/rules/*.md"
+  ],
+  "rastreador": {
+    "tipo": "local"
+  },
+  "comandos": {
+    "restaurar": "dotnet restore MeuProjeto.sln",
+    "build": "dotnet build MeuProjeto.sln --no-restore -v q -nologo",
+    "teste": "dotnet test MeuProjeto.sln --no-build",
+    "vulnerabilidades": "dotnet list MeuProjeto.sln package --vulnerable --include-transitive"
+  },
+  "servico": {
+    "executar": [
+      "dotnet",
+      "run",
+      "--no-build",
+      "--project",
+      "src/MeuProjeto.Api"
+    ],
+    "healthcheck": "http://localhost:5000/healthcheck",
+    "processos": [
+      "MeuProjeto*"
+    ]
+  },
+  "validacao": {
+    "tipo": "http",
+    "base_url": "http://localhost:5000",
+    "casos_obrigatorios": [
+      "sucesso",
+      "400 de validação"
+    ]
+  },
+  "git": {
+    "branch_base": "main",
+    "commit_por_task": true,
+    "push": "humano",
+    "formato_commit": "{mensagem} (#{id})"
+  },
+  "protecao": {
+    "textos_proibidos": [],
+    "diretorios_proibidos": [],
+    "gerados": [],
+    "segredos": {
+      "arquivos": [
+        ".claude/local/token.txt"
+      ],
+      "scripts_permitidos": "(token_login|http_lote)\\.py"
+    }
+  },
+  "pare_e_pergunte": []
+}

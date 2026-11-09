@@ -1,0 +1,36 @@
+# CI de scripts SQL: confere convenções e publica os scripts versionados como artefato.
+# A aplicação em cada ambiente vem de deploy-estagios.yml (com aprovação em produção).
+trigger:
+  branches:
+    include: [main]
+  paths:
+    include: [database/*]
+
+pr:
+  branches:
+    include: [main]
+  paths:
+    include: [database/*]
+
+variables:
+  pasta: database
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - script: |
+      set -e
+      falhou=0
+      for f in $(pasta)/scripts/*.sql; do
+        base=$(basename "$f" .sql)
+        rollback="$(pasta)/rollback/${base}.rollback.sql"
+        [ -f "$rollback" ] || { echo "##vso[task.logissue type=error]$f sem rollback ($rollback)"; falhou=1; }
+        grep -qiE 'IF (NOT )?EXISTS|CREATE OR ALTER|OBJECT_ID|COL_LENGTH' "$f" || { echo "##vso[task.logissue type=error]$f não parece idempotente"; falhou=1; }
+      done
+      exit $falhou
+    displayName: Rollback pareado e idempotência
+
+  - publish: $(pasta)
+    artifact: sql
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))

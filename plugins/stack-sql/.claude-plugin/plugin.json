@@ -1,0 +1,7 @@
+{
+  "name": "stack-sql",
+  "version": "0.1.0",
+  "description": "Convenções de scripts SQL Server para o fluxo: idempotência, rollback pareado, transação, lote e validação em base de desenvolvimento.",
+  "author": { "name": "Gabriel Nunes Campos" },
+  "keywords": ["sql", "sqlserver", "migrations"]
+}

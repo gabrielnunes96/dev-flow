@@ -1,0 +1,23 @@
+<!-- Descrição do card = texto original (Origem + Padrão) seguido destas três seções. -->
+<h3>Origem</h3>
+<p>{de onde veio a tarefa: demanda, critério de aceite, levantamento}</p>
+<h3>Padrão</h3>
+<p>{convenção que a implementação segue}</p>
+
+<h3>Implementação ({dd/mm/aaaa}, commit {hash curto})</h3>
+<ul>
+  <li><b>Rota/contrato:</b> {verbo e rota, ou objeto de banco}</li>
+  <li><b>Request:</b> {campos e obrigatoriedade}</li>
+  <li><b>{Variante A}:</b> {como foi implementado}</li>
+  <li><b>{Variante B}:</b> {como foi implementado ou 501 e motivo}</li>
+  <li><b>Response:</b> {campos}</li>
+</ul>
+
+<h3>Testes unitários</h3>
+<p><code>{ClasseDeTeste}</code>: {o que cobre}. Suíte: {N} testes passando.</p>
+
+<h3>Validação ({ambiente}, {dd/mm/aaaa})</h3>
+<table border="1" cellpadding="4">
+  <tr><th>Chamada</th><th>Status</th><th>Resultado</th></tr>
+  <tr><td>{nome}</td><td>{status}</td><td>{ids e mensagens relevantes}</td></tr>
+</table>
