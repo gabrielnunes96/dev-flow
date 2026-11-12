@@ -19,30 +19,66 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import analisar  # noqa: E402
 
-PAGINA = """<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<title>Análise de logs</title>
-<style>
-body{font:15px/1.45 sans-serif;margin:32px auto;max-width:720px;color:#1b1f24}
-h1{font-size:22px;margin:0 0 8px}
-form{margin-top:20px}
-input[type=file]{display:block;margin:12px 0}
-button{font:inherit;padding:6px 14px}
-</style>
-</head>
-<body>
+PAGINA = analisar.documento("Análise de logs", """
+<main class="miolo">
+<p class="marca">dev-flow · logs</p>
 <h1>Análise de logs</h1>
-<p>Um arquivo, vários arquivos, um zip ou tar, ou vários zips e tars juntos.
+<p class="lead">Um arquivo, vários arquivos, um zip ou tar, ou vários zips e tars juntos.
 A leitura é uma só e o painel sai embaixo.</p>
 <form action="/analisar" method="post" enctype="multipart/form-data">
-<input type="file" name="arquivo" multiple>
+<label class="zona" for="arquivo">
+<strong>Solte os logs aqui</strong>
+<span>ou escolha no computador · .log, .txt, .gz, .zip, .tar, .tar.gz</span>
+<input class="arquivo" id="arquivo" type="file" name="arquivo" multiple>
+</label>
+<ul class="escolhidos" id="lista" hidden></ul>
+<div class="acoes">
 <button type="submit">Analisar</button>
+<p class="estado" id="estado" hidden>Lendo o conjunto e separando erro de ruído.</p>
+</div>
 </form>
-</body>
-</html>
-"""
+</main>
+<script>
+const entrada = document.querySelector("#arquivo");
+const lista = document.querySelector("#lista");
+const zona = document.querySelector(".zona");
+const form = document.querySelector("form");
+const botao = document.querySelector("button");
+const estado = document.querySelector("#estado");
+function escapar(texto) {
+  return texto.replace(/[&<>"]/g, function (c) {
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;"}[c];
+  });
+}
+function mostrar(arquivos) {
+  if (!arquivos.length) { lista.hidden = true; lista.textContent = ""; return; }
+  const visiveis = Array.prototype.slice.call(arquivos, 0, 6);
+  let html = visiveis.map(function (f) { return "<li>" + escapar(f.name) + "</li>"; }).join("");
+  if (arquivos.length > 6) html += "<li>e mais " + (arquivos.length - 6) + "</li>";
+  lista.innerHTML = html;
+  lista.hidden = false;
+}
+entrada.addEventListener("change", function () { mostrar(entrada.files); });
+["dragenter", "dragover"].forEach(function (nome) {
+  zona.addEventListener(nome, function (e) { e.preventDefault(); zona.classList.add("sobre"); });
+});
+["dragleave", "drop"].forEach(function (nome) {
+  zona.addEventListener(nome, function (e) { e.preventDefault(); zona.classList.remove("sobre"); });
+});
+zona.addEventListener("drop", function (e) {
+  const dt = new DataTransfer();
+  Array.prototype.forEach.call(e.dataTransfer.files, function (f) { dt.items.add(f); });
+  entrada.files = dt.files;
+  mostrar(entrada.files);
+});
+form.addEventListener("submit", function () {
+  if (!entrada.files.length) return;
+  botao.disabled = true;
+  botao.textContent = "Analisando…";
+  estado.hidden = false;
+});
+</script>
+""")
 
 
 def nome_seguro(bruto):
@@ -104,15 +140,17 @@ def analisar_uploads(arquivos):
 
 
 def html_erro(mensagem):
-    return (
-        "<!DOCTYPE html><html lang=\"pt-BR\"><head><meta charset=\"utf-8\"><title>Análise de logs</title></head>"
-        f"<body><p><a href=\"/\">Voltar</a></p><p>{analisar.html.escape(mensagem)}</p></body></html>"
+    miolo = (
+        "<main class=\"miolo\"><p class=\"marca\">dev-flow · logs</p>"
+        "<h1>Não deu para analisar</h1>"
+        f"<p class=\"erro\">{analisar.html.escape(mensagem)}</p>"
+        "<p><a class=\"botao\" href=\"/\">Voltar</a></p></main>"
     )
+    return analisar.documento("Análise de logs", miolo)
 
 
 def html_resultado(relatorio):
-    pagina = analisar.html_painel(relatorio)
-    return pagina.replace("<body>", '<body><p><a href="/">Nova análise</a></p>', 1)
+    return analisar.html_painel(relatorio, inicio=True)
 
 
 class Pedido(BaseHTTPRequestHandler):

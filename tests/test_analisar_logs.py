@@ -174,6 +174,52 @@ class EntradaTests(unittest.TestCase):
         self.assertEqual(rel["resumo"]["arquivos"], 450)
         self.assertEqual(rel["resumo"]["erros"], 1)
 
+    def test_painel_resume_lista_longa_de_arquivos(self):
+        pasta = os.path.join(self.tmp, "muitos")
+        os.makedirs(pasta)
+        for i in range(8):
+            escrever(os.path.join(pasta, f"a{i}.log"), "ERROR TypeError: falhou\n")
+        pagina = analisar.html_painel(analisar.analisar_entradas([pasta]))
+        self.assertIn("e mais 4", pagina)
+        self.assertIn("Tudo cai em TypeError, 8 vezes.", pagina)
+        self.assertNotIn("a7.log", pagina)
+        self.assertIn("<small>(8)</small>", pagina)
+
+    def test_metadado_de_macos_nao_entra(self):
+        caminho = os.path.join(self.tmp, "mac.tar")
+        with tarfile.open(caminho, "w") as t:
+            for nome, dados in (
+                ("._app.log", b"\x00\x00"),
+                ("__MACOSX/app.log", b"\x00"),
+                (".DS_Store", b"\x00"),
+                ("app.log", b"ERROR TypeError: falhou\n"),
+            ):
+                info = tarfile.TarInfo(nome)
+                info.size = len(dados)
+                t.addfile(info, io.BytesIO(dados))
+        rel = analisar.analisar_entradas([caminho])
+        self.assertEqual([a["nome"] for a in rel["arquivos"]], ["app.log"])
+        self.assertEqual(rel["resumo"]["erros"], 1)
+        self.assertNotIn("Arquivos pulados", analisar.html_painel(rel))
+
+    def test_muitos_vazios_viram_uma_linha(self):
+        caminho = os.path.join(self.tmp, "vazios.tar")
+        with tarfile.open(caminho, "w") as t:
+            for i in range(9):
+                dados = b"\x00" * 8
+                info = tarfile.TarInfo(f"v{i}.log")
+                info.size = len(dados)
+                t.addfile(info, io.BytesIO(dados))
+            dados = b"ERROR TypeError: falhou\n"
+            info = tarfile.TarInfo("app.log")
+            info.size = len(dados)
+            t.addfile(info, io.BytesIO(dados))
+        rel = analisar.analisar_entradas([caminho])
+        pagina = analisar.html_painel(rel)
+        self.assertEqual(sum(1 for a in rel["arquivos"] if a["ignorado"] == "vazio"), 9)
+        self.assertIn("9 arquivos vazios.", pagina)
+        self.assertNotIn("v8.log", pagina)
+
     def test_binario_e_pulado(self):
         caminho = os.path.join(self.tmp, "foto.png")
         with open(caminho, "wb") as f:
