@@ -6,6 +6,7 @@ Uso:
 Abre http://127.0.0.1:8765/ . Aceita um arquivo, vários, um zip ou tar,
 ou vários zips e tars no mesmo envio. O painel sai na mesma página.
 """
+import json
 import os
 import re
 import shutil
@@ -18,8 +19,9 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import analisar  # noqa: E402
+import guarda  # noqa: E402
 
-PAGINA = analisar.documento("Análise de logs", """
+FORMULARIO = """
 <main class="miolo">
 <p class="marca">dev-flow · logs</p>
 <h1>Análise de logs</h1>
@@ -78,7 +80,24 @@ form.addEventListener("submit", function () {
   estado.hidden = false;
 });
 </script>
-""")
+"""
+
+
+def pagina_inicial():
+    miolo = FORMULARIO
+    itens = guarda.listar()
+    if itens:
+        linhas = ["<h2>Guardadas neste computador</h2><ul class=\"escolhidos\">"]
+        for item in itens:
+            resumo = item.get("resumo") or {}
+            nomes = ", ".join(item.get("nomes") or []) or "análise"
+            erros = resumo.get("erros", 0)
+            linhas.append(
+                f"<li><a href=\"/guarda/{item['chave']}\">{analisar.html.escape(nomes)}</a>"
+                f" · {erros} erros</li>")
+        linhas.append("</ul>")
+        miolo = miolo.replace("</main>", "".join(linhas) + "</main>", 1)
+    return analisar.documento("Análise de logs", miolo)
 
 
 def nome_seguro(bruto):
@@ -124,6 +143,10 @@ def partes_multipart(content_type, body):
 
 
 def analisar_uploads(arquivos):
+    chave = guarda.chave_de_bytes(arquivos)
+    guardado = guarda.ler(chave)
+    if guardado is not None:
+        return guardado, chave, True
     pasta = tempfile.mkdtemp(prefix="logs-gui-")
     try:
         caminhos = []
@@ -134,9 +157,11 @@ def analisar_uploads(arquivos):
             with open(destino, "wb") as f:
                 f.write(dados)
             caminhos.append(destino)
-        return analisar.analisar_entradas(caminhos)
+        relatorio = analisar.analisar_entradas(caminhos)
     finally:
         shutil.rmtree(pasta, ignore_errors=True)
+    guarda.guardar(chave, relatorio, [nome for nome, _ in arquivos])
+    return relatorio, chave, False
 
 
 def html_erro(mensagem):
@@ -149,16 +174,44 @@ def html_erro(mensagem):
     return analisar.documento("Análise de logs", miolo)
 
 
-def html_resultado(relatorio):
-    return analisar.html_painel(relatorio, inicio=True)
+def html_resultado(relatorio, chave=None, do_cache=False):
+    return analisar.html_painel(relatorio, inicio=True, guarda=chave, do_cache=do_cache)
 
 
 class Pedido(BaseHTTPRequestHandler):
     def do_GET(self):
-        if self.path.split("?", 1)[0] != "/":
+        caminho = self.path.split("?", 1)[0]
+        if caminho == "/":
+            self._enviar(200, pagina_inicial())
+            return
+        achado = re.fullmatch(
+            r"/guarda/([0-9a-f]{64})(?:/(relatorio\.json|achados\.csv|painel\.html))?",
+            caminho,
+        )
+        if not achado:
             self._enviar(404, html_erro("não encontrado"))
             return
-        self._enviar(200, PAGINA)
+        chave, tipo = achado.group(1), achado.group(2)
+        relatorio = guarda.ler(chave)
+        if relatorio is None:
+            self._enviar(404, html_erro("não encontrado"))
+            return
+        if tipo == "relatorio.json":
+            corpo = json.dumps(relatorio, ensure_ascii=False, indent=2).encode("utf-8")
+            self._baixar(200, corpo, "application/json; charset=utf-8", "relatorio.json")
+            return
+        if tipo == "achados.csv":
+            self._baixar(200, analisar.csv_achados(relatorio).encode("utf-8"), "text/csv; charset=utf-8", "achados.csv")
+            return
+        if tipo == "painel.html":
+            self._baixar(
+                200,
+                analisar.html_painel(relatorio, guarda=chave).encode("utf-8"),
+                "text/html; charset=utf-8",
+                "painel.html",
+            )
+            return
+        self._enviar(200, html_resultado(relatorio, chave))
 
     def do_POST(self):
         if self.path.split("?", 1)[0] != "/analisar":
@@ -173,22 +226,27 @@ class Pedido(BaseHTTPRequestHandler):
             return
         corpo = self.rfile.read(tamanho)
         try:
-            relatorio = analisar_uploads(partes_multipart(self.headers.get("Content-Type", ""), corpo))
+            relatorio, chave, do_cache = analisar_uploads(
+                partes_multipart(self.headers.get("Content-Type", ""), corpo))
         except analisar.EntradaInvalida as e:
             self._enviar(400, html_erro(str(e)))
             return
         except (zipfile.BadZipFile, tarfile.TarError, OSError):
             self._enviar(400, html_erro("não foi possível ler a entrada"))
             return
-        self._enviar(200, html_resultado(relatorio))
+        self._enviar(200, html_resultado(relatorio, chave, do_cache))
 
     def log_message(self, fmt, *args):
         return
 
     def _enviar(self, codigo, corpo):
-        dados = corpo.encode("utf-8")
+        self._baixar(codigo, corpo.encode("utf-8"), "text/html; charset=utf-8", None)
+
+    def _baixar(self, codigo, dados, tipo, nome):
         self.send_response(codigo)
-        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Type", tipo)
+        if nome:
+            self.send_header("Content-Disposition", f'attachment; filename="{nome}"')
         self.send_header("Content-Length", str(len(dados)))
         self.end_headers()
         self.wfile.write(dados)

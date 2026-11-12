@@ -13,10 +13,11 @@ Script determinístico, só biblioteca padrão: `python -I ../../scripts/analisa
 2. Para a interface: `python -I ../../scripts/gui.py`. Abre `http://127.0.0.1:8765/`. A página tem uma área para soltar os arquivos. Vale um arquivo, vários, um zip ou tar, ou vários zips e tars no mesmo envio. O painel sai na mesma página e abre pela frase do grupo principal, com os arquivos do grupo fechados. `--porta` muda a porta. `--sem-navegador` não abre o browser.
 3. Pelo terminal: `python -I ../../scripts/analisar.py <entradas> --saida .claude/local/logs/<nome>`. `<nome>` curto, sem espaço. `--estrito` devolve código 2 se houver erro ou falso negativo.
 4. No terminal, leia `relatorio.json`. O painel é `painel.html` na mesma pasta. Os números do feedback saem desse JSON. Na interface, leia o painel que a página mostrou.
-5. Responda no formato abaixo. Reclassificar um achado exige arquivo, linha e uma frase de motivo.
+5. O painel filtra por classe e por nível (erro, aviso, info, debug, sem nível). `resumo.niveis` conta os blocos, inclusive os que não viraram achado. A mesma entrada, com os mesmos bytes, fica guardada neste computador (`~/.cache/dev-flow/logs` ou `DEVFLOW_LOGS_CACHE`) e reabre sem reler. Dá para baixar JSON, CSV e HTML. O script também grava `achados.csv` ao lado do painel.
+6. Responda no formato abaixo. Reclassificar um achado exige arquivo, linha e uma frase de motivo.
 
 ## Classes
-- **erro**: nível error/fatal, exceção nesse nível, ou HTTP 5xx sem um nível mais baixo escondendo o fato.
+- **erro**: nível error/fatal, a palavra `Erro` na linha (mesmo sem `Exception`), exceção nesse nível, ou HTTP 5xx sem um nível mais baixo escondendo o fato.
 - **falso_negativo**: a falha está no texto ou no retorno, mas o nível era info/warn/debug, ou o HTTP do cliente foi 2xx enquanto o corpo ou o upstream falhou. É o achado mais grave.
 - **falso_positivo**: o sinal disparou e não é incidente. Caminho `/favicon.ico`, `/robots.txt` ou ícone da apple; `error_count=0`, `"error": null` ou `"errors": []`; cliente que fechou a conexão (`broken pipe`, `connection reset by peer`).
 - **aviso**: HTTP 4xx que não é ruído (400, 401, 409, 422).

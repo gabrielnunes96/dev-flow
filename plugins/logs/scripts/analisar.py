@@ -9,14 +9,19 @@ saem num único relatório.
 Sem --saida, grava ./analise-logs/relatorio.json e painel.html.
 Código 0: análise concluída. 1: entrada inválida. 2: --estrito com erro ou falso negativo.
 """
+import csv
 import gzip
 import html
+import io
 import json
 import os
 import re
 import sys
 import tarfile
 import zipfile
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import guarda  # noqa: E402
 
 MAX_ARQUIVO = 20 * 1024 * 1024
 MAX_TOTAL = 512 * 1024 * 1024
@@ -40,7 +45,8 @@ RUIDO_CONEXAO = (
 NIVEL_BAIXO = {"info", "debug", "warn", "warning", "trace"}
 NIVEL_ALTO = {"error", "fatal", "critical", "panic"}
 
-RE_NIVEL = re.compile(r"\b(FATAL|CRITICAL|ERROR|PANIC|WARN(?:ING)?|INFO|DEBUG|TRACE)\b", re.I)
+RE_NIVEL = re.compile(
+    r"\b(FATAL|CRITICAL|ERROR|PANIC|WARN(?:ING)?|INFO|DEBUG|TRACE|ERRO|AVISO)\b", re.I)
 RE_STATUS = re.compile(
     r"\b(?:status(?:_?code)?|http_status|statusCode)\s*[=:]\s*(\d{3})\b", re.I)
 RE_UPSTREAM = re.compile(r"\bupstream_status\s*[=:]\s*(\d{3})\b", re.I)
@@ -96,8 +102,28 @@ def _nivel(texto):
     m = RE_NIVEL.search(texto)
     if not m:
         return None
-    n = m.group(1).lower()
-    return "warn" if n == "warning" else n
+    return _canon_nivel(m.group(1))
+
+
+def _canon_nivel(nivel):
+    n = nivel.lower()
+    if n in ("warning", "aviso"):
+        return "warn"
+    if n == "erro":
+        return "error"
+    return n
+
+
+def _familia(nivel):
+    if nivel in ("error", "fatal", "critical", "panic"):
+        return "error"
+    if nivel in ("warn", "warning"):
+        return "warning"
+    if nivel == "info":
+        return "info"
+    if nivel in ("debug", "trace"):
+        return "debug"
+    return "outro"
 
 
 def _inteiro(valor):
@@ -122,9 +148,7 @@ def _do_json(texto):
         return {}
     nivel = dado.get("level") or dado.get("severity") or dado.get("lvl")
     if isinstance(nivel, str):
-        nivel = nivel.lower()
-        if nivel == "warning":
-            nivel = "warn"
+        nivel = _canon_nivel(nivel)
     else:
         nivel = None
     err = dado.get("error")
@@ -211,7 +235,7 @@ def _blocos(linhas):
 
 
 def classificar(texto):
-    """Devolve (achado ou None, lista de {codigo, como}). achado não inclui amostras."""
+    """Devolve (achado ou None, retornos, família do nível). achado não inclui amostras."""
     extra = _do_json(texto)
     s = _sinais(texto, extra)
     retornos = []
@@ -220,39 +244,59 @@ def classificar(texto):
     if s["upstream"] is not None:
         retornos.append({"codigo": s["upstream"], "como": "upstream"})
     status, upstream, nivel = s["status"], s["upstream"], s["nivel"]
+    familia = _familia(nivel)
+
+    def sair(achado):
+        if achado is not None:
+            achado["nivel"] = familia
+        return achado, retornos, familia
+
     falha_grave = (status is not None and status >= 500) or (upstream is not None and upstream >= 500)
     ruido_caminho = s["caminho"] in CAMINHOS_RUIDO and not falha_grave
     if ruido_caminho or (s["conexao"] and not falha_grave):
         motivo = "caminho de ruído " + s["caminho"] if ruido_caminho else "cliente fechou a conexão"
         titulo = s["caminho"] or "conexão encerrada pelo cliente"
-        return _achado("falso_positivo", motivo, titulo, status), retornos
+        return sair(_achado("falso_positivo", motivo, titulo, status))
     if s["erro_vazio"] and not s["excecao"] and not s["sucesso_falso"] and not falha_grave and not s["timeout"]:
-        return _achado("falso_positivo", "contador de erro zerado", "contador zerado", status), retornos
+        return sair(_achado("falso_positivo", "contador de erro zerado", "contador zerado", status))
     if s["sucesso_falso"] and (status is None or status < 400):
-        return _achado("falso_negativo", "HTTP 2xx com falha no corpo" if status else "corpo diz success=false",
-                       "success=false", status), retornos
+        return sair(_achado("falso_negativo", "HTTP 2xx com falha no corpo" if status else "corpo diz success=false",
+                            "success=false", status))
     if s["erro_campo"] and (nivel in NIVEL_BAIXO or nivel is None) and (status is None or status < 400):
-        return _achado("falso_negativo", "campo error em nível baixo", "campo error", status), retornos
+        return sair(_achado("falso_negativo", "campo error em nível baixo", "campo error", status))
     if upstream is not None and upstream >= 500 and (status is None or status < 400):
-        return _achado("falso_negativo", f"HTTP {status or '2xx'} com upstream {upstream}",
-                       f"upstream {upstream}", status), retornos
+        return sair(_achado("falso_negativo", f"HTTP {status or '2xx'} com upstream {upstream}",
+                            f"upstream {upstream}", status))
     if status is not None and status >= 500 and nivel in NIVEL_BAIXO:
-        return _achado("falso_negativo", f"nível {nivel} esconde HTTP {status}", f"HTTP {status}", status), retornos
+        return sair(_achado("falso_negativo", f"nível {nivel} esconde HTTP {status}", f"HTTP {status}", status))
     if s["excecao"] and nivel in NIVEL_BAIXO:
-        return _achado("falso_negativo", f"exceção em nível {nivel}", s["tipo"] or "exceção", status), retornos
+        return sair(_achado("falso_negativo", f"exceção em nível {nivel}", s["tipo"] or "exceção", status))
     if s["timeout"] and (nivel in NIVEL_BAIXO or nivel is None) and not falha_grave:
-        return _achado("falso_negativo", "timeout fora do nível error", "timeout", status), retornos
+        return sair(_achado("falso_negativo", "timeout fora do nível error", "timeout", status))
     if status is not None and status >= 500:
-        return _achado("erro", f"HTTP {status}", s["tipo"] or f"HTTP {status}", status), retornos
+        return sair(_achado("erro", f"HTTP {status}", s["tipo"] or f"HTTP {status}", status))
     if nivel in NIVEL_ALTO or (s["excecao"] and nivel not in NIVEL_BAIXO):
-        return _achado("erro", "nível " + (nivel or "error"), s["tipo"] or (nivel or "error"), status), retornos
+        return sair(_achado("erro", "nível " + (nivel or "error"), _titulo_util(texto, s["tipo"]), status))
     if status is not None and 400 <= status < 500:
-        return _achado("aviso", f"HTTP {status}", s["caminho"] or f"HTTP {status}", status), retornos
-    return None, retornos
+        return sair(_achado("aviso", f"HTTP {status}", s["caminho"] or f"HTTP {status}", status))
+    return sair(None)
 
 
 def _achado(classe, motivo, titulo, retorno):
     return {"classe": classe, "motivo": motivo, "titulo": titulo[:140], "retorno": retorno}
+
+
+def _titulo_util(texto, tipo):
+    if tipo and tipo.lower() not in ("error", "erro"):
+        return tipo
+    linha = texto.splitlines()[0].strip()
+    linha = re.sub(r"^\d{2}/\d{2}/\d{4}\s+\d{2}:\d{2}:\d{2}\s*-\s*", "", linha)
+    linha = re.sub(
+        r"^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?\s*",
+        "",
+        linha,
+    )
+    return linha or tipo or "erro"
 
 
 def normalizar(texto):
@@ -271,6 +315,7 @@ def montar(documentos):
     grupos = {}
     retornos = {}
     ordem = []
+    niveis = {"error": 0, "warning": 0, "info": 0, "debug": 0, "outro": 0}
     for doc in documentos:
         if doc.get("ignorado"):
             arquivos.append({"nome": doc["nome"], "bytes": doc.get("bytes", 0), "linhas": 0, "ignorado": doc["ignorado"]})
@@ -279,7 +324,8 @@ def montar(documentos):
         linhas = texto.splitlines()
         arquivos.append({"nome": doc["nome"], "bytes": doc.get("bytes", len(texto.encode("utf-8"))), "linhas": len(linhas), "ignorado": None})
         for numero, bloco in _blocos(linhas):
-            achado, cods = classificar(bloco)
+            achado, cods, familia = classificar(bloco)
+            niveis[familia] += 1
             for c in cods:
                 chave = (c["codigo"], c["como"])
                 retornos[chave] = retornos.get(chave, 0) + 1
@@ -292,6 +338,7 @@ def montar(documentos):
                     "motivo": achado["motivo"],
                     "titulo": achado["titulo"],
                     "retorno": achado["retorno"],
+                    "nivel": achado.get("nivel") or "outro",
                     "contagem": 0,
                     "arquivos": [],
                     "amostras": [],
@@ -326,6 +373,7 @@ def montar(documentos):
             "falsos_negativos": contagem["falso_negativo"],
             "falsos_positivos": contagem["falso_positivo"],
             "avisos": contagem["aviso"],
+            "niveis": niveis,
         },
         "arquivos": arquivos,
         "achados": achados,
@@ -559,6 +607,12 @@ button:disabled { opacity: 0.72; cursor: progress; }
 .nums .marca-fn b, .nums .marca-er b { color: var(--cor-perigo); }
 .nums .marca-av b { color: var(--cor-aviso); }
 .nums .zero b { color: var(--cor-texto-suave); }
+.filtros, .niveis { display: flex; flex-wrap: wrap; gap: var(--espaco-2); margin: var(--espaco-4) 0 0; padding: 0; list-style: none; }
+.filtros button, .niveis button { min-height: 36px; padding: 0 var(--espaco-3); border: 1px solid var(--cor-borda); border-radius: 999px; background: var(--cor-superficie); color: var(--cor-texto); font-size: var(--texto-sm); }
+.filtros button[aria-pressed="true"], .niveis button[aria-pressed="true"] { background: var(--cor-acento); color: var(--cor-sobre-acento); border-color: var(--cor-acento); }
+.selo { display: inline-block; margin-left: var(--espaco-2); padding: 2px var(--espaco-2); border-radius: 999px; background: var(--cor-sutil); color: var(--cor-texto-suave); font-size: var(--texto-sm); font-weight: var(--peso-medio); }
+.exportar { display: flex; flex-wrap: wrap; gap: var(--espaco-4); margin: var(--espaco-4) 0 0; }
+[hidden] { display: none !important; }
 .achado { margin: 0 0 var(--espaco-3); padding: var(--espaco-4); min-width: 0; background: var(--cor-superficie);
   border: 1px solid var(--cor-borda); border-left: 3px solid var(--cor-borda-forte); border-radius: var(--raio-m); }
 .achado-erro, .achado-falso_negativo { border-left-color: var(--cor-perigo); }
@@ -612,7 +666,7 @@ def _cortar_amostra(bloco):
 
 
 def _motivo_humano(motivo):
-    if motivo.startswith("nível "):
+    if motivo.startswith("nível ") and " " not in motivo[len("nível "):]:
         nivel = motivo[len("nível "):]
         if nivel in ("error", "fatal", "critical"):
             return "O próprio log marca como erro."
@@ -658,13 +712,106 @@ def _bloco_amostra(am):
     )
 
 
-def html_painel(relatorio, inicio=False):
+ROTULO_NIVEL = (
+    ("error", "Erro"),
+    ("warning", "Aviso"),
+    ("info", "Info"),
+    ("debug", "Debug"),
+    ("outro", "Sem nível"),
+)
+SELO_NIVEL = dict(ROTULO_NIVEL)
+
+
+def _filtros(relatorio):
+    niveis = (relatorio.get("resumo") or {}).get("niveis") or {}
+    partes = ["<ul class=\"niveis\">"]
+    for chave, rotulo in ROTULO_NIVEL:
+        n = niveis.get(chave, 0)
+        if n == 0 and chave not in ("error", "warning", "info"):
+            continue
+        partes.append(
+            f"<li><button type=\"button\" data-nivel-filtro=\"{chave}\" aria-pressed=\"false\">"
+            f"{rotulo} <b>{_fmt(n)}</b></button></li>")
+    partes.append("</ul><ul class=\"filtros\">")
+    partes.append("<li><button type=\"button\" data-classe-filtro=\"\" aria-pressed=\"true\">Tudo</button></li>")
+    for chave, rotulo in (
+        ("falso_negativo", "Falso negativo"),
+        ("erro", "Erro"),
+        ("aviso", "Aviso"),
+        ("falso_positivo", "Falso positivo"),
+    ):
+        partes.append(
+            f"<li><button type=\"button\" data-classe-filtro=\"{chave}\" aria-pressed=\"false\">{rotulo}</button></li>")
+    partes.append("</ul><p id=\"vazio-filtro\" class=\"vazio\" hidden>Nada neste filtro.</p>")
+    return "".join(partes)
+
+
+def _script_filtro():
+    return """
+<script>
+(function () {
+  var classe = "";
+  var nivel = "";
+  function aplicar() {
+    var algum = false;
+    var cards = document.querySelectorAll(".achado");
+    cards.forEach(function (el) {
+      var ok = (!classe || el.getAttribute("data-classe") === classe) && (!nivel || el.getAttribute("data-nivel") === nivel);
+      el.hidden = !ok;
+      if (ok) algum = true;
+    });
+    document.querySelectorAll("h2[data-classe]").forEach(function (h) {
+      var visivel = false;
+      var n = h.nextElementSibling;
+      while (n && n.classList && n.classList.contains("achado")) {
+        if (!n.hidden) visivel = true;
+        n = n.nextElementSibling;
+      }
+      h.hidden = !visivel;
+    });
+    var vazio = document.getElementById("vazio-filtro");
+    if (vazio) vazio.hidden = algum || cards.length === 0;
+  }
+  document.querySelectorAll("[data-classe-filtro]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      classe = b.getAttribute("data-classe-filtro") || "";
+      document.querySelectorAll("[data-classe-filtro]").forEach(function (o) {
+        o.setAttribute("aria-pressed", o === b ? "true" : "false");
+      });
+      aplicar();
+    });
+  });
+  document.querySelectorAll("[data-nivel-filtro]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var valor = b.getAttribute("data-nivel-filtro") || "";
+      nivel = nivel === valor ? "" : valor;
+      document.querySelectorAll("[data-nivel-filtro]").forEach(function (o) {
+        o.setAttribute("aria-pressed", o === b && nivel ? "true" : "false");
+      });
+      aplicar();
+    });
+  });
+})();
+</script>
+"""
+
+
+def html_painel(relatorio, inicio=False, guarda=None, do_cache=False):
     r = relatorio["resumo"]
     partes = ["<main class=\"miolo\">"]
     if inicio:
         partes.append("<p class=\"voltar\"><a href=\"/\">Nova análise</a></p>")
     partes.append("<p class=\"marca\">dev-flow · logs</p><h1>Análise de logs</h1>")
     partes.append(f"<p class=\"veredito\">{html.escape(_veredito(relatorio))}</p>")
+    if do_cache:
+        partes.append("<p class=\"resumo\">Leitura guardada neste computador. Não reli o arquivo.</p>")
+    if guarda:
+        partes.append(
+            "<p class=\"exportar\">"
+            f"<a href=\"/guarda/{guarda}/relatorio.json\">Baixar JSON</a>"
+            f"<a href=\"/guarda/{guarda}/achados.csv\">Baixar CSV</a>"
+            f"<a href=\"/guarda/{guarda}/painel.html\">Baixar HTML</a>"
+            "</p>")
     partes.append(
         f"<p class=\"resumo\">{_fmt(r['arquivos'])} arquivos, {_fmt(r['linhas'])} linhas.</p>"
         "<ul class=\"nums\">"
@@ -674,6 +821,7 @@ def html_painel(relatorio, inicio=False):
         f"<li class=\"{'zero' if not r['falsos_positivos'] else ''}\"><b>{_fmt(r['falsos_positivos'])}</b><span>falsos positivos</span></li>"
         "</ul>"
     )
+    partes.append(_filtros(relatorio))
     if relatorio["retornos"]:
         partes.append("<h2>Retornos HTTP</h2><div class=\"tabela\"><table><tr><th>Código</th><th>Onde</th><th class=\"n\">Contagem</th></tr>")
         for item in relatorio["retornos"]:
@@ -688,13 +836,15 @@ def html_painel(relatorio, inicio=False):
         if not lista:
             continue
         teve = True
-        partes.append(f"<h2>{titulo}</h2>")
+        partes.append(f"<h2 data-classe=\"{classe}\">{titulo}</h2>")
         for a in lista:
             principal = " achado-principal" if a is lista[0] and classe in ("falso_negativo", "erro") else ""
+            nivel = a.get("nivel") or "outro"
             partes.append(
-                f"<article class=\"achado achado-{classe}{principal}\">"
+                f"<article class=\"achado achado-{classe}{principal}\" data-classe=\"{classe}\" data-nivel=\"{nivel}\">"
                 f"<h3>{html.escape(a['id'])} · {html.escape(a['titulo'])} "
-                f"<small>({a['contagem']})</small></h3>"
+                f"<small>({a['contagem']})</small> "
+                f"<span class=\"selo\">{html.escape(SELO_NIVEL.get(nivel, nivel))}</span></h3>"
                 f"<p>{html.escape(_motivo_humano(a['motivo']))}</p>"
                 f"{_lista_arquivos(a['arquivos'])}")
             amostras = a["amostras"]
@@ -724,19 +874,40 @@ def html_painel(relatorio, inicio=False):
             for motivo, n in grupos.items():
                 partes.append(
                     f"<p class=\"onde\">{_fmt(n)} arquivos {html.escape(nomes.get(motivo, motivo))}.</p>")
+    partes.append(_script_filtro())
     partes.append("</main>")
     return documento("Análise de logs", "".join(partes))
+
+
+def csv_achados(relatorio):
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(["id", "classe", "nivel", "contagem", "titulo", "motivo", "arquivos"])
+    for a in relatorio.get("achados") or []:
+        w.writerow([
+            a.get("id", ""),
+            a.get("classe", ""),
+            a.get("nivel", ""),
+            a.get("contagem", 0),
+            a.get("titulo", ""),
+            a.get("motivo", ""),
+            " ".join(a.get("arquivos") or []),
+        ])
+    return buf.getvalue()
 
 
 def gravar(relatorio, saida):
     os.makedirs(saida, exist_ok=True)
     json_path = os.path.join(saida, "relatorio.json")
     html_path = os.path.join(saida, "painel.html")
+    csv_path = os.path.join(saida, "achados.csv")
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(relatorio, f, ensure_ascii=False, indent=2)
         f.write("\n")
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(html_painel(relatorio))
+    with open(csv_path, "w", encoding="utf-8", newline="") as f:
+        f.write(csv_achados(relatorio))
     return json_path, html_path
 
 
@@ -748,6 +919,8 @@ def _resumo_stdout(relatorio, html_path):
     print(f"erros: {r['erros']}")
     print(f"avisos: {r['avisos']}")
     print(f"falsos_positivos: {r['falsos_positivos']}")
+    if r.get("niveis"):
+        print(f"niveis: {r['niveis']}")
     print(f"painel: {html_path}")
 
 
@@ -776,7 +949,13 @@ def main(argv):
         print(__doc__.strip(), file=sys.stderr)
         return 1
     try:
-        relatorio = analisar_entradas(entradas)
+        chave = guarda.chave_de_caminhos(entradas)
+        relatorio = guarda.ler(chave)
+        if relatorio is None:
+            relatorio = analisar_entradas(entradas)
+            guarda.guardar(chave, relatorio, [os.path.basename(c) for c in entradas])
+        else:
+            print("cache: hit")
     except EntradaInvalida as e:
         print(str(e), file=sys.stderr)
         return 1

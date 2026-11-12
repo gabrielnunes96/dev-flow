@@ -96,6 +96,24 @@ class ClassificarTests(unittest.TestCase):
         self.assertEqual(len(classes(rel, "erro")), 1)
         self.assertEqual(classes(rel, "erro")[0]["contagem"], 2)
 
+    def test_erro_em_portugues_sem_exception_entra(self):
+        texto = (
+            "06/11/2026 15:47:01 - Status das Threads concluídas:\n"
+            "06/11/2026 15:47:01 - Thread #21: RanToCompletion\n"
+            "06/11/2026 16:45:19 - Erro ao gerar law, retorno StatusCode diferente 200. StatusCode -> OK\n"
+            "06/11/2026 16:45:19 - Erro geral API_CRIPTOGRAFIA_CARTAO: "
+            "Api de Criptografia retornou falta de sucesso em sua transação..\n"
+            "06/11/2026 16:45:30 - Status das Threads concluídas:\n"
+        )
+        rel = analisar.montar([{"nome": "sonda.txt", "texto": texto}])
+        self.assertEqual(rel["resumo"]["erros"], 2)
+        titulos = [a["titulo"] for a in rel["achados"]]
+        self.assertIn("Erro ao gerar law, retorno StatusCode diferente 200. StatusCode -> OK", titulos)
+        self.assertTrue(any("API_CRIPTOGRAFIA_CARTAO" in t for t in titulos))
+        pagina = analisar.html_painel(rel)
+        self.assertIn("API_CRIPTOGRAFIA_CARTAO", pagina)
+        self.assertNotIn("RanToCompletion", pagina)
+
     def test_palavra_error_solta_nao_e_excecao(self):
         rel = analisar.montar([{"nome": "a.log", "texto": "INFO the word error is not a fault\n"}])
         self.assertEqual(rel["achados"], [])
@@ -234,7 +252,7 @@ class EntradaTests(unittest.TestCase):
             [sys.executable, "-I", SCRIPT, *entradas, "--saida", saida],
             capture_output=True, text=True, check=False)
         self.assertEqual(r.returncode, 0, r.stderr)
-        self.assertEqual(sorted(os.listdir(saida)), ["painel.html", "relatorio.json"])
+        self.assertEqual(sorted(os.listdir(saida)), ["achados.csv", "painel.html", "relatorio.json"])
         with open(os.path.join(saida, "relatorio.json"), encoding="utf-8") as f:
             rel = json.load(f)
         with open(os.path.join(saida, "painel.html"), encoding="utf-8") as f:
@@ -379,7 +397,10 @@ class EntradaTests(unittest.TestCase):
         self.assertIn("Falso negativo", pagina)
         self.assertIn("NullReferenceException", pagina)
         self.assertIn("Retornos HTTP", pagina)
-        self.assertNotIn("<script", pagina.lower())
+        self.assertIn("data-nivel-filtro", pagina)
+        script = pagina.lower().split("<script", 1)[1]
+        self.assertNotIn("nullreference", script)
+        self.assertNotIn("pedido", script)
 
     def test_cli_sem_entrada(self):
         r = subprocess.run([sys.executable, "-I", SCRIPT], capture_output=True, text=True, check=False)
