@@ -2,6 +2,7 @@
 
 A chave é o hash do conteúdo. O mesmo arquivo, com os mesmos bytes, reabre
 sem ler de novo. DEVFLOW_LOGS_CACHE troca a pasta. Vazio desliga.
+limpar apaga essa guarda.
 """
 import hashlib
 import json
@@ -111,6 +112,50 @@ def listar(raiz=None):
     if not base:
         return []
     return _ler_indice(base)
+
+
+def _arquivo_da_guarda(nome):
+    if nome in ("indice.json", "indice.json.tmp"):
+        return True
+    if nome.endswith(".json.tmp"):
+        chave = nome[: -len(".json.tmp")]
+    elif nome.endswith(".json"):
+        chave = nome[: -len(".json")]
+    else:
+        return False
+    return chave_valida(chave)
+
+
+def _dentro_da_pasta(base_real, alvo):
+    real = os.path.realpath(alvo)
+    try:
+        return os.path.commonpath([base_real, real]) == base_real
+    except ValueError:
+        return False
+
+
+def limpar(raiz=None):
+    """Apaga as análises guardadas neste computador. Devolve quantas saíram."""
+    base = diretorio(raiz)
+    if not base or not os.path.isdir(base):
+        return 0
+    base_real = os.path.realpath(base)
+    apagados = 0
+    for nome in os.listdir(base):
+        if not _arquivo_da_guarda(nome):
+            continue
+        alvo = os.path.join(base, nome)
+        if os.path.islink(alvo) or not os.path.isfile(alvo):
+            continue
+        if not _dentro_da_pasta(base_real, alvo):
+            continue
+        try:
+            os.remove(alvo)
+        except OSError:
+            continue
+        if nome != "indice.json" and nome.endswith(".json"):
+            apagados += 1
+    return apagados
 
 
 def guardar(chave, relatorio, nomes, raiz=None):

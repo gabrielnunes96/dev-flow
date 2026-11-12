@@ -83,20 +83,36 @@ form.addEventListener("submit", function () {
 """
 
 
-def pagina_inicial():
-    miolo = FORMULARIO
+def html_guardadas():
     itens = guarda.listar()
-    if itens:
-        linhas = ["<h2>Guardadas neste computador</h2><ul class=\"escolhidos\">"]
-        for item in itens:
-            resumo = item.get("resumo") or {}
-            nomes = ", ".join(item.get("nomes") or []) or "análise"
-            erros = resumo.get("erros", 0)
-            linhas.append(
-                f"<li><a href=\"/guarda/{item['chave']}\">{analisar.html.escape(nomes)}</a>"
-                f" · {erros} erros</li>")
-        linhas.append("</ul>")
-        miolo = miolo.replace("</main>", "".join(linhas) + "</main>", 1)
+    if not itens:
+        return ""
+    linhas = [
+        '<section class="guardadas">',
+        '<div class="cabeca-lista"><h2>Guardadas neste computador</h2>',
+        '<form action="/guarda/limpar" method="post" '
+        'onsubmit="return confirm(\'Apagar as análises guardadas neste computador?\')">',
+        '<button class="secundario" type="submit">Limpar lista</button>',
+        '</form></div><ul class="escolhidos">',
+    ]
+    for item in itens:
+        resumo = item.get("resumo") or {}
+        nomes = ", ".join(item.get("nomes") or []) or "análise"
+        erros = resumo.get("erros", 0)
+        linhas.append(
+            f"<li><a href=\"/guarda/{item['chave']}\">{analisar.html.escape(nomes)}</a>"
+            f" · {erros} erros</li>")
+    linhas.append("</ul></section>")
+    return "".join(linhas)
+
+
+def pagina_inicial(limpas=False):
+    miolo = FORMULARIO
+    extra = html_guardadas()
+    if limpas and not extra:
+        extra = '<p class="resumo">As análises guardadas neste computador foram apagadas.</p>'
+    if extra:
+        miolo = miolo.replace("</main>", extra + "</main>", 1)
     return analisar.documento("Análise de logs", miolo)
 
 
@@ -188,7 +204,9 @@ class Pedido(BaseHTTPRequestHandler):
     def do_GET(self):
         caminho = self.path.split("?", 1)[0]
         if caminho == "/":
-            self._enviar(200, pagina_inicial())
+            consulta = self.path.split("?", 1)[1] if "?" in self.path else ""
+            limpas = "limpas=1" in consulta.split("&")
+            self._enviar(200, pagina_inicial(limpas))
             return
         achado = re.fullmatch(
             r"/guarda/([0-9a-f]{64})(?:/(achados\.xlsx))?",
@@ -213,7 +231,15 @@ class Pedido(BaseHTTPRequestHandler):
         self._enviar(200, html_resultado(relatorio, chave))
 
     def do_POST(self):
-        if self.path.split("?", 1)[0] != "/analisar":
+        caminho = self.path.split("?", 1)[0]
+        if caminho == "/guarda/limpar":
+            guarda.limpar()
+            self.send_response(303)
+            self.send_header("Location", "/?limpas=1")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return
+        if caminho != "/analisar":
             self._enviar(404, html_erro("não encontrado"))
             return
         try:

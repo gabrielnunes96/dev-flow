@@ -593,11 +593,15 @@ a:hover { color: var(--cor-acento-hover); }
 .arquivo { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
 .escolhidos { margin: var(--espaco-4) 0 0; padding: 0; list-style: none; }
 .escolhidos li { padding: var(--espaco-2) 0; border-bottom: 1px solid var(--cor-borda); font-family: var(--fonte-mono); font-size: var(--texto-sm); }
+.cabeca-lista { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--espaco-3); margin-top: var(--espaco-6); }
+.cabeca-lista h2, .cabeca-lista form { margin: 0; }
 .acoes { display: flex; align-items: center; gap: var(--espaco-4); margin-top: var(--espaco-5); }
 button, .botao { appearance: none; display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--espaco-5);
   border: 0; border-radius: var(--raio-m); background: var(--cor-acento); color: var(--cor-sobre-acento);
   font: var(--peso-medio) var(--texto-md)/1 var(--fonte-texto); text-decoration: none; cursor: pointer; }
 button:hover, .botao:hover { background: var(--cor-acento-hover); color: var(--cor-sobre-acento); }
+button.secundario { background: transparent; color: var(--cor-texto); border: 1px solid var(--cor-borda-forte); }
+button.secundario:hover { background: var(--cor-sutil); color: var(--cor-texto); }
 button:disabled { opacity: 0.72; cursor: progress; }
 .estado { margin: 0; color: var(--cor-texto-suave); }
 .nums { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--espaco-3); margin: var(--espaco-5) 0 0; padding: 0; list-style: none; }

@@ -462,6 +462,25 @@ class EntradaTests(unittest.TestCase):
         self.assertIsNone(guarda.diretorio())
         guarda.guardar("a" * 64, {"resumo": {"erros": 1}}, ["a.log"])
         self.assertIsNone(guarda.ler("a" * 64))
+        self.assertEqual(guarda.limpar(), 0)
+
+    def test_limpar_apaga_so_a_guarda(self):
+        raiz = os.path.join(self.tmp, "guarda")
+        os.makedirs(raiz)
+        chave = "ab" * 32
+        outra = "cd" * 32
+        guarda.guardar(chave, {"resumo": {"erros": 2}, "achados": []}, ["api.log"], raiz=raiz)
+        guarda.guardar(outra, {"resumo": {"erros": 0}}, ["b.log"], raiz=raiz)
+        with open(os.path.join(raiz, "nota.txt"), "w", encoding="utf-8") as f:
+            f.write("ficar")
+        self.assertEqual(len(guarda.listar(raiz)), 2)
+        self.assertEqual(guarda.limpar(raiz), 2)
+        self.assertEqual(guarda.listar(raiz), [])
+        self.assertIsNone(guarda.ler(chave, raiz))
+        self.assertIsNone(guarda.ler(outra, raiz))
+        with open(os.path.join(raiz, "nota.txt"), encoding="utf-8") as f:
+            self.assertEqual(f.read(), "ficar")
+        self.assertEqual(guarda.limpar(raiz), 0)
 
     def test_cache_nao_reanalisa(self):
         log = os.path.join(self.tmp, "a.log")
