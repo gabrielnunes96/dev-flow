@@ -148,6 +148,43 @@ class GuiLogsTests(unittest.TestCase):
         self.assertIn(f"/guarda/{chave}", inicio)
         self.assertIn("api.log", inicio)
 
+    def test_limpar_a_lista_guardada(self):
+        linha = "ERROR LimparListaMarker: sumiu\n"
+        status, html = self._post([("limpar-lista.log", linha.encode())])
+        self.assertEqual(status, 200)
+        self.assertNotIn("Leitura guardada neste computador", html)
+        status, inicio = self._get("/")
+        self.assertEqual(status, 200)
+        self.assertIn("Guardadas neste computador", inicio)
+        self.assertIn("Limpar lista", inicio)
+        self.assertIn("limpar-lista.log", inicio)
+        self.assertIn("/guarda/limpar", inicio)
+        self.assertIn("Apagar as análises guardadas neste computador?", inicio)
+        pedido = urllib.request.Request(self.base + "/guarda/limpar", data=b"", method="POST")
+
+        class NaoSegue(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self, req, fp, code, msg, headers, newurl):
+                raise urllib.error.HTTPError(newurl, code, msg, headers, fp)
+
+        try:
+            urllib.request.build_opener(NaoSegue).open(pedido)
+            self.fail("esperava redirecionar")
+        except urllib.error.HTTPError as e:
+            self.assertEqual(e.code, 303)
+            self.assertEqual(e.headers.get("Location"), "/?limpas=1")
+        status, limpa = self._get("/?limpas=1")
+        self.assertEqual(status, 200)
+        self.assertIn("foram apagadas", limpa)
+        self.assertNotIn("Guardadas neste computador", limpa)
+        self.assertNotIn("limpar-lista.log", limpa)
+        status, inicio = self._get("/")
+        self.assertNotIn("foram apagadas", inicio)
+        status, html = self._post([("limpar-lista.log", linha.encode())])
+        self.assertEqual(status, 200)
+        self.assertNotIn("Leitura guardada neste computador", html)
+        status, html = self._get("/guarda/limpar")
+        self.assertEqual(status, 404)
+
     def test_rejeita_chave_que_nao_e_hex(self):
         for caminho in ("/guarda/nao-e-hex", "/guarda/" + "g" * 64, "/guarda/" + "A" * 64):
             status, html = self._get(caminho)

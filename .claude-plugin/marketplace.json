@@ -66,7 +66,7 @@
       "name": "logs",
       "source": "./plugins/logs",
       "description": "Analisa um conjunto de logs (arquivo, pasta, zip ou tar) numa interface local ou pelo script: erro, aviso, códigos de retorno e um painel HTML.",
-      "version": "0.1.7",
+      "version": "0.1.8",
       "category": "development"
     }
   ]
