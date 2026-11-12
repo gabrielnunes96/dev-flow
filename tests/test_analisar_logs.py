@@ -149,6 +149,19 @@ class EntradaTests(unittest.TestCase):
         with self.assertRaises(analisar.EntradaInvalida):
             analisar.analisar_entradas([zp])
 
+    def test_tar_com_caminho_inseguro_falha(self):
+        caminho = os.path.join(self.tmp, "mau.tar")
+        buf = io.BytesIO()
+        with tarfile.open(fileobj=buf, mode="w") as t:
+            dados = b"ERROR TypeError: x\n"
+            info = tarfile.TarInfo("../fora.log")
+            info.size = len(dados)
+            t.addfile(info, io.BytesIO(dados))
+        with open(caminho, "wb") as f:
+            f.write(buf.getvalue())
+        with self.assertRaises(analisar.EntradaInvalida):
+            analisar.analisar_entradas([caminho])
+
     def test_binario_e_pulado(self):
         caminho = os.path.join(self.tmp, "foto.png")
         with open(caminho, "wb") as f:
