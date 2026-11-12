@@ -65,8 +65,8 @@
     {
       "name": "logs",
       "source": "./plugins/logs",
-      "description": "Analisa um conjunto de logs (arquivo, pasta, zip ou tar) numa interface local ou pelo script: erro real, falso positivo, falso negativo, códigos de retorno e um painel HTML.",
-      "version": "0.1.6",
+      "description": "Analisa um conjunto de logs (arquivo, pasta, zip ou tar) numa interface local ou pelo script: erro, aviso, códigos de retorno e um painel HTML.",
+      "version": "0.1.7",
       "category": "development"
     }
   ]

@@ -59,19 +59,19 @@ def tar_gz(caminho, conteudo):
 class ClassificarTests(unittest.TestCase):
     def test_conjunto_separa_as_classes(self):
         rel = analisar.montar([{"nome": "api.log", "texto": LOG}])
-        self.assertEqual(rel["resumo"]["erros"], 1)
-        self.assertGreaterEqual(rel["resumo"]["falsos_negativos"], 3)
-        self.assertGreaterEqual(rel["resumo"]["falsos_positivos"], 3)
+        self.assertEqual(rel["resumo"]["erros"], 5)
+        self.assertEqual(rel["resumo"]["avisos"], 0)
+        self.assertNotIn("falsos_negativos", rel["resumo"])
+        self.assertNotIn("falsos_positivos", rel["resumo"])
         erros = classes(rel, "erro")
-        self.assertEqual(erros[0]["titulo"], "NullReferenceException")
-        self.assertEqual(erros[0]["amostras"][0]["linha"], 2)
-        self.assertIn("PedidoService.Fechar", erros[0]["amostras"][0]["texto"])
-        fps = " ".join(a["motivo"] for a in classes(rel, "falso_positivo"))
-        self.assertIn("/favicon.ico", fps)
-        self.assertIn("contador de erro zerado", fps)
-        self.assertIn("cliente fechou a conexão", fps)
-        fns = classes(rel, "falso_negativo")
-        motivos = " ".join(a["motivo"] for a in fns)
+        self.assertEqual(len(erros), 5)
+        nulo = next(a for a in erros if a["titulo"] == "NullReferenceException")
+        self.assertEqual(nulo["amostras"][0]["linha"], 2)
+        self.assertIn("PedidoService.Fechar", nulo["amostras"][0]["texto"])
+        motivos = " ".join(a["motivo"] for a in erros)
+        self.assertNotIn("favicon", motivos)
+        self.assertNotIn("contador", motivos)
+        self.assertNotIn("conexão", motivos)
         self.assertIn("falha no corpo", motivos)
         self.assertIn("upstream 502", motivos)
         self.assertIn("esconde HTTP 500", motivos)
@@ -89,7 +89,6 @@ class ClassificarTests(unittest.TestCase):
 
     def test_404_de_api_e_aviso_e_health_nao_e_ruido(self):
         rel = analisar.montar([{"nome": "a.log", "texto": "INFO GET /health 404\nINFO GET /api/pedido/1 422\n"}])
-        self.assertEqual(rel["resumo"]["falsos_positivos"], 0)
         self.assertEqual(rel["resumo"]["avisos"], 2)
 
     def test_mesmo_erro_agrupa(self):
@@ -142,7 +141,7 @@ class ClassificarTests(unittest.TestCase):
         self.assertIn('data-nivel="error"', pagina)
         for chave in ("error", "warning", "info", "debug", "outro"):
             self.assertIn(f'data-nivel-filtro="{chave}"', pagina)
-        for chave in ("", "falso_negativo", "erro", "aviso", "falso_positivo"):
+        for chave in ("", "erro", "aviso"):
             self.assertIn(f'data-classe-filtro="{chave}"', pagina)
         self.assertIn("Sem nível", pagina)
         self.assertIn("Volume do arquivo", pagina)
@@ -198,9 +197,8 @@ class EntradaTests(unittest.TestCase):
         rel = analisar.analisar_entradas([um, zp, tar_path])
         nomes = {a["nome"] for a in rel["arquivos"]}
         self.assertEqual(nomes, {"um.log", "a.log", "b.log", "c.log"})
-        self.assertEqual(rel["resumo"]["erros"], 1)
-        self.assertEqual(rel["resumo"]["falsos_negativos"], 1)
-        self.assertEqual(rel["resumo"]["falsos_positivos"], 1)
+        self.assertEqual(rel["resumo"]["erros"], 2)
+        self.assertEqual(rel["resumo"]["avisos"], 0)
 
     def test_gzip_e_pasta(self):
         pasta = os.path.join(self.tmp, "pasta")
@@ -249,9 +247,10 @@ class EntradaTests(unittest.TestCase):
         for i in range(8):
             escrever(os.path.join(pasta, f"a{i}.log"), "ERROR TypeError: falhou\n")
         pagina = analisar.html_painel(analisar.analisar_entradas([pasta]))
-        self.assertIn("e mais 4", pagina)
+        self.assertNotRegex(pagina, r"e mais \d+")
         self.assertIn("Tudo cai em TypeError, 8 vezes.", pagina)
-        self.assertNotIn("a7.log", pagina)
+        for i in range(8):
+            self.assertIn(f"a{i}.log", pagina)
         self.assertIn('class="n">8<', pagina)
 
     def test_metadado_de_macos_nao_entra(self):
@@ -287,7 +286,8 @@ class EntradaTests(unittest.TestCase):
         pagina = analisar.html_painel(rel)
         self.assertEqual(sum(1 for a in rel["arquivos"] if a["ignorado"] == "vazio"), 9)
         self.assertIn("9 arquivos vazios.", pagina)
-        self.assertNotIn("v8.log", pagina)
+        self.assertIn("v0.log", pagina)
+        self.assertIn("v8.log", pagina)
 
     def test_binario_e_pulado(self):
         caminho = os.path.join(self.tmp, "foto.png")
@@ -335,11 +335,10 @@ class EntradaTests(unittest.TestCase):
         self.assertEqual({a["nome"] for a in rel["arquivos"]}, {"a.log", "b.log", "c.log", "d.log"})
         self.assertEqual(rel["resumo"]["arquivos"], 4)
         self.assertEqual(rel["resumo"]["erros"], 2)
-        self.assertEqual(rel["resumo"]["falsos_positivos"], 1)
-        self.assertEqual(rel["resumo"]["falsos_negativos"], 0)
+        self.assertEqual(rel["resumo"]["avisos"], 0)
         self.assertIn("TypeError", pagina)
         self.assertIn("IOException", pagina)
-        self.assertIn("/favicon.ico", pagina)
+        self.assertNotIn("/favicon.ico", pagina)
 
     def test_tar_gz_com_varios_arquivos(self):
         caminho = os.path.join(self.tmp, "lote.tar.gz")
@@ -352,11 +351,11 @@ class EntradaTests(unittest.TestCase):
         self.assertEqual({a["nome"] for a in rel["arquivos"]}, {"n1.log", "n2.log", "n3.log"})
         self.assertEqual(rel["resumo"]["arquivos"], 3)
         self.assertEqual(rel["resumo"]["erros"], 2)
-        self.assertEqual(rel["resumo"]["falsos_positivos"], 1)
+        self.assertEqual(rel["resumo"]["avisos"], 0)
         self.assertEqual(classes(rel, "erro")[0]["contagem"], 2)
         self.assertEqual(classes(rel, "erro")[0]["arquivos"], ["n1.log", "n2.log"])
         self.assertIn("n1.log", pagina)
-        self.assertIn("n3.log", pagina)
+        self.assertNotIn("n3.log", pagina)
 
     def test_dois_zips_somam_contagens(self):
         z1 = os.path.join(self.tmp, "erros.zip")
@@ -371,9 +370,8 @@ class EntradaTests(unittest.TestCase):
         self.assertEqual({a["nome"] for a in rel["arquivos"]}, {"api.log", "web.log"})
         self.assertEqual(rel["resumo"]["arquivos"], 2)
         self.assertEqual(rel["resumo"]["linhas"], 4)
-        self.assertEqual(rel["resumo"]["erros"], 3)
-        self.assertEqual(rel["resumo"]["falsos_negativos"], 1)
-        self.assertEqual(rel["resumo"]["falsos_positivos"], 0)
+        self.assertEqual(rel["resumo"]["erros"], 4)
+        self.assertEqual(rel["resumo"]["avisos"], 0)
         self.assertEqual(classes(rel, "erro")[0]["contagem"], 3)
         self.assertEqual(classes(rel, "erro")[0]["arquivos"], ["api.log", "web.log"])
         codigos = {(r["codigo"], r["como"]): r["contagem"] for r in rel["retornos"]}
@@ -381,7 +379,8 @@ class EntradaTests(unittest.TestCase):
         self.assertIn('class="n">3<', pagina)
         self.assertIn("api.log", pagina)
         self.assertIn("web.log", pagina)
-        self.assertIn("Falso negativo", pagina)
+        self.assertNotIn("Falso negativo", pagina)
+        self.assertNotIn("Falso positivo", pagina)
 
     def test_arquivos_soltos_e_zip(self):
         solto1 = os.path.join(self.tmp, "solto1.log")
@@ -398,9 +397,8 @@ class EntradaTests(unittest.TestCase):
             {a["nome"] for a in rel["arquivos"]},
             {"solto1.log", "solto2.log", "interno.log", "outro.log"})
         self.assertEqual(rel["resumo"]["arquivos"], 4)
-        self.assertEqual(rel["resumo"]["erros"], 2)
-        self.assertEqual(rel["resumo"]["falsos_positivos"], 1)
-        self.assertEqual(rel["resumo"]["falsos_negativos"], 1)
+        self.assertEqual(rel["resumo"]["erros"], 3)
+        self.assertEqual(rel["resumo"]["avisos"], 0)
         self.assertEqual(classes(rel, "erro")[0]["contagem"], 2)
         self.assertEqual(classes(rel, "erro")[0]["arquivos"], ["solto1.log", "interno.log"])
         self.assertIn("solto1.log", pagina)
@@ -415,8 +413,8 @@ class EntradaTests(unittest.TestCase):
         rel, pagina = self._emitir(pasta)
         self.assertEqual({a["nome"] for a in rel["arquivos"]}, {"a.log", "sub/b.log"})
         self.assertEqual(rel["resumo"]["arquivos"], 2)
-        self.assertEqual(rel["resumo"]["erros"], 1)
-        self.assertEqual(rel["resumo"]["falsos_negativos"], 1)
+        self.assertEqual(rel["resumo"]["erros"], 2)
+        self.assertEqual(rel["resumo"]["avisos"], 0)
         self.assertIn("sub/b.log", pagina)
 
         s1 = os.path.join(self.tmp, "um.log")
@@ -426,9 +424,9 @@ class EntradaTests(unittest.TestCase):
         rel, pagina = self._emitir(s1, s2)
         self.assertEqual({a["nome"] for a in rel["arquivos"]}, {"um.log", "dois.log"})
         self.assertEqual(rel["resumo"]["erros"], 1)
-        self.assertEqual(rel["resumo"]["falsos_positivos"], 1)
+        self.assertEqual(rel["resumo"]["avisos"], 0)
         self.assertIn("IOException", pagina)
-        self.assertIn("dois.log", pagina)
+        self.assertNotIn("dois.log", pagina)
 
     def test_cli_grava_painel_e_estrito(self):
         log = os.path.join(self.tmp, "a.log")
@@ -439,13 +437,15 @@ class EntradaTests(unittest.TestCase):
             [sys.executable, "-I", SCRIPT, log, "--saida", saida, "--estrito"],
             capture_output=True, text=True, check=False)
         self.assertEqual(r.returncode, 2, r.stderr)
-        self.assertIn("falsos_negativos:", r.stdout)
+        self.assertIn("erros:", r.stdout)
+        self.assertNotIn("falsos_negativos:", r.stdout)
         with open(os.path.join(saida, "relatorio.json"), encoding="utf-8") as f:
             rel = json.load(f)
-        self.assertGreater(rel["resumo"]["falsos_negativos"], 0)
+        self.assertGreater(rel["resumo"]["erros"], 0)
         with open(os.path.join(saida, "painel.html"), encoding="utf-8") as f:
             pagina = f.read()
-        self.assertIn("Falso negativo", pagina)
+        self.assertNotIn("Falso negativo", pagina)
+        self.assertNotIn("Falso positivo", pagina)
         self.assertIn("NullReferenceException", pagina)
         self.assertIn("Retornos HTTP", pagina)
         self.assertIn("data-nivel-filtro", pagina)

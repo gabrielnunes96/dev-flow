@@ -54,10 +54,9 @@ function escapar(texto) {
 }
 function mostrar(arquivos) {
   if (!arquivos.length) { lista.hidden = true; lista.textContent = ""; return; }
-  const visiveis = Array.prototype.slice.call(arquivos, 0, 6);
-  let html = visiveis.map(function (f) { return "<li>" + escapar(f.name) + "</li>"; }).join("");
-  if (arquivos.length > 6) html += "<li>e mais " + (arquivos.length - 6) + "</li>";
-  lista.innerHTML = html;
+  lista.innerHTML = Array.prototype.map.call(arquivos, function (f) {
+    return "<li>" + escapar(f.name) + "</li>";
+  }).join("");
   lista.hidden = false;
 }
 entrada.addEventListener("change", function () { mostrar(entrada.files); });
