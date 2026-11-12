@@ -1,0 +1,32 @@
+---
+name: logs
+description: Analisa um ou mais logs (arquivo, pasta, zip ou tar), separa erro real, falso positivo e falso negativo, lê códigos de retorno e gera um painel HTML. Use quando a pessoa enviar logs, um zip ou tar de logs, ou pedir diagnóstico, erro escondido ou dashboard de logs.
+argument-hint: "[arquivo, pasta, zip ou tar — um ou vários]"
+---
+
+# Análise de logs
+
+Script determinístico, só biblioteca padrão: `python -I ../../scripts/analisar.py`.
+
+## Passos
+1. Um comando só aceita um arquivo de log, uma pasta, um `.gz`, ou um `.zip`/`.tar`/`.tar.gz`/`.tgz` com um log ou vários — e também vários desses juntos, zips e tars misturados com arquivos soltos. A saída é um único `relatorio.json` e um `painel.html`.
+2. `python -I ../../scripts/analisar.py <entradas> --saida .claude/local/logs/<nome>`. `<nome>` curto, sem espaço. `--estrito` devolve código 2 se houver erro ou falso negativo.
+3. Leia `relatorio.json`. O painel é `painel.html` na mesma pasta. Os números do feedback saem desse JSON.
+4. Responda no formato abaixo. Reclassificar um achado exige arquivo, linha e uma frase de motivo.
+
+## Classes
+- **erro**: nível error/fatal, exceção nesse nível, ou HTTP 5xx sem um nível mais baixo escondendo o fato.
+- **falso_negativo**: a falha está no texto ou no retorno, mas o nível era info/warn/debug, ou o HTTP do cliente foi 2xx enquanto o corpo ou o upstream falhou. É o achado mais grave.
+- **falso_positivo**: o sinal disparou e não é incidente. Caminho `/favicon.ico`, `/robots.txt` ou ícone da apple; `error_count=0`, `"error": null` ou `"errors": []`; cliente que fechou a conexão (`broken pipe`, `connection reset by peer`).
+- **aviso**: HTTP 4xx que não é ruído (400, 401, 409, 422).
+- **retornos**: cada código visto em `status` e em `upstream_status`, inclusive os 2xx saudáveis.
+
+O script não trata 404 de `/health` como ruído: saúde quebrada aparece como aviso.
+
+## Feedback
+1. Uma frase: o que o conjunto mostra.
+2. Falsos negativos, depois erros. Cada um com contagem, arquivos, amostra e a ação.
+3. Retornos que mudam a leitura (5xx, e 2xx que mente).
+4. Falsos positivos em uma linha.
+5. Arquivos pulados (`ignorados`).
+6. Caminho do `painel.html`.

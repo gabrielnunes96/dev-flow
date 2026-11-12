@@ -3,7 +3,7 @@
   "owner": { "name": "Gabriel Nunes Campos" },
   "metadata": {
     "description": "Fluxo de desenvolvimento automatizado do time: da demanda à especificação funcional e técnica, plano, implementação task a task, revisão, validação, PR e CI/CD.",
-    "version": "0.1.2"
+    "version": "0.1.3"
   },
   "plugins": [
     {
@@ -61,6 +61,13 @@
       "description": "Vídeo-resumo animado e narrado de uma entrega a partir de um roteiro JSON: cenas sincronizadas com a fala, transições, trilha e efeitos.",
       "version": "0.1.0",
       "category": "productivity"
+    },
+    {
+      "name": "logs",
+      "source": "./plugins/logs",
+      "description": "Analisa um conjunto de logs (arquivo, pasta, zip ou tar): erro real, falso positivo, falso negativo, códigos de retorno e um painel HTML.",
+      "version": "0.1.0",
+      "category": "development"
     }
   ]
 }
