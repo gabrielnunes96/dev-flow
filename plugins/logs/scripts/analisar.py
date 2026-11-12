@@ -307,7 +307,7 @@ def montar(documentos):
                     "arquivo": doc["nome"],
                     "linha": numero,
                     "quando": quando.group(0) if quando else None,
-                    "texto": bloco[:MAX_TEXTO],
+                    "texto": _cortar_amostra(bloco),
                 })
     rank = {"falso_negativo": 0, "erro": 1, "aviso": 2, "falso_positivo": 3}
     chaves = sorted(ordem, key=lambda k: (rank[k[0]], -grupos[k]["contagem"], k[1]))
@@ -339,13 +339,24 @@ def montar(documentos):
 def _decodificar(data, nome):
     if len(data) > MAX_ARQUIVO:
         return {"nome": nome, "bytes": len(data), "ignorado": "arquivo grande demais"}
-    if b"\x00" in data[:4096]:
+    amostra = data[:4096]
+    if amostra and all(b == 0 for b in amostra):
+        return {"nome": nome, "bytes": len(data), "ignorado": "vazio"}
+    if b"\x00" in amostra:
         return {"nome": nome, "bytes": len(data), "ignorado": "binário"}
     try:
         texto = data.decode("utf-8")
     except UnicodeDecodeError:
         texto = data.decode("latin-1")
     return {"nome": nome, "bytes": len(data), "texto": texto}
+
+
+def _ruido(nome):
+    partes = nome.replace("\\", "/").split("/")
+    if any(p == "__MACOSX" for p in partes):
+        return True
+    base = partes[-1] if partes else ""
+    return base.startswith("._") or base == ".DS_Store"
 
 
 def _nome_seguro(nome):
@@ -372,6 +383,8 @@ def _entrar_zip(caminho):
             if info.is_dir():
                 continue
             nome = _nome_seguro(info.filename)
+            if _ruido(nome):
+                continue
             if info.file_size > MAX_ARQUIVO:
                 docs.append({"nome": nome, "bytes": info.file_size, "ignorado": "arquivo grande demais"})
                 continue
@@ -390,6 +403,8 @@ def _entrar_tar(caminho):
             if not membro.isfile() or membro.issym() or membro.islnk():
                 continue
             nome = _nome_seguro(membro.name)
+            if _ruido(nome):
+                continue
             if membro.size > MAX_ARQUIVO:
                 docs.append({"nome": nome, "bytes": membro.size, "ignorado": "arquivo grande demais"})
                 continue
@@ -434,8 +449,10 @@ def coletar(caminhos):
                     cheio = os.path.join(raiz, nome)
                     if os.path.islink(cheio):
                         continue
-                    achou = True
                     rel = os.path.relpath(cheio, caminho).replace("\\", "/")
+                    if _ruido(rel):
+                        continue
+                    achou = True
                     acrescentar(_ler_caminho(cheio, rel))
             if not achou:
                 raise EntradaInvalida("nenhum arquivo de log")
@@ -450,56 +467,265 @@ def analisar_entradas(caminhos):
     return montar(coletar(caminhos))
 
 
-def html_painel(relatorio):
+ESTILO = """
+:root {
+  --matiz: 230; --croma-acento: 0.14; --croma-neutro: 0.012;
+  --n-0: oklch(99.5% calc(var(--croma-neutro) * 0.5) var(--matiz));
+  --n-50: oklch(98% var(--croma-neutro) var(--matiz));
+  --n-100: oklch(96% var(--croma-neutro) var(--matiz));
+  --n-200: oklch(92% var(--croma-neutro) var(--matiz));
+  --n-400: oklch(75% var(--croma-neutro) var(--matiz));
+  --n-500: oklch(60% var(--croma-neutro) var(--matiz));
+  --n-600: oklch(47% var(--croma-neutro) var(--matiz));
+  --n-800: oklch(27% var(--croma-neutro) var(--matiz));
+  --n-900: oklch(21% var(--croma-neutro) var(--matiz));
+  --n-950: oklch(16% var(--croma-neutro) var(--matiz));
+  --n-1000: oklch(13% var(--croma-neutro) var(--matiz));
+  --a-100: oklch(95% calc(var(--croma-acento) * 0.25) var(--matiz));
+  --a-500: oklch(62% var(--croma-acento) var(--matiz));
+  --a-600: oklch(54% var(--croma-acento) var(--matiz));
+  --a-700: oklch(47% var(--croma-acento) var(--matiz));
+  --cor-fundo: var(--n-50); --cor-superficie: var(--n-0); --cor-sutil: var(--n-100);
+  --cor-borda: var(--n-200); --cor-borda-forte: var(--n-500);
+  --cor-texto: var(--n-900); --cor-texto-suave: var(--n-600);
+  --cor-acento: var(--a-600); --cor-acento-hover: var(--a-700);
+  --cor-acento-suave: var(--a-100); --cor-sobre-acento: oklch(100% 0 0); --cor-foco: var(--a-500);
+  --cor-perigo: oklch(55% 0.2 27); --cor-perigo-suave: oklch(96% 0.03 27);
+  --cor-aviso: oklch(54% 0.13 70); --cor-aviso-suave: oklch(97% 0.04 85);
+  --fonte-texto: "Segoe UI", system-ui, -apple-system, sans-serif;
+  --fonte-mono: ui-monospace, "SF Mono", Consolas, monospace;
+  --texto-sm: 0.875rem; --texto-md: 1rem; --texto-lg: 1.25rem; --texto-xl: 1.5625rem; --texto-2xl: 1.9375rem;
+  --altura-texto: 1.5; --altura-titulo: 1.2; --peso-normal: 400; --peso-medio: 550; --peso-forte: 650;
+  --espaco-1: 4px; --espaco-2: 8px; --espaco-3: 12px; --espaco-4: 16px; --espaco-5: 24px; --espaco-6: 32px; --espaco-7: 48px; --espaco-8: 64px;
+  --raio-p: 6px; --raio-m: 10px; --raio-g: 16px;
+  --sombra-1: 0 1px 2px oklch(20% 0.02 var(--matiz) / 0.06), 0 1px 3px oklch(20% 0.02 var(--matiz) / 0.08);
+  --anel-foco: 0 0 0 2px var(--cor-fundo), 0 0 0 4px var(--cor-foco);
+  --dur-rapida: 120ms; --dur-media: 220ms;
+  --curva-entrada: cubic-bezier(0.16, 1, 0.3, 1); --curva-padrao: cubic-bezier(0.65, 0, 0.35, 1);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --cor-fundo: var(--n-1000); --cor-superficie: var(--n-950); --cor-sutil: var(--n-900);
+    --cor-borda: var(--n-800); --cor-borda-forte: oklch(52% var(--croma-neutro) var(--matiz));
+    --cor-texto: oklch(94% var(--croma-neutro) var(--matiz)); --cor-texto-suave: var(--n-400);
+    --cor-acento: oklch(72% calc(var(--croma-acento) * 0.85) var(--matiz));
+    --cor-acento-hover: oklch(78% calc(var(--croma-acento) * 0.8) var(--matiz));
+    --cor-acento-suave: oklch(28% calc(var(--croma-acento) * 0.4) var(--matiz));
+    --cor-sobre-acento: var(--n-1000); --cor-foco: oklch(75% var(--croma-acento) var(--matiz));
+    --cor-perigo: oklch(70% 0.17 27); --cor-perigo-suave: oklch(27% 0.06 27);
+    --cor-aviso: oklch(78% 0.14 75); --cor-aviso-suave: oklch(28% 0.05 75);
+    color-scheme: dark;
+  }
+}
+body { margin: 0; background: var(--cor-fundo); color: var(--cor-texto);
+  font: var(--peso-normal) var(--texto-md)/var(--altura-texto) var(--fonte-texto); }
+.miolo { max-width: 920px; margin: 0 auto; padding: var(--espaco-6) var(--espaco-5) var(--espaco-8); }
+.marca { margin: 0 0 var(--espaco-2); color: var(--cor-texto-suave); font-size: var(--texto-sm); letter-spacing: 0.06em; text-transform: uppercase; }
+h1, h2, h3 { font-weight: var(--peso-forte); line-height: var(--altura-titulo); letter-spacing: -0.02em; }
+h1 { margin: 0; font-size: var(--texto-2xl); }
+h2 { margin: var(--espaco-6) 0 var(--espaco-3); font-size: var(--texto-lg); }
+.lead, .resumo { margin: var(--espaco-3) 0 0; max-width: 66ch; color: var(--cor-texto-suave); }
+.veredito { margin: var(--espaco-4) 0 0; max-width: 34em; font-size: var(--texto-lg); font-weight: var(--peso-medio); letter-spacing: -0.015em; }
+details.arquivos, details.mais { margin-top: var(--espaco-3); }
+summary { cursor: pointer; color: var(--cor-acento); }
+.achado-principal h3 { font-size: var(--texto-lg); }
+.voltar { margin: 0 0 var(--espaco-5); }
+a { color: var(--cor-acento); }
+a:hover { color: var(--cor-acento-hover); }
+:focus-visible { outline: none; box-shadow: var(--anel-foco); border-radius: var(--raio-p); }
+.zona { position: relative; display: grid; gap: var(--espaco-1); margin-top: var(--espaco-6);
+  padding: var(--espaco-7) var(--espaco-5); border: 1px dashed var(--cor-borda-forte); border-radius: var(--raio-g);
+  background: var(--cor-superficie); text-align: center; cursor: pointer;
+  transition: border-color var(--dur-rapida) var(--curva-padrao), background var(--dur-rapida) var(--curva-padrao); }
+.zona:hover, .zona.sobre { border-color: var(--cor-acento); background: var(--cor-acento-suave); }
+.zona:focus-within { box-shadow: var(--anel-foco); }
+.zona strong { color: var(--cor-texto); font-size: var(--texto-lg); }
+.zona span { color: var(--cor-texto-suave); font-size: var(--texto-sm); }
+.arquivo { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
+.escolhidos { margin: var(--espaco-4) 0 0; padding: 0; list-style: none; }
+.escolhidos li { padding: var(--espaco-2) 0; border-bottom: 1px solid var(--cor-borda); font-family: var(--fonte-mono); font-size: var(--texto-sm); }
+.acoes { display: flex; align-items: center; gap: var(--espaco-4); margin-top: var(--espaco-5); }
+button, .botao { appearance: none; display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--espaco-5);
+  border: 0; border-radius: var(--raio-m); background: var(--cor-acento); color: var(--cor-sobre-acento);
+  font: var(--peso-medio) var(--texto-md)/1 var(--fonte-texto); text-decoration: none; cursor: pointer; }
+button:hover, .botao:hover { background: var(--cor-acento-hover); color: var(--cor-sobre-acento); }
+button:disabled { opacity: 0.72; cursor: progress; }
+.estado { margin: 0; color: var(--cor-texto-suave); }
+.nums { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--espaco-3); margin: var(--espaco-5) 0 0; padding: 0; list-style: none; }
+.nums li { background: var(--cor-superficie); border: 1px solid var(--cor-borda); border-radius: var(--raio-m); padding: var(--espaco-4); box-shadow: var(--sombra-1); }
+.nums b { display: block; font-size: var(--texto-xl); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.nums span { color: var(--cor-texto-suave); font-size: var(--texto-sm); }
+.nums .marca-fn b, .nums .marca-er b { color: var(--cor-perigo); }
+.nums .marca-av b { color: var(--cor-aviso); }
+.nums .zero b { color: var(--cor-texto-suave); }
+.achado { margin: 0 0 var(--espaco-3); padding: var(--espaco-4); min-width: 0; background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda); border-left: 3px solid var(--cor-borda-forte); border-radius: var(--raio-m); }
+.achado-erro, .achado-falso_negativo { border-left-color: var(--cor-perigo); }
+.achado-aviso { border-left-color: var(--cor-aviso); }
+.achado h3 { margin: 0; font-size: var(--texto-md); }
+.achado small { color: var(--cor-texto-suave); font-weight: var(--peso-normal); }
+.achado p { margin: var(--espaco-2) 0 0; }
+.onde { margin: var(--espaco-3) 0 0; color: var(--cor-texto-suave); font-size: var(--texto-sm); }
+.nomes { margin: var(--espaco-1) 0 0; padding: 0; list-style: none; }
+.nomes li { color: var(--cor-texto-suave); font-family: var(--fonte-mono); font-size: var(--texto-sm); overflow-wrap: anywhere; }
+.amostra { margin: var(--espaco-3) 0 0; min-width: 0; }
+.amostra p { margin: 0 0 var(--espaco-1); color: var(--cor-texto-suave); font-family: var(--fonte-mono); font-size: var(--texto-sm); overflow-wrap: anywhere; }
+pre { box-sizing: border-box; max-width: 100%; margin: 0; padding: var(--espaco-3); overflow-x: auto;
+  white-space: pre-wrap; overflow-wrap: break-word;
+  background: var(--cor-sutil); border-radius: var(--raio-p); font-family: var(--fonte-mono); font-size: var(--texto-sm); }
+table { width: 100%; border-collapse: collapse; background: var(--cor-superficie); }
+th, td { text-align: left; padding: var(--espaco-3) var(--espaco-4); border-bottom: 1px solid var(--cor-borda); vertical-align: top; }
+th.n, td.n { text-align: right; font-variant-numeric: tabular-nums; }
+.tabela { overflow: auto; border: 1px solid var(--cor-borda); border-radius: var(--raio-m); }
+.erro { margin: var(--espaco-4) 0 var(--espaco-5); padding: var(--espaco-4); background: var(--cor-perigo-suave); color: var(--cor-texto); border-radius: var(--raio-m); }
+.vazio { margin-top: var(--espaco-5); }
+@media (max-width: 700px) { .nums { grid-template-columns: 1fr 1fr; } h1 { font-size: var(--texto-xl); } }
+@media (prefers-reduced-motion: no-preference) {
+  .miolo { animation: entrar var(--dur-media) var(--curva-entrada); }
+  @keyframes entrar { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+}
+"""
+
+
+def documento(titulo, miolo):
+    return (
+        "<!DOCTYPE html><html lang=\"pt-BR\"><head><meta charset=\"utf-8\">"
+        "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
+        f"<title>{html.escape(titulo)}</title><style>{ESTILO}</style></head><body>{miolo}</body></html>"
+    )
+
+
+def _fmt(numero):
+    return f"{numero:,}".replace(",", ".")
+
+
+def _cortar_amostra(bloco):
+    linhas = bloco.splitlines()
+    if len(linhas) <= 8 and len(bloco) <= 900:
+        return bloco
+    pedaco = "\n".join(linhas[:8])
+    if len(pedaco) > 900:
+        corte = pedaco.rfind("\n", 0, 900)
+        pedaco = pedaco[:corte if corte > 40 else 900]
+    return pedaco.rstrip() + "\n…"
+
+
+def _motivo_humano(motivo):
+    if motivo.startswith("nível "):
+        nivel = motivo[len("nível "):]
+        if nivel in ("error", "fatal", "critical"):
+            return "O próprio log marca como erro."
+        return f"O próprio log marca como {nivel}."
+    return motivo if motivo.endswith(".") else motivo + "."
+
+
+def _veredito(relatorio):
+    achados = relatorio["achados"]
+    if not achados:
+        return "Nada a destacar neste conjunto."
+    topo = max(achados, key=lambda a: a["contagem"])
+    total = sum(a["contagem"] for a in achados)
+    if len(achados) == 1:
+        vezes = "1 vez" if topo["contagem"] == 1 else f"{_fmt(topo['contagem'])} vezes"
+        return f"Tudo cai em {topo['titulo']}, {vezes}."
+    if topo["contagem"] * 2 >= total:
+        return f"O grosso é {topo['titulo']}: {_fmt(topo['contagem'])} de {_fmt(total)}."
+    return f"{_fmt(total)} ocorrências em {len(achados)} grupos."
+
+
+def _lista_arquivos(nomes):
+    rotulo = "1 arquivo" if len(nomes) == 1 else f"{len(nomes)} arquivos"
+    itens = "".join(f"<li>{html.escape(nome)}</li>" for nome in nomes[:4])
+    if len(nomes) > 4:
+        itens += f"<li>e mais {len(nomes) - 4}</li>"
+    return f"<details class=\"arquivos\"><summary>{rotulo}</summary><ul class=\"nomes\">{itens}</ul></details>"
+
+
+def _codigo(texto):
+    t = html.escape(texto)
+    for marca in (".", "\\", "/", "_"):
+        t = t.replace(marca, marca + "\u200b")
+    return t
+
+
+def _bloco_amostra(am):
+    quando = f"{am['quando']} · " if am["quando"] else ""
+    return (
+        "<div class=\"amostra\">"
+        f"<p>{html.escape(quando + am['arquivo'] + ':' + str(am['linha']))}</p>"
+        f"<pre>{_codigo(am['texto'])}</pre></div>"
+    )
+
+
+def html_painel(relatorio, inicio=False):
     r = relatorio["resumo"]
-    partes = [
-        "<!DOCTYPE html><html lang=\"pt-BR\"><head><meta charset=\"utf-8\">",
-        "<title>Análise de logs</title><style>",
-        "body{font:15px/1.45 sans-serif;margin:24px auto;max-width:980px;color:#1b1f24}",
-        "h1{font-size:22px;margin:0 0 8px} h2{font-size:16px;margin:28px 0 8px}",
-        "table{border-collapse:collapse;width:100%} th,td{border-bottom:1px solid #d0d7de;text-align:left;padding:6px 8px;vertical-align:top}",
-        "td.n,th.n{text-align:right} pre{white-space:pre-wrap;background:#f6f8fa;padding:8px;margin:6px 0}",
-        ".nums{display:flex;gap:16px;flex-wrap:wrap;margin:12px 0 4px}.nums div{min-width:120px}",
-        ".nums b{display:block;font-size:20px}",
-        "</style></head><body>",
-        "<h1>Análise de logs</h1>",
-        f"<p>{r['arquivos']} arquivos, {r['linhas']} linhas.</p><div class=\"nums\">",
-        f"<div><b>{r['falsos_negativos']}</b>falsos negativos</div>",
-        f"<div><b>{r['erros']}</b>erros</div>",
-        f"<div><b>{r['avisos']}</b>avisos</div>",
-        f"<div><b>{r['falsos_positivos']}</b>falsos positivos</div></div>",
-    ]
+    partes = ["<main class=\"miolo\">"]
+    if inicio:
+        partes.append("<p class=\"voltar\"><a href=\"/\">Nova análise</a></p>")
+    partes.append("<p class=\"marca\">dev-flow · logs</p><h1>Análise de logs</h1>")
+    partes.append(f"<p class=\"veredito\">{html.escape(_veredito(relatorio))}</p>")
+    partes.append(
+        f"<p class=\"resumo\">{_fmt(r['arquivos'])} arquivos, {_fmt(r['linhas'])} linhas.</p>"
+        "<ul class=\"nums\">"
+        f"<li class=\"marca-fn{' zero' if not r['falsos_negativos'] else ''}\"><b>{_fmt(r['falsos_negativos'])}</b><span>falsos negativos</span></li>"
+        f"<li class=\"marca-er{' zero' if not r['erros'] else ''}\"><b>{_fmt(r['erros'])}</b><span>erros</span></li>"
+        f"<li class=\"marca-av{' zero' if not r['avisos'] else ''}\"><b>{_fmt(r['avisos'])}</b><span>avisos</span></li>"
+        f"<li class=\"{'zero' if not r['falsos_positivos'] else ''}\"><b>{_fmt(r['falsos_positivos'])}</b><span>falsos positivos</span></li>"
+        "</ul>"
+    )
     if relatorio["retornos"]:
-        partes.append("<h2>Retornos HTTP</h2><table><tr><th>Código</th><th>Onde</th><th class=\"n\">Contagem</th></tr>")
+        partes.append("<h2>Retornos HTTP</h2><div class=\"tabela\"><table><tr><th>Código</th><th>Onde</th><th class=\"n\">Contagem</th></tr>")
         for item in relatorio["retornos"]:
             partes.append(
                 f"<tr><td>{item['codigo']}</td><td>{html.escape(item['como'])}</td>"
-                f"<td class=\"n\">{item['contagem']}</td></tr>")
-        partes.append("</table>")
+                f"<td class=\"n\">{_fmt(item['contagem'])}</td></tr>")
+        partes.append("</table></div>")
     rotulo = {"falso_negativo": "Falso negativo", "erro": "Erro", "aviso": "Aviso", "falso_positivo": "Falso positivo"}
+    teve = False
     for classe, titulo in rotulo.items():
         lista = [a for a in relatorio["achados"] if a["classe"] == classe]
         if not lista:
             continue
+        teve = True
         partes.append(f"<h2>{titulo}</h2>")
         for a in lista:
+            principal = " achado-principal" if a is lista[0] and classe in ("falso_negativo", "erro") else ""
             partes.append(
+                f"<article class=\"achado achado-{classe}{principal}\">"
                 f"<h3>{html.escape(a['id'])} · {html.escape(a['titulo'])} "
-                f"<small>({a['contagem']})</small></h3>")
-            partes.append(f"<p>{html.escape(a['motivo'])}. Arquivos: {html.escape(', '.join(a['arquivos']))}.</p>")
-            for am in a["amostras"]:
-                quando = f"{am['quando']} · " if am["quando"] else ""
-                partes.append(
-                    f"<pre>{html.escape(quando + am['arquivo'] + ':' + str(am['linha']))}\n"
-                    f"{html.escape(am['texto'])}</pre>")
+                f"<small>({a['contagem']})</small></h3>"
+                f"<p>{html.escape(_motivo_humano(a['motivo']))}</p>"
+                f"{_lista_arquivos(a['arquivos'])}")
+            amostras = a["amostras"]
+            if amostras:
+                partes.append(_bloco_amostra(amostras[0]))
+            if len(amostras) > 1:
+                partes.append(f"<details class=\"mais\"><summary>Mais {len(amostras) - 1} amostras</summary>")
+                for am in amostras[1:]:
+                    partes.append(_bloco_amostra(am))
+                partes.append("</details>")
+            partes.append("</article>")
+    if not teve and not relatorio["retornos"]:
+        partes.append("<p class=\"vazio\">Nada a destacar neste conjunto.</p>")
     pulados = [a for a in relatorio["arquivos"] if a["ignorado"]]
     if pulados:
-        partes.append("<h2>Arquivos pulados</h2><ul>")
-        for a in pulados:
-            partes.append(f"<li>{html.escape(a['nome'])}: {html.escape(a['ignorado'])}</li>")
-        partes.append("</ul>")
-    partes.append("</body></html>")
-    return "".join(partes)
+        partes.append("<h2>Arquivos pulados</h2>")
+        if len(pulados) <= 8:
+            partes.append("<ul class=\"escolhidos\">")
+            for a in pulados:
+                partes.append(f"<li>{html.escape(a['nome'])}: {html.escape(a['ignorado'])}</li>")
+            partes.append("</ul>")
+        else:
+            grupos = {}
+            for a in pulados:
+                grupos[a["ignorado"]] = grupos.get(a["ignorado"], 0) + 1
+            nomes = {"vazio": "vazios", "binário": "binários", "arquivo grande demais": "grandes demais"}
+            for motivo, n in grupos.items():
+                partes.append(
+                    f"<p class=\"onde\">{_fmt(n)} arquivos {html.escape(nomes.get(motivo, motivo))}.</p>")
+    partes.append("</main>")
+    return documento("Análise de logs", "".join(partes))
 
 
 def gravar(relatorio, saida):

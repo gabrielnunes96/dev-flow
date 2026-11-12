@@ -65,6 +65,8 @@ class GuiLogsTests(unittest.TestCase):
         with urllib.request.urlopen(self.base + "/") as resp:
             html = resp.read().decode("utf-8")
         self.assertIn("vários zips", html)
+        self.assertIn("Solte os logs", html)
+        self.assertIn("prefers-color-scheme", html)
         self.assertIn('multiple', html)
 
     def test_um_arquivo(self):
