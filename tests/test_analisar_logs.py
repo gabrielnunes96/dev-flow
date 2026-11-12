@@ -13,6 +13,7 @@ import apoio
 
 sys.path.insert(0, os.path.join(apoio.RAIZ_REPO, "plugins", "logs", "scripts"))
 import analisar  # noqa: E402
+import guarda  # noqa: E402
 
 SCRIPT = os.path.join(apoio.RAIZ_REPO, "plugins", "logs", "scripts", "analisar.py")
 
@@ -113,6 +114,36 @@ class ClassificarTests(unittest.TestCase):
         pagina = analisar.html_painel(rel)
         self.assertIn("API_CRIPTOGRAFIA_CARTAO", pagina)
         self.assertNotIn("RanToCompletion", pagina)
+        self.assertEqual(rel["resumo"]["niveis"]["error"], 2)
+        self.assertEqual(sum(rel["resumo"]["niveis"].values()), 5)
+        for achado in rel["achados"]:
+            self.assertEqual(achado["classe"], "erro")
+            self.assertEqual(achado["nivel"], "error")
+
+    def test_niveis_contam_cada_bloco_e_o_painel_filtra(self):
+        texto = "\n".join([
+            "ERROR TypeError: x",
+            "AVISO disco quase cheio",
+            "INFO status=200 path=/ok",
+            "DEBUG detalhe interno",
+            "linha sem nivel",
+        ]) + "\n"
+        rel = analisar.montar([{"nome": "a.log", "texto": texto}])
+        self.assertEqual(rel["resumo"]["niveis"], {
+            "error": 1, "warning": 1, "info": 1, "debug": 1, "outro": 1,
+        })
+        self.assertEqual([a["classe"] for a in rel["achados"]], ["erro"])
+        pagina = analisar.html_painel(rel)
+        self.assertIn("data-classe", pagina)
+        self.assertIn("data-nivel", pagina)
+        self.assertIn("Filtrar", pagina)
+        self.assertIn('data-classe="erro"', pagina)
+        self.assertIn('data-nivel="error"', pagina)
+        for chave in ("error", "warning", "info", "debug", "outro"):
+            self.assertIn(f'data-nivel-filtro="{chave}"', pagina)
+        for chave in ("", "falso_negativo", "erro", "aviso", "falso_positivo"):
+            self.assertIn(f'data-classe-filtro="{chave}"', pagina)
+        self.assertIn("Sem nível", pagina)
 
     def test_palavra_error_solta_nao_e_excecao(self):
         rel = analisar.montar([{"nome": "a.log", "texto": "INFO the word error is not a fault\n"}])
@@ -122,8 +153,14 @@ class ClassificarTests(unittest.TestCase):
 class EntradaTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp(prefix="logs-")
+        self._env_cache = os.environ.get("DEVFLOW_LOGS_CACHE")
+        os.environ["DEVFLOW_LOGS_CACHE"] = os.path.join(self.tmp, "cache")
 
     def tearDown(self):
+        if self._env_cache is None:
+            os.environ.pop("DEVFLOW_LOGS_CACHE", None)
+        else:
+            os.environ["DEVFLOW_LOGS_CACHE"] = self._env_cache
         import shutil
         shutil.rmtree(self.tmp, ignore_errors=True)
 
@@ -405,3 +442,49 @@ class EntradaTests(unittest.TestCase):
     def test_cli_sem_entrada(self):
         r = subprocess.run([sys.executable, "-I", SCRIPT], capture_output=True, text=True, check=False)
         self.assertEqual(r.returncode, 1)
+
+    def test_cache_vazio_desliga(self):
+        os.environ["DEVFLOW_LOGS_CACHE"] = ""
+        self.assertIsNone(guarda.diretorio())
+        guarda.guardar("a" * 64, {"resumo": {"erros": 1}}, ["a.log"])
+        self.assertIsNone(guarda.ler("a" * 64))
+
+    def test_cache_nao_reanalisa(self):
+        log = os.path.join(self.tmp, "a.log")
+        escrever(log, "ERROR TypeError: quebrou\n")
+        chamadas = {"n": 0}
+        original = analisar.analisar_entradas
+
+        def contar(caminhos):
+            chamadas["n"] += 1
+            return original(caminhos)
+
+        analisar.analisar_entradas = contar
+        try:
+            buf = io.StringIO()
+            antigo = sys.stdout
+            sys.stdout = buf
+            try:
+                codigo = analisar.main([log, "--saida", os.path.join(self.tmp, "s1")])
+            finally:
+                sys.stdout = antigo
+            self.assertEqual(codigo, 0)
+            self.assertNotIn("cache: hit", buf.getvalue())
+            self.assertEqual(chamadas["n"], 1)
+            chave = guarda.chave_de_caminhos([log])
+            guardado = guarda.ler(chave)
+            self.assertIsNotNone(guardado)
+            self.assertEqual(guardado["resumo"]["erros"], 1)
+            buf = io.StringIO()
+            antigo = sys.stdout
+            sys.stdout = buf
+            try:
+                codigo = analisar.main([log, "--saida", os.path.join(self.tmp, "s2")])
+            finally:
+                sys.stdout = antigo
+            self.assertEqual(codigo, 0)
+            self.assertEqual(chamadas["n"], 1)
+            self.assertIn("cache: hit", buf.getvalue())
+            self.assertEqual(guarda.ler(chave)["achados"][0]["titulo"], "TypeError")
+        finally:
+            analisar.analisar_entradas = original

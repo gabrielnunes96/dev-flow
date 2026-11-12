@@ -160,6 +160,8 @@ def analisar_uploads(arquivos):
         relatorio = analisar.analisar_entradas(caminhos)
     finally:
         shutil.rmtree(pasta, ignore_errors=True)
+    if guarda.diretorio() is None:
+        return relatorio, None, False
     guarda.guardar(chave, relatorio, [nome for nome, _ in arquivos])
     return relatorio, chave, False
 
