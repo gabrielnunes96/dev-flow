@@ -9,7 +9,7 @@ argument-hint: "[arquivo, pasta, zip ou tar — um ou vários]"
 Script determinístico, só biblioteca padrão: `python -I ../../scripts/analisar.py`.
 
 ## Passos
-1. Um comando só aceita um arquivo de log, uma pasta, um `.gz`, ou um `.zip`/`.tar`/`.tar.gz`/`.tgz` com um log ou vários — e também vários desses juntos, zips e tars misturados com arquivos soltos. A saída é um único `relatorio.json` e um `painel.html`.
+1. Um comando só aceita um arquivo de log, uma pasta, um `.gz`, ou um `.zip`/`.tar`/`.tar.gz`/`.tgz` com um log ou vários — e também vários desses juntos, zips e tars misturados com arquivos soltos. Um tar com milhares de `.log` entra inteiro. A saída é um único `relatorio.json` e um `painel.html`.
 2. Para a interface: `python -I ../../scripts/gui.py`. Abre `http://127.0.0.1:8765/`. Vale um arquivo, vários, um zip ou tar, ou vários zips e tars no mesmo envio. O painel sai na página. `--porta` muda a porta. `--sem-navegador` não abre o browser.
 3. Pelo terminal: `python -I ../../scripts/analisar.py <entradas> --saida .claude/local/logs/<nome>`. `<nome>` curto, sem espaço. `--estrito` devolve código 2 se houver erro ou falso negativo.
 4. No terminal, leia `relatorio.json`. O painel é `painel.html` na mesma pasta. Os números do feedback saem desse JSON. Na interface, leia o painel que a página mostrou.

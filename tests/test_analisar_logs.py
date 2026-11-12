@@ -162,6 +162,18 @@ class EntradaTests(unittest.TestCase):
         with self.assertRaises(analisar.EntradaInvalida):
             analisar.analisar_entradas([caminho])
 
+    def test_tar_com_mais_de_400_arquivos(self):
+        caminho = os.path.join(self.tmp, "muitos.tar")
+        with tarfile.open(caminho, "w") as t:
+            for i in range(450):
+                dados = b"INFO status=200 path=/ok\n" if i else b"ERROR TypeError: falhou\n"
+                info = tarfile.TarInfo(f"l{i}.log")
+                info.size = len(dados)
+                t.addfile(info, io.BytesIO(dados))
+        rel = analisar.analisar_entradas([caminho])
+        self.assertEqual(rel["resumo"]["arquivos"], 450)
+        self.assertEqual(rel["resumo"]["erros"], 1)
+
     def test_binario_e_pulado(self):
         caminho = os.path.join(self.tmp, "foto.png")
         with open(caminho, "wb") as f:
