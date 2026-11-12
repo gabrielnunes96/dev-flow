@@ -150,16 +150,22 @@ def analisar_uploads(arquivos):
     pasta = tempfile.mkdtemp(prefix="logs-gui-")
     try:
         caminhos = []
+        usados = set()
         for i, (nome, dados) in enumerate(arquivos, 1):
             if len(dados) > analisar.MAX_ARQUIVO:
                 raise analisar.EntradaInvalida("arquivo grande demais")
-            destino = os.path.join(pasta, f"{i}-{nome_seguro(nome)}")
+            base = nome_seguro(nome)
+            final = base if base not in usados else f"{i}-{base}"
+            usados.add(final)
+            destino = os.path.join(pasta, final)
             with open(destino, "wb") as f:
                 f.write(dados)
             caminhos.append(destino)
         relatorio = analisar.analisar_entradas(caminhos)
     finally:
         shutil.rmtree(pasta, ignore_errors=True)
+    if guarda.diretorio() is None:
+        return relatorio, None, False
     guarda.guardar(chave, relatorio, [nome for nome, _ in arquivos])
     return relatorio, chave, False
 

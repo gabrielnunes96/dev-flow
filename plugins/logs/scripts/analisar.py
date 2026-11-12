@@ -6,7 +6,7 @@ Uso:
 Entrada, num comando só: um arquivo, uma pasta, .gz, .zip, .tar, .tar.gz, .tgz ou .tar.bz2.
 Um zip ou tar traz um log ou vários. Vários zips, tars e arquivos soltos juntos
 saem num único relatório.
-Sem --saida, grava ./analise-logs/relatorio.json e painel.html.
+Sem --saida, grava ./analise-logs/relatorio.json, painel.html e achados.csv.
 Código 0: análise concluída. 1: entrada inválida. 2: --estrito com erro ou falso negativo.
 """
 import csv
@@ -607,7 +607,8 @@ button:disabled { opacity: 0.72; cursor: progress; }
 .nums .marca-fn b, .nums .marca-er b { color: var(--cor-perigo); }
 .nums .marca-av b { color: var(--cor-aviso); }
 .nums .zero b { color: var(--cor-texto-suave); }
-.filtros, .niveis { display: flex; flex-wrap: wrap; gap: var(--espaco-2); margin: var(--espaco-4) 0 0; padding: 0; list-style: none; }
+.filtrar { margin: var(--espaco-5) 0 0; color: var(--cor-texto-suave); font-size: var(--texto-sm); font-weight: var(--peso-medio); }
+.filtros, .niveis { display: flex; flex-wrap: wrap; gap: var(--espaco-2); margin: var(--espaco-2) 0 0; padding: 0; list-style: none; }
 .filtros button, .niveis button { min-height: 36px; padding: 0 var(--espaco-3); border: 1px solid var(--cor-borda); border-radius: 999px; background: var(--cor-superficie); color: var(--cor-texto); font-size: var(--texto-sm); }
 .filtros button[aria-pressed="true"], .niveis button[aria-pressed="true"] { background: var(--cor-acento); color: var(--cor-sobre-acento); border-color: var(--cor-acento); }
 .selo { display: inline-block; margin-left: var(--espaco-2); padding: 2px var(--espaco-2); border-radius: 999px; background: var(--cor-sutil); color: var(--cor-texto-suave); font-size: var(--texto-sm); font-weight: var(--peso-medio); }
@@ -724,11 +725,9 @@ SELO_NIVEL = dict(ROTULO_NIVEL)
 
 def _filtros(relatorio):
     niveis = (relatorio.get("resumo") or {}).get("niveis") or {}
-    partes = ["<ul class=\"niveis\">"]
+    partes = ["<p class=\"filtrar\">Filtrar</p><ul class=\"niveis\">"]
     for chave, rotulo in ROTULO_NIVEL:
         n = niveis.get(chave, 0)
-        if n == 0 and chave not in ("error", "warning", "info"):
-            continue
         partes.append(
             f"<li><button type=\"button\" data-nivel-filtro=\"{chave}\" aria-pressed=\"false\">"
             f"{rotulo} <b>{_fmt(n)}</b></button></li>")

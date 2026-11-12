@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -40,6 +41,7 @@ class GuiLogsTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls._cache = tempfile.mkdtemp()
+        cls._env_cache = os.environ.get("DEVFLOW_LOGS_CACHE")
         os.environ["DEVFLOW_LOGS_CACHE"] = cls._cache
         cls.servidor = gui.criar_servidor(0)
         cls.thread = threading.Thread(target=cls.servidor.serve_forever, daemon=True)
@@ -50,7 +52,10 @@ class GuiLogsTests(unittest.TestCase):
     def tearDownClass(cls):
         cls.servidor.shutdown()
         cls.thread.join(timeout=3)
-        os.environ.pop("DEVFLOW_LOGS_CACHE", None)
+        if cls._env_cache is None:
+            os.environ.pop("DEVFLOW_LOGS_CACHE", None)
+        else:
+            os.environ["DEVFLOW_LOGS_CACHE"] = cls._env_cache
         shutil.rmtree(cls._cache, ignore_errors=True)
 
     def _post(self, arquivos):
@@ -67,6 +72,13 @@ class GuiLogsTests(unittest.TestCase):
         except urllib.error.HTTPError as e:
             return e.code, e.read().decode("utf-8")
 
+    def _get(self, caminho):
+        try:
+            with urllib.request.urlopen(self.base + caminho) as resp:
+                return resp.status, resp.read().decode("utf-8")
+        except urllib.error.HTTPError as e:
+            return e.code, e.read().decode("utf-8")
+
     def test_pagina_inicial(self):
         with urllib.request.urlopen(self.base + "/") as resp:
             html = resp.read().decode("utf-8")
@@ -79,6 +91,8 @@ class GuiLogsTests(unittest.TestCase):
         status, html = self._post([("api.log", b"ERROR TypeError: quebrou\n")])
         self.assertEqual(status, 200)
         self.assertIn("TypeError", html)
+        self.assertIn("api.log", html)
+        self.assertNotIn("1-api.log", html)
         self.assertIn("Nova análise", html)
 
     def test_dois_zips_no_mesmo_envio(self):
@@ -99,3 +113,36 @@ class GuiLogsTests(unittest.TestCase):
     def test_nome_com_caminho_fica_no_basename(self):
         self.assertEqual(gui.nome_seguro("../fora.log"), "fora.log")
         self.assertEqual(gui.nome_seguro("pasta\\app.log"), "app.log")
+
+    def test_reenvio_vem_da_guarda_e_o_csv_baixa(self):
+        linha = "Erro falhou ao gravar o pedido\n"
+        status, html = self._post([("api.log", linha.encode())])
+        self.assertEqual(status, 200)
+        self.assertNotIn("Leitura guardada neste computador", html)
+        self.assertIn("data-classe", html)
+        self.assertIn("data-nivel", html)
+        self.assertIn("Filtrar", html)
+        achado = re.search(r"/guarda/([0-9a-f]{64})/achados\.csv", html)
+        self.assertIsNotNone(achado)
+        chave = achado.group(1)
+        status, csv = self._get(f"/guarda/{chave}/achados.csv")
+        self.assertEqual(status, 200)
+        self.assertIn("id,classe,nivel,contagem,titulo,motivo,arquivos", csv)
+        self.assertIn("Erro falhou ao gravar o pedido", csv)
+        status, de_novo = self._post([("api.log", linha.encode())])
+        self.assertEqual(status, 200)
+        self.assertIn("Leitura guardada neste computador", de_novo)
+        status, inicio = self._get("/")
+        self.assertEqual(status, 200)
+        self.assertIn("Guardadas neste computador", inicio)
+        self.assertIn(f"/guarda/{chave}", inicio)
+        self.assertIn("api.log", inicio)
+
+    def test_rejeita_chave_que_nao_e_hex(self):
+        for caminho in ("/guarda/nao-e-hex", "/guarda/" + "g" * 64, "/guarda/" + "A" * 64):
+            status, html = self._get(caminho)
+            self.assertEqual(status, 404, caminho)
+            self.assertIn("não encontrado", html)
+        status, html = self._get("/guarda/" + "ab" * 32)
+        self.assertEqual(status, 404)
+        self.assertIn("não encontrado", html)
