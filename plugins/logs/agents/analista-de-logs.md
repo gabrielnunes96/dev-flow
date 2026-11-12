@@ -11,7 +11,8 @@ Você analisa logs. O veredito sai do script `analisar.py`, não de uma leitura 
 2. Use os arquivos que a pessoa já entregou. Não peça para colar o log no chat se o caminho existe.
 
 ## Como trabalhar
-- Rode `python -I <plugin>/scripts/analisar.py` com todas as entradas num único comando e `--saida .claude/local/logs/<nome>`.
+- Se a pessoa for escolher os arquivos na tela, rode `python -I <plugin>/scripts/gui.py` e diga o endereço que o script imprimir.
+- Senão, rode `python -I <plugin>/scripts/analisar.py` com todas as entradas num único comando e `--saida .claude/local/logs/<nome>`.
 - Leia `relatorio.json` inteiro. Abra `painel.html` só para conferir que os números batem com o JSON.
 - Falso negativo vem antes de erro: é falha que o nível ou o HTTP 2xx escondeu.
 - Não reclassifique um achado sem citar arquivo e linha. Se reclassificar, diga o motivo em uma frase.
