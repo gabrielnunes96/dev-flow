@@ -1,5 +1,7 @@
 import os
+import shutil
 import sys
+import tempfile
 import threading
 import unittest
 import urllib.error
@@ -37,6 +39,8 @@ def _zip(nome_interno, texto):
 class GuiLogsTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls._cache = tempfile.mkdtemp()
+        os.environ["DEVFLOW_LOGS_CACHE"] = cls._cache
         cls.servidor = gui.criar_servidor(0)
         cls.thread = threading.Thread(target=cls.servidor.serve_forever, daemon=True)
         cls.thread.start()
@@ -46,6 +50,8 @@ class GuiLogsTests(unittest.TestCase):
     def tearDownClass(cls):
         cls.servidor.shutdown()
         cls.thread.join(timeout=3)
+        os.environ.pop("DEVFLOW_LOGS_CACHE", None)
+        shutil.rmtree(cls._cache, ignore_errors=True)
 
     def _post(self, arquivos):
         limite, corpo = _corpo(arquivos)
