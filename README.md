@@ -26,6 +26,7 @@ demanda (você explica)
 | **stack-sql** | Convenções SQL Server (idempotência, rollback pareado, lote) + modelos de script e rollback. |
 | **stack-front** | Convenções de front, verificação visual no navegador (desktop e mobile), checklist. |
 | **design** | Skill `design` e agente `designer`: direção visual, tema claro/escuro com tokens, telas e fluxos, animações limpas, acessibilidade e revisão visual; modelos `tokens.css` e `movimento.css`. |
+| **logs** | Skill `logs` e agente `analista-de-logs`: analisa arquivo, pasta, zip ou tar, separa erro, falso positivo e falso negativo, conta os retornos HTTP e grava `painel.html`. |
 
 Instale o `fluxo` sempre; os demais conforme o projeto. As skills de stack são carregadas pelo ciclo da tarefa conforme `stacks` do perfil.
 
