@@ -1,7 +1,7 @@
 {
   "name": "logs",
-  "version": "0.1.7",
-  "description": "Analisa um conjunto de logs (arquivo, pasta, zip ou tar): erro real, falso positivo, falso negativo, códigos de retorno e um painel HTML.",
+  "version": "0.1.8",
+  "description": "Analisa um conjunto de logs (arquivo, pasta, zip ou tar): erro, aviso, códigos de retorno e um painel HTML.",
   "author": { "name": "Gabriel Nunes Campos" },
-  "keywords": ["logs", "erro", "falso-positivo", "falso-negativo", "http", "zip", "tar", "painel"]
+  "keywords": ["logs", "erro", "aviso", "http", "zip", "tar", "painel"]
 }

@@ -1,4 +1,4 @@
-"""Analisa um conjunto de logs e separa erro, falso positivo e falso negativo.
+"""Analisa um conjunto de logs e separa erro e aviso.
 
 Uso:
   python -I analisar.py <entrada>... [--saida DIR] [--estrito]
@@ -7,7 +7,7 @@ Entrada, num comando só: um arquivo, uma pasta, .gz, .zip, .tar, .tar.gz, .tgz 
 Um zip ou tar traz um log ou vários. Vários zips, tars e arquivos soltos juntos
 saem num único relatório.
 Sem --saida, grava ./analise-logs/relatorio.json, painel.html e achados.xlsx.
-Código 0: análise concluída. 1: entrada inválida. 2: --estrito com erro ou falso negativo.
+Código 0: análise concluída. 1: entrada inválida. 2: --estrito com erro.
 """
 import gzip
 import html
@@ -254,25 +254,23 @@ def classificar(texto):
     falha_grave = (status is not None and status >= 500) or (upstream is not None and upstream >= 500)
     ruido_caminho = s["caminho"] in CAMINHOS_RUIDO and not falha_grave
     if ruido_caminho or (s["conexao"] and not falha_grave):
-        motivo = "caminho de ruído " + s["caminho"] if ruido_caminho else "cliente fechou a conexão"
-        titulo = s["caminho"] or "conexão encerrada pelo cliente"
-        return sair(_achado("falso_positivo", motivo, titulo, status))
+        return sair(None)
     if s["erro_vazio"] and not s["excecao"] and not s["sucesso_falso"] and not falha_grave and not s["timeout"]:
-        return sair(_achado("falso_positivo", "contador de erro zerado", "contador zerado", status))
+        return sair(None)
     if s["sucesso_falso"] and (status is None or status < 400):
-        return sair(_achado("falso_negativo", "HTTP 2xx com falha no corpo" if status else "corpo diz success=false",
+        return sair(_achado("erro", "HTTP 2xx com falha no corpo" if status else "corpo diz success=false",
                             "success=false", status))
     if s["erro_campo"] and (nivel in NIVEL_BAIXO or nivel is None) and (status is None or status < 400):
-        return sair(_achado("falso_negativo", "campo error em nível baixo", "campo error", status))
+        return sair(_achado("erro", "campo error em nível baixo", "campo error", status))
     if upstream is not None and upstream >= 500 and (status is None or status < 400):
-        return sair(_achado("falso_negativo", f"HTTP {status or '2xx'} com upstream {upstream}",
+        return sair(_achado("erro", f"HTTP {status or '2xx'} com upstream {upstream}",
                             f"upstream {upstream}", status))
     if status is not None and status >= 500 and nivel in NIVEL_BAIXO:
-        return sair(_achado("falso_negativo", f"nível {nivel} esconde HTTP {status}", f"HTTP {status}", status))
+        return sair(_achado("erro", f"nível {nivel} esconde HTTP {status}", f"HTTP {status}", status))
     if s["excecao"] and nivel in NIVEL_BAIXO:
-        return sair(_achado("falso_negativo", f"exceção em nível {nivel}", s["tipo"] or "exceção", status))
+        return sair(_achado("erro", f"exceção em nível {nivel}", s["tipo"] or "exceção", status))
     if s["timeout"] and (nivel in NIVEL_BAIXO or nivel is None) and not falha_grave:
-        return sair(_achado("falso_negativo", "timeout fora do nível error", "timeout", status))
+        return sair(_achado("erro", "timeout fora do nível error", "timeout", status))
     if status is not None and status >= 500:
         return sair(_achado("erro", f"HTTP {status}", s["tipo"] or f"HTTP {status}", status))
     if nivel in NIVEL_ALTO or (s["excecao"] and nivel not in NIVEL_BAIXO):
@@ -356,7 +354,7 @@ def montar(documentos):
                     "quando": quando.group(0) if quando else None,
                     "texto": _cortar_amostra(bloco),
                 })
-    rank = {"falso_negativo": 0, "erro": 1, "aviso": 2, "falso_positivo": 3}
+    rank = {"erro": 0, "aviso": 1}
     chaves = sorted(ordem, key=lambda k: (rank[k[0]], -grupos[k]["contagem"], k[1]))
     achados = []
     for i, k in enumerate(chaves, 1):
@@ -364,14 +362,12 @@ def montar(documentos):
         item["id"] = f"A{i}"
         achados.append(item)
     contagem = {c: sum(a["contagem"] for a in achados if a["classe"] == c)
-                for c in ("erro", "falso_negativo", "falso_positivo", "aviso")}
+                for c in ("erro", "aviso")}
     return {
         "resumo": {
             "arquivos": len(arquivos),
             "linhas": sum(a["linhas"] for a in arquivos),
             "erros": contagem["erro"],
-            "falsos_negativos": contagem["falso_negativo"],
-            "falsos_positivos": contagem["falso_positivo"],
             "avisos": contagem["aviso"],
             "niveis": niveis,
         },
@@ -614,7 +610,7 @@ button:disabled { opacity: 0.72; cursor: progress; }
 .painel { max-width: 1120px; }
 .topo { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--espaco-4); }
 .topo .botao { flex: none; }
-.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--espaco-3); margin: var(--espaco-5) 0 0; padding: 0; list-style: none; }
+.kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--espaco-3); margin: var(--espaco-5) 0 0; padding: 0; list-style: none; }
 .kpis button { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: var(--espaco-1); width: 100%; min-height: 88px; padding: var(--espaco-4); border: 1px solid var(--cor-borda); border-radius: var(--raio-m); background: var(--cor-superficie); color: var(--cor-texto); box-shadow: var(--sombra-1); text-align: left; cursor: pointer; }
 .kpis button b { font-size: var(--texto-2xl); font-variant-numeric: tabular-nums; letter-spacing: -0.03em; line-height: 1.1; }
 .kpis button span { color: var(--cor-texto-suave); font-size: var(--texto-sm); font-weight: var(--peso-normal); }
@@ -658,7 +654,7 @@ button:disabled { opacity: 0.72; cursor: progress; }
 .achado small { color: var(--cor-texto-suave); font-weight: var(--peso-normal); }
 .achado p { margin: var(--espaco-2) 0 0; }
 .onde { margin: var(--espaco-3) 0 0; color: var(--cor-texto-suave); font-size: var(--texto-sm); }
-.nomes { margin: var(--espaco-1) 0 0; padding: 0; list-style: none; }
+.nomes { margin: var(--espaco-1) 0 0; padding: 0; list-style: none; max-height: 18rem; overflow: auto; }
 .nomes li { color: var(--cor-texto-suave); font-family: var(--fonte-mono); font-size: var(--texto-sm); overflow-wrap: anywhere; }
 .amostra { margin: var(--espaco-3) 0 0; min-width: 0; }
 .amostra p { margin: 0 0 var(--espaco-1); color: var(--cor-texto-suave); font-family: var(--fonte-mono); font-size: var(--texto-sm); overflow-wrap: anywhere; }
@@ -734,9 +730,7 @@ def _veredito(relatorio):
 
 def _lista_arquivos(nomes):
     rotulo = "1 arquivo" if len(nomes) == 1 else f"{len(nomes)} arquivos"
-    itens = "".join(f"<li>{html.escape(nome)}</li>" for nome in nomes[:4])
-    if len(nomes) > 4:
-        itens += f"<li>e mais {len(nomes) - 4}</li>"
+    itens = "".join(f"<li>{html.escape(nome)}</li>" for nome in nomes)
     return f"<details class=\"arquivos\"><summary>{rotulo}</summary><ul class=\"nomes\">{itens}</ul></details>"
 
 
@@ -767,10 +761,8 @@ SELO_NIVEL = dict(ROTULO_NIVEL)
 
 
 ROTULO_CLASSE = (
-    ("falso_negativo", "Falso negativo", "falsos_negativos", "marca-fn"),
     ("erro", "Erro", "erros", "marca-er"),
     ("aviso", "Aviso", "avisos", "marca-av"),
-    ("falso_positivo", "Falso positivo", "falsos_positivos", ""),
 )
 ROTULO_CLASSE_NOME = {chave: rotulo for chave, rotulo, _, _ in ROTULO_CLASSE}
 
@@ -940,19 +932,17 @@ def _pulados(relatorio):
     if not pulados:
         return ""
     partes = ["<section class=\"secao\"><h2>Arquivos pulados</h2>"]
-    if len(pulados) <= 8:
-        partes.append("<ul class=\"escolhidos\">")
-        for a in pulados:
-            partes.append(f"<li>{html.escape(a['nome'])}: {html.escape(a['ignorado'])}</li>")
-        partes.append("</ul>")
-    else:
+    if len(pulados) > 8:
         grupos = {}
         for a in pulados:
             grupos[a["ignorado"]] = grupos.get(a["ignorado"], 0) + 1
         nomes = {"vazio": "vazios", "binário": "binários", "arquivo grande demais": "grandes demais"}
         for motivo, n in grupos.items():
             partes.append(f"<p class=\"onde\">{_fmt(n)} arquivos {html.escape(nomes.get(motivo, motivo))}.</p>")
-    partes.append("</section>")
+    partes.append("<ul class=\"nomes\">")
+    for a in pulados:
+        partes.append(f"<li>{html.escape(a['nome'])}: {html.escape(a['ignorado'])}</li>")
+    partes.append("</ul></section>")
     return "".join(partes)
 
 
@@ -1088,10 +1078,8 @@ def _resumo_stdout(relatorio, html_path, xlsx_path):
     r = relatorio["resumo"]
     print(f"arquivos: {r['arquivos']}")
     print(f"linhas: {r['linhas']}")
-    print(f"falsos_negativos: {r['falsos_negativos']}")
     print(f"erros: {r['erros']}")
     print(f"avisos: {r['avisos']}")
-    print(f"falsos_positivos: {r['falsos_positivos']}")
     if r.get("niveis"):
         print(f"niveis: {r['niveis']}")
     print(f"painel: {html_path}")
@@ -1139,7 +1127,7 @@ def main(argv):
     _, html_path, xlsx_path = gravar(relatorio, saida)
     _resumo_stdout(relatorio, html_path, xlsx_path)
     r = relatorio["resumo"]
-    if estrito and (r["erros"] or r["falsos_negativos"]):
+    if estrito and r["erros"]:
         return 2
     return 0
 

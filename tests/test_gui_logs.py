@@ -103,7 +103,8 @@ class GuiLogsTests(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertIn("IOException", html)
         self.assertIn("success=false", html)
-        self.assertIn("Falso negativo", html)
+        self.assertNotIn("Falso negativo", html)
+        self.assertNotIn("Falso positivo", html)
 
     def test_sem_arquivo(self):
         status, html = self._post([])

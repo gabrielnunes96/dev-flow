@@ -220,7 +220,7 @@ s.append(tabela(["Plugin", "O que traz", "Integra com"], [
     ["<b>stack-sql</b>", "Convenções SQL Server (idempotência, rollback pareado, lote); modelos de script e rollback.", "Banco de desenvolvimento"],
     ["<b>stack-front</b>", "Convenções de front, verificação visual no navegador (desktop e mobile), checklist.", "Navegador"],
     ["<b>design</b>", "Designer de UX/UI: direção visual, tema claro/escuro com tokens, telas, animações limpas, acessibilidade e revisão visual.", "Navegador, stack-front"],
-    ["<b>logs</b>", "Interface no navegador e script: um arquivo, vários, ou vários zips e tars. Separa erro, falso positivo e falso negativo e mostra o painel.", "Navegador em 127.0.0.1"],
+    ["<b>logs</b>", "Interface no navegador e script: um arquivo, vários, ou vários zips e tars. Separa erro e aviso e mostra o painel.", "Navegador em 127.0.0.1"],
     ["<b>video</b>", "Vídeo-resumo a partir de um roteiro JSON. Este manual não traz o passo a passo; ele está na skill video do plugin.", "Python e as dependências do plugin"],
 ], [33 * mm, 87 * mm, 50 * mm]))
 s.append(P("Hooks (rodam sozinhos)", h2))
@@ -291,7 +291,7 @@ s.append(P("Interface de logs", h2))
 s.append(P(
     f"No repositório do dev-flow, ou na pasta do plugin instalado: {c('python -I plugins/logs/scripts/gui.py')}. "
     "Abre uma página em 127.0.0.1:8765. Envie um arquivo, vários, um zip ou tar, ou vários zips e tars juntos. "
-    "O painel (falso negativo, erro, aviso, falso positivo e os retornos HTTP) aparece na mesma página."
+    "O painel (erro, aviso e os retornos HTTP) aparece na mesma página. A lista de arquivos do achado mostra todos os nomes."
 ))
 s.append(P(
     f"Pelo terminal, o mesmo motor: {c('python -I plugins/logs/scripts/analisar.py arquivos --saida .claude/local/logs/nome')}. "
