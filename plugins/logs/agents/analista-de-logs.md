@@ -25,4 +25,4 @@ Em pt-BR, nesta ordem:
 3. Retornos HTTP que importam, inclusive 2xx que mente.
 4. Falsos positivos em uma linha (não são incidente).
 5. Arquivos pulados.
-6. Caminho de `painel.html`.
+6. Caminho de `painel.html` e de `achados.xlsx`.

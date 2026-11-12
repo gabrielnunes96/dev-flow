@@ -6,7 +6,6 @@ Uso:
 Abre http://127.0.0.1:8765/ . Aceita um arquivo, vários, um zip ou tar,
 ou vários zips e tars no mesmo envio. O painel sai na mesma página.
 """
-import json
 import os
 import re
 import shutil
@@ -20,6 +19,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import analisar  # noqa: E402
 import guarda  # noqa: E402
+import planilha  # noqa: E402
 
 FORMULARIO = """
 <main class="miolo">
@@ -191,7 +191,7 @@ class Pedido(BaseHTTPRequestHandler):
             self._enviar(200, pagina_inicial())
             return
         achado = re.fullmatch(
-            r"/guarda/([0-9a-f]{64})(?:/(relatorio\.json|achados\.csv|painel\.html))?",
+            r"/guarda/([0-9a-f]{64})(?:/(achados\.xlsx))?",
             caminho,
         )
         if not achado:
@@ -202,19 +202,12 @@ class Pedido(BaseHTTPRequestHandler):
         if relatorio is None:
             self._enviar(404, html_erro("não encontrado"))
             return
-        if tipo == "relatorio.json":
-            corpo = json.dumps(relatorio, ensure_ascii=False, indent=2).encode("utf-8")
-            self._baixar(200, corpo, "application/json; charset=utf-8", "relatorio.json")
-            return
-        if tipo == "achados.csv":
-            self._baixar(200, analisar.csv_achados(relatorio).encode("utf-8"), "text/csv; charset=utf-8", "achados.csv")
-            return
-        if tipo == "painel.html":
+        if tipo == "achados.xlsx":
             self._baixar(
                 200,
-                analisar.html_painel(relatorio, guarda=chave).encode("utf-8"),
-                "text/html; charset=utf-8",
-                "painel.html",
+                planilha.xlsx_relatorio(relatorio),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "achados.xlsx",
             )
             return
         self._enviar(200, html_resultado(relatorio, chave))
