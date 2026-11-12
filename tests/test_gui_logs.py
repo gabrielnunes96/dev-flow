@@ -114,7 +114,7 @@ class GuiLogsTests(unittest.TestCase):
         self.assertEqual(gui.nome_seguro("../fora.log"), "fora.log")
         self.assertEqual(gui.nome_seguro("pasta\\app.log"), "app.log")
 
-    def test_reenvio_vem_da_guarda_e_o_csv_baixa(self):
+    def test_reenvio_vem_da_guarda_e_o_excel_baixa(self):
         linha = "Erro falhou ao gravar o pedido\n"
         status, html = self._post([("api.log", linha.encode())])
         self.assertEqual(status, 200)
@@ -122,13 +122,22 @@ class GuiLogsTests(unittest.TestCase):
         self.assertIn("data-classe", html)
         self.assertIn("data-nivel", html)
         self.assertIn("Filtrar", html)
-        achado = re.search(r"/guarda/([0-9a-f]{64})/achados\.csv", html)
+        self.assertIn("Volume do arquivo", html)
+        self.assertNotIn("achados.csv", html)
+        self.assertNotIn("Baixar JSON", html)
+        achado = re.search(r"/guarda/([0-9a-f]{64})/achados\.xlsx", html)
         self.assertIsNotNone(achado)
         chave = achado.group(1)
-        status, csv = self._get(f"/guarda/{chave}/achados.csv")
-        self.assertEqual(status, 200)
-        self.assertIn("id,classe,nivel,contagem,titulo,motivo,arquivos", csv)
-        self.assertIn("Erro falhou ao gravar o pedido", csv)
+        with urllib.request.urlopen(self.base + f"/guarda/{chave}/achados.xlsx") as resp:
+            self.assertEqual(resp.status, 200)
+            self.assertIn("spreadsheetml", resp.headers.get("Content-Type", ""))
+            dados = resp.read()
+        self.assertTrue(dados.startswith(b"PK"))
+        with zipfile.ZipFile(io.BytesIO(dados)) as z:
+            aba = z.read("xl/worksheets/sheet1.xml").decode("utf-8")
+        self.assertIn("Erro falhou ao gravar o pedido", aba)
+        status, html = self._get(f"/guarda/{chave}/achados.csv")
+        self.assertEqual(status, 404)
         status, de_novo = self._post([("api.log", linha.encode())])
         self.assertEqual(status, 200)
         self.assertIn("Leitura guardada neste computador", de_novo)

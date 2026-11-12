@@ -6,14 +6,13 @@ Uso:
 Entrada, num comando só: um arquivo, uma pasta, .gz, .zip, .tar, .tar.gz, .tgz ou .tar.bz2.
 Um zip ou tar traz um log ou vários. Vários zips, tars e arquivos soltos juntos
 saem num único relatório.
-Sem --saida, grava ./analise-logs/relatorio.json, painel.html e achados.csv.
+Sem --saida, grava ./analise-logs/relatorio.json, painel.html e achados.xlsx.
 Código 0: análise concluída. 1: entrada inválida. 2: --estrito com erro ou falso negativo.
 """
-import csv
 import gzip
 import html
-import io
 import json
+import math
 import os
 import re
 import sys
@@ -22,6 +21,7 @@ import zipfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import guarda  # noqa: E402
+import planilha  # noqa: E402
 
 MAX_ARQUIVO = 20 * 1024 * 1024
 MAX_TOTAL = 512 * 1024 * 1024
@@ -607,6 +607,38 @@ button:disabled { opacity: 0.72; cursor: progress; }
 .nums .marca-fn b, .nums .marca-er b { color: var(--cor-perigo); }
 .nums .marca-av b { color: var(--cor-aviso); }
 .nums .zero b { color: var(--cor-texto-suave); }
+.painel { max-width: 1120px; }
+.topo { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--espaco-4); }
+.topo .botao { flex: none; }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--espaco-3); margin: var(--espaco-5) 0 0; padding: 0; list-style: none; }
+.kpis button { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: var(--espaco-1); width: 100%; min-height: 88px; padding: var(--espaco-4); border: 1px solid var(--cor-borda); border-radius: var(--raio-m); background: var(--cor-superficie); color: var(--cor-texto); box-shadow: var(--sombra-1); text-align: left; cursor: pointer; }
+.kpis button b { font-size: var(--texto-2xl); font-variant-numeric: tabular-nums; letter-spacing: -0.03em; line-height: 1.1; }
+.kpis button span { color: var(--cor-texto-suave); font-size: var(--texto-sm); font-weight: var(--peso-normal); }
+.kpis button[aria-pressed="true"] { border-color: var(--cor-acento); box-shadow: 0 0 0 1px var(--cor-acento); }
+.kpis .marca-fn b, .kpis .marca-er b { color: var(--cor-perigo); }
+.kpis .marca-av b { color: var(--cor-aviso); }
+.kpis .zero b { color: var(--cor-texto-suave); }
+.grade { display: grid; grid-template-columns: 1.5fr 1fr; gap: var(--espaco-4); margin-top: var(--espaco-5); }
+.cartao { min-width: 0; background: var(--cor-superficie); border: 1px solid var(--cor-borda); border-radius: var(--raio-m); padding: var(--espaco-4); }
+.cartao h2, .secao h2 { margin: 0 0 var(--espaco-3); }
+.linha-barra { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(72px, 1fr) auto; gap: var(--espaco-2); align-items: center; width: 100%; min-height: 36px; margin: 0; padding: 2px 0; border: 0; border-radius: var(--raio-p); background: transparent; color: var(--cor-texto); font: var(--peso-normal) var(--texto-sm)/1.3 var(--fonte-texto); text-align: left; cursor: pointer; }
+.linha-barra.vol { cursor: default; }
+.linha-barra .nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.linha-barra b { font-variant-numeric: tabular-nums; font-weight: var(--peso-medio); }
+.trilha { display: block; height: 8px; border-radius: 999px; background: var(--cor-sutil); overflow: hidden; }
+.barra { display: block; height: 100%; width: 100%; transform-origin: left center; border-radius: inherit; background: var(--cor-acento); }
+.barra-erro, .barra-falso_negativo, .barra-error { background: var(--cor-perigo); }
+.barra-aviso, .barra-warning { background: var(--cor-aviso); }
+.barra-falso_positivo, .barra-outro, .barra-info, .barra-debug { background: var(--cor-texto-suave); }
+.linha-barra.apagada { opacity: 0.38; }
+.linha-barra[aria-pressed="true"] .nome { font-weight: var(--peso-medio); }
+.linha-barra:hover { background: var(--cor-sutil); color: var(--cor-texto); }
+.kpis button:hover { background: var(--cor-superficie); color: var(--cor-texto); }
+.busca { display: flex; flex-wrap: wrap; gap: var(--espaco-3); align-items: center; margin-top: var(--espaco-3); }
+.busca input { min-height: 36px; min-width: min(100%, 18rem); padding: 0 var(--espaco-3); border: 1px solid var(--cor-borda-forte); border-radius: var(--raio-p); background: var(--cor-superficie); color: var(--cor-texto); font: inherit; }
+.legenda { margin: var(--espaco-2) 0 0; color: var(--cor-texto-suave); font-size: var(--texto-sm); }
+.motivo { display: block; margin-top: var(--espaco-1); color: var(--cor-texto-suave); font-weight: var(--peso-normal); }
+.secao { margin-top: var(--espaco-6); }
 .filtrar { margin: var(--espaco-5) 0 0; color: var(--cor-texto-suave); font-size: var(--texto-sm); font-weight: var(--peso-medio); }
 .filtros, .niveis { display: flex; flex-wrap: wrap; gap: var(--espaco-2); margin: var(--espaco-2) 0 0; padding: 0; list-style: none; }
 .filtros button, .niveis button { min-height: 36px; padding: 0 var(--espaco-3); border: 1px solid var(--cor-borda); border-radius: 999px; background: var(--cor-superficie); color: var(--cor-texto); font-size: var(--texto-sm); }
@@ -635,10 +667,17 @@ th.n, td.n { text-align: right; font-variant-numeric: tabular-nums; }
 .tabela { overflow: auto; border: 1px solid var(--cor-borda); border-radius: var(--raio-m); }
 .erro { margin: var(--espaco-4) 0 var(--espaco-5); padding: var(--espaco-4); background: var(--cor-perigo-suave); color: var(--cor-texto); border-radius: var(--raio-m); }
 .vazio { margin-top: var(--espaco-5); }
-@media (max-width: 700px) { .nums { grid-template-columns: 1fr 1fr; } h1 { font-size: var(--texto-xl); } }
+@media (max-width: 800px) {
+  .nums, .kpis, .grade { grid-template-columns: 1fr 1fr; }
+  .topo { flex-direction: column; align-items: flex-start; }
+  h1 { font-size: var(--texto-xl); }
+}
+@media (max-width: 560px) { .kpis, .grade { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: no-preference) {
   .miolo { animation: entrar var(--dur-media) var(--curva-entrada); }
+  .barra { animation: crescer var(--dur-media) var(--curva-entrada); }
   @keyframes entrar { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @keyframes crescer { from { transform: scaleX(0); } }
 }
 """
 
@@ -723,25 +762,193 @@ ROTULO_NIVEL = (
 SELO_NIVEL = dict(ROTULO_NIVEL)
 
 
-def _filtros(relatorio):
-    niveis = (relatorio.get("resumo") or {}).get("niveis") or {}
-    partes = ["<p class=\"filtrar\">Filtrar</p><ul class=\"niveis\">"]
+ROTULO_CLASSE = (
+    ("falso_negativo", "Falso negativo", "falsos_negativos", "marca-fn"),
+    ("erro", "Erro", "erros", "marca-er"),
+    ("aviso", "Aviso", "avisos", "marca-av"),
+    ("falso_positivo", "Falso positivo", "falsos_positivos", ""),
+)
+ROTULO_CLASSE_NOME = {chave: rotulo for chave, rotulo, _, _ in ROTULO_CLASSE}
+
+
+def _pct(n, maior, log=False):
+    if n <= 0 or maior <= 0:
+        return 0.0
+    if log:
+        return math.log10(n + 1) / math.log10(maior + 1)
+    return n / maior
+
+
+def _trilha(pct, cor):
+    return (
+        f"<span class=\"trilha\"><span class=\"barra barra-{html.escape(cor)}\" "
+        f"style=\"transform:scaleX({pct:.4f})\"></span></span>"
+    )
+
+
+def _contagem_nivel(relatorio):
+    tot = {chave: 0 for chave, _ in ROTULO_NIVEL}
+    for a in relatorio["achados"]:
+        chave = a.get("nivel") or "outro"
+        tot[chave] = tot.get(chave, 0) + a["contagem"]
+    return tot
+
+
+def _attrs_achado(a):
+    nivel = a.get("nivel") or "outro"
+    busca = html.escape((a["titulo"] + " " + a["motivo"]).lower(), quote=True)
+    return (
+        f"data-id=\"{html.escape(a['id'])}\" data-classe=\"{a['classe']}\" "
+        f"data-nivel=\"{nivel}\" data-busca=\"{busca}\""
+    )
+
+
+def _barras_top(achados):
+    if not achados:
+        return "<section class=\"cartao\"><h2>O que mais aparece</h2><p class=\"vazio\">Nada a destacar neste conjunto.</p></section>"
+    ordem = sorted(achados, key=lambda a: a["contagem"], reverse=True)
+    visiveis = ordem[:12]
+    maior = visiveis[0]["contagem"]
+    linhas = []
+    for a in visiveis:
+        linhas.append(
+            f"<button type=\"button\" class=\"linha-barra\" data-barra data-id-filtro {_attrs_achado(a)}>"
+            f"<span class=\"nome\" title=\"{html.escape(a['titulo'], quote=True)}\">{html.escape(a['titulo'])}</span>"
+            f"{_trilha(_pct(a['contagem'], maior), a['classe'])}"
+            f"<b>{_fmt(a['contagem'])}</b></button>"
+        )
+    nota = ""
+    if len(ordem) > len(visiveis):
+        nota = f"<p class=\"legenda\">Mais {len(ordem) - len(visiveis)} grupos na tabela.</p>"
+    return (
+        "<section class=\"cartao\"><h2>O que mais aparece</h2>"
+        + "".join(linhas) + nota + "</section>"
+    )
+
+
+def _volume(niveis):
+    maior = max(niveis.values(), default=0)
+    linhas = []
     for chave, rotulo in ROTULO_NIVEL:
         n = niveis.get(chave, 0)
+        linhas.append(
+            "<div class=\"linha-barra vol\">"
+            f"<span class=\"nome\">{rotulo}</span>"
+            f"{_trilha(_pct(n, maior, log=True), chave)}"
+            f"<b>{_fmt(n)}</b></div>"
+        )
+    return (
+        "<section class=\"cartao\"><h2>Volume do arquivo</h2>"
+        "<p class=\"legenda\">Linha do arquivo, com ou sem problema. "
+        "A barra compara a ordem de grandeza, para sem nível não esconder o erro.</p>"
+        + "".join(linhas) + "</section>"
+    )
+
+
+def _kpis(resumo):
+    itens = []
+    for chave, rotulo, campo, marca in ROTULO_CLASSE:
+        n = resumo[campo]
+        zero = " zero" if not n else ""
+        itens.append(
+            f"<li class=\"{marca}{zero}\"><button type=\"button\" data-classe-filtro=\"{chave}\" aria-pressed=\"false\">"
+            f"<b>{_fmt(n)}</b><span>{rotulo}</span></button></li>"
+        )
+    return "<ul class=\"kpis\">" + "".join(itens) + "</ul>"
+
+
+def _filtros(relatorio):
+    por_nivel = _contagem_nivel(relatorio)
+    partes = [
+        "<p class=\"filtrar\">Filtrar</p><ul class=\"filtros\">",
+        "<li><button type=\"button\" data-classe-filtro=\"\" aria-pressed=\"true\">Tudo</button></li>",
+    ]
+    for chave, rotulo, _, _ in ROTULO_CLASSE:
+        partes.append(
+            f"<li><button type=\"button\" data-classe-filtro=\"{chave}\" aria-pressed=\"false\">{rotulo}</button></li>"
+        )
+    partes.append("</ul><ul class=\"niveis\">")
+    for chave, rotulo in ROTULO_NIVEL:
         partes.append(
             f"<li><button type=\"button\" data-nivel-filtro=\"{chave}\" aria-pressed=\"false\">"
-            f"{rotulo} <b>{_fmt(n)}</b></button></li>")
-    partes.append("</ul><ul class=\"filtros\">")
-    partes.append("<li><button type=\"button\" data-classe-filtro=\"\" aria-pressed=\"true\">Tudo</button></li>")
-    for chave, rotulo in (
-        ("falso_negativo", "Falso negativo"),
-        ("erro", "Erro"),
-        ("aviso", "Aviso"),
-        ("falso_positivo", "Falso positivo"),
-    ):
-        partes.append(
-            f"<li><button type=\"button\" data-classe-filtro=\"{chave}\" aria-pressed=\"false\">{rotulo}</button></li>")
-    partes.append("</ul><p id=\"vazio-filtro\" class=\"vazio\" hidden>Nada neste filtro.</p>")
+            f"{rotulo} <b>{_fmt(por_nivel.get(chave, 0))}</b></button></li>"
+        )
+    partes.append(
+        "</ul><p class=\"legenda\">Nível do achado. O volume do arquivo, acima, conta outra coisa.</p>"
+        "<label class=\"busca\">Buscar no título <input id=\"busca\" type=\"search\"></label>"
+        "<p id=\"filtro-status\" class=\"legenda\"></p>"
+        "<p id=\"vazio-filtro\" class=\"vazio\" hidden>Nada neste filtro.</p>"
+    )
+    return "".join(partes)
+
+
+def _tabela(relatorio):
+    if not relatorio["achados"]:
+        return ""
+    linhas = [
+        "<div class=\"tabela\"><table><thead><tr>"
+        "<th>Título</th><th>Classe</th><th>Nível</th><th class=\"n\">Vezes</th><th>Arquivos</th>"
+        "</tr></thead><tbody>"
+    ]
+    for a in relatorio["achados"]:
+        nivel = a.get("nivel") or "outro"
+        amostras = a["amostras"]
+        extra = ""
+        if amostras:
+            extra = _bloco_amostra(amostras[0])
+            if len(amostras) > 1:
+                extra += f"<details class=\"mais\"><summary>Mais {len(amostras) - 1} amostras</summary>"
+                extra += "".join(_bloco_amostra(am) for am in amostras[1:])
+                extra += "</details>"
+        linhas.append(
+            f"<tr data-linha {_attrs_achado(a)}>"
+            f"<td><strong>{html.escape(a['titulo'])}</strong> "
+            f"<span class=\"selo\">{html.escape(a['id'])}</span>"
+            f"<span class=\"motivo\">{html.escape(_motivo_humano(a['motivo']))}</span>{extra}</td>"
+            f"<td>{ROTULO_CLASSE_NOME[a['classe']]}</td>"
+            f"<td>{html.escape(SELO_NIVEL.get(nivel, nivel))}</td>"
+            f"<td class=\"n\">{_fmt(a['contagem'])}</td>"
+            f"<td>{_lista_arquivos(a['arquivos'])}</td></tr>"
+        )
+    linhas.append("</tbody></table></div>")
+    return "".join(linhas)
+
+
+def _http(retornos):
+    if not retornos:
+        return ""
+    maior = max(item["contagem"] for item in retornos)
+    linhas = ["<section class=\"secao cartao\"><h2>Retornos HTTP</h2>"]
+    for item in retornos:
+        cor = "erro" if item["codigo"] >= 500 else "aviso" if item["codigo"] >= 400 else "info"
+        linhas.append(
+            "<div class=\"linha-barra vol\">"
+            f"<span class=\"nome\">{item['codigo']} · {html.escape(item['como'])}</span>"
+            f"{_trilha(_pct(item['contagem'], maior, log=True), cor)}"
+            f"<b>{_fmt(item['contagem'])}</b></div>"
+        )
+    linhas.append("</section>")
+    return "".join(linhas)
+
+
+def _pulados(relatorio):
+    pulados = [a for a in relatorio["arquivos"] if a["ignorado"]]
+    if not pulados:
+        return ""
+    partes = ["<section class=\"secao\"><h2>Arquivos pulados</h2>"]
+    if len(pulados) <= 8:
+        partes.append("<ul class=\"escolhidos\">")
+        for a in pulados:
+            partes.append(f"<li>{html.escape(a['nome'])}: {html.escape(a['ignorado'])}</li>")
+        partes.append("</ul>")
+    else:
+        grupos = {}
+        for a in pulados:
+            grupos[a["ignorado"]] = grupos.get(a["ignorado"], 0) + 1
+        nomes = {"vazio": "vazios", "binário": "binários", "arquivo grande demais": "grandes demais"}
+        for motivo, n in grupos.items():
+            partes.append(f"<p class=\"onde\">{_fmt(n)} arquivos {html.escape(nomes.get(motivo, motivo))}.</p>")
+    partes.append("</section>")
     return "".join(partes)
 
 
@@ -751,31 +958,43 @@ def _script_filtro():
 (function () {
   var classe = "";
   var nivel = "";
+  var escolhido = "";
+  var busca = "";
+  function casa(el, comId) {
+    if (classe && el.getAttribute("data-classe") !== classe) return false;
+    if (nivel && el.getAttribute("data-nivel") !== nivel) return false;
+    if (comId && escolhido && el.getAttribute("data-id") !== escolhido) return false;
+    if (busca && (el.getAttribute("data-busca") || "").indexOf(busca) < 0) return false;
+    return true;
+  }
   function aplicar() {
+    var linhas = document.querySelectorAll("[data-linha]");
     var algum = false;
-    var cards = document.querySelectorAll(".achado");
-    cards.forEach(function (el) {
-      var ok = (!classe || el.getAttribute("data-classe") === classe) && (!nivel || el.getAttribute("data-nivel") === nivel);
+    var visiveis = 0;
+    linhas.forEach(function (el) {
+      var ok = casa(el, true);
       el.hidden = !ok;
-      if (ok) algum = true;
+      if (ok) { algum = true; visiveis += 1; }
     });
-    document.querySelectorAll("h2[data-classe]").forEach(function (h) {
-      var visivel = false;
-      var n = h.nextElementSibling;
-      while (n && n.classList && n.classList.contains("achado")) {
-        if (!n.hidden) visivel = true;
-        n = n.nextElementSibling;
-      }
-      h.hidden = !visivel;
+    document.querySelectorAll("[data-barra]").forEach(function (el) {
+      var ok = casa(el, false);
+      el.hidden = !ok;
+      var ativo = !!(escolhido && el.getAttribute("data-id") === escolhido);
+      el.classList.toggle("apagada", !!(escolhido && ok && !ativo));
+      el.setAttribute("aria-pressed", ativo ? "true" : "false");
     });
     var vazio = document.getElementById("vazio-filtro");
-    if (vazio) vazio.hidden = algum || cards.length === 0;
+    if (vazio) vazio.hidden = algum || linhas.length === 0;
+    var status = document.getElementById("filtro-status");
+    if (status) status.textContent = visiveis + " de " + linhas.length + " grupos";
   }
   document.querySelectorAll("[data-classe-filtro]").forEach(function (b) {
     b.addEventListener("click", function () {
-      classe = b.getAttribute("data-classe-filtro") || "";
+      var valor = b.getAttribute("data-classe-filtro") || "";
+      classe = (classe === valor && valor) ? "" : valor;
+      escolhido = "";
       document.querySelectorAll("[data-classe-filtro]").forEach(function (o) {
-        o.setAttribute("aria-pressed", o === b ? "true" : "false");
+        o.setAttribute("aria-pressed", (o.getAttribute("data-classe-filtro") || "") === classe ? "true" : "false");
       });
       aplicar();
     });
@@ -785,11 +1004,24 @@ def _script_filtro():
       var valor = b.getAttribute("data-nivel-filtro") || "";
       nivel = nivel === valor ? "" : valor;
       document.querySelectorAll("[data-nivel-filtro]").forEach(function (o) {
-        o.setAttribute("aria-pressed", o === b && nivel ? "true" : "false");
+        o.setAttribute("aria-pressed", o.getAttribute("data-nivel-filtro") === nivel ? "true" : "false");
       });
       aplicar();
     });
   });
+  document.querySelectorAll("[data-id-filtro]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var valor = b.getAttribute("data-id") || "";
+      escolhido = escolhido === valor ? "" : valor;
+      aplicar();
+    });
+  });
+  var campo = document.getElementById("busca");
+  if (campo) campo.addEventListener("input", function () {
+    busca = (campo.value || "").toLowerCase();
+    aplicar();
+  });
+  aplicar();
 })();
 </script>
 """
@@ -797,120 +1029,58 @@ def _script_filtro():
 
 def html_painel(relatorio, inicio=False, guarda=None, do_cache=False):
     r = relatorio["resumo"]
-    partes = ["<main class=\"miolo\">"]
+    href = f"/guarda/{guarda}/achados.xlsx" if guarda else "achados.xlsx"
+    partes = ["<main class=\"miolo painel\">"]
     if inicio:
         partes.append("<p class=\"voltar\"><a href=\"/\">Nova análise</a></p>")
-    partes.append("<p class=\"marca\">dev-flow · logs</p><h1>Análise de logs</h1>")
-    partes.append(f"<p class=\"veredito\">{html.escape(_veredito(relatorio))}</p>")
+    partes.append(
+        "<div class=\"topo\"><div>"
+        "<p class=\"marca\">dev-flow · logs</p><h1>Análise de logs</h1>"
+        f"<p class=\"veredito\">{html.escape(_veredito(relatorio))}</p>"
+        "</div>"
+        f"<a class=\"botao\" href=\"{html.escape(href, quote=True)}\">Baixar Excel</a></div>"
+    )
     if do_cache:
         partes.append("<p class=\"resumo\">Leitura guardada neste computador. Não reli o arquivo.</p>")
-    if guarda:
-        partes.append(
-            "<p class=\"exportar\">"
-            f"<a href=\"/guarda/{guarda}/relatorio.json\">Baixar JSON</a>"
-            f"<a href=\"/guarda/{guarda}/achados.csv\">Baixar CSV</a>"
-            f"<a href=\"/guarda/{guarda}/painel.html\">Baixar HTML</a>"
-            "</p>")
     partes.append(
-        f"<p class=\"resumo\">{_fmt(r['arquivos'])} arquivos, {_fmt(r['linhas'])} linhas.</p>"
-        "<ul class=\"nums\">"
-        f"<li class=\"marca-fn{' zero' if not r['falsos_negativos'] else ''}\"><b>{_fmt(r['falsos_negativos'])}</b><span>falsos negativos</span></li>"
-        f"<li class=\"marca-er{' zero' if not r['erros'] else ''}\"><b>{_fmt(r['erros'])}</b><span>erros</span></li>"
-        f"<li class=\"marca-av{' zero' if not r['avisos'] else ''}\"><b>{_fmt(r['avisos'])}</b><span>avisos</span></li>"
-        f"<li class=\"{'zero' if not r['falsos_positivos'] else ''}\"><b>{_fmt(r['falsos_positivos'])}</b><span>falsos positivos</span></li>"
-        "</ul>"
+        f"<p class=\"resumo\">{_fmt(r['arquivos'])} arquivos, {_fmt(r['linhas'])} linhas. "
+        "Os cartões contam ocorrência com problema.</p>"
     )
-    partes.append(_filtros(relatorio))
-    if relatorio["retornos"]:
-        partes.append("<h2>Retornos HTTP</h2><div class=\"tabela\"><table><tr><th>Código</th><th>Onde</th><th class=\"n\">Contagem</th></tr>")
-        for item in relatorio["retornos"]:
-            partes.append(
-                f"<tr><td>{item['codigo']}</td><td>{html.escape(item['como'])}</td>"
-                f"<td class=\"n\">{_fmt(item['contagem'])}</td></tr>")
-        partes.append("</table></div>")
-    rotulo = {"falso_negativo": "Falso negativo", "erro": "Erro", "aviso": "Aviso", "falso_positivo": "Falso positivo"}
-    teve = False
-    for classe, titulo in rotulo.items():
-        lista = [a for a in relatorio["achados"] if a["classe"] == classe]
-        if not lista:
-            continue
-        teve = True
-        partes.append(f"<h2 data-classe=\"{classe}\">{titulo}</h2>")
-        for a in lista:
-            principal = " achado-principal" if a is lista[0] and classe in ("falso_negativo", "erro") else ""
-            nivel = a.get("nivel") or "outro"
-            partes.append(
-                f"<article class=\"achado achado-{classe}{principal}\" data-classe=\"{classe}\" data-nivel=\"{nivel}\">"
-                f"<h3>{html.escape(a['id'])} · {html.escape(a['titulo'])} "
-                f"<small>({a['contagem']})</small> "
-                f"<span class=\"selo\">{html.escape(SELO_NIVEL.get(nivel, nivel))}</span></h3>"
-                f"<p>{html.escape(_motivo_humano(a['motivo']))}</p>"
-                f"{_lista_arquivos(a['arquivos'])}")
-            amostras = a["amostras"]
-            if amostras:
-                partes.append(_bloco_amostra(amostras[0]))
-            if len(amostras) > 1:
-                partes.append(f"<details class=\"mais\"><summary>Mais {len(amostras) - 1} amostras</summary>")
-                for am in amostras[1:]:
-                    partes.append(_bloco_amostra(am))
-                partes.append("</details>")
-            partes.append("</article>")
-    if not teve and not relatorio["retornos"]:
+    partes.append(_kpis(r))
+    partes.append("<div class=\"grade\">")
+    partes.append(_barras_top(relatorio["achados"]))
+    partes.append(_volume(r.get("niveis") or {}))
+    partes.append("</div>")
+    if relatorio["achados"]:
+        partes.append("<section class=\"secao\">")
+        partes.append(_filtros(relatorio))
+        partes.append(_tabela(relatorio))
+        partes.append("</section>")
+    elif not relatorio["retornos"]:
         partes.append("<p class=\"vazio\">Nada a destacar neste conjunto.</p>")
-    pulados = [a for a in relatorio["arquivos"] if a["ignorado"]]
-    if pulados:
-        partes.append("<h2>Arquivos pulados</h2>")
-        if len(pulados) <= 8:
-            partes.append("<ul class=\"escolhidos\">")
-            for a in pulados:
-                partes.append(f"<li>{html.escape(a['nome'])}: {html.escape(a['ignorado'])}</li>")
-            partes.append("</ul>")
-        else:
-            grupos = {}
-            for a in pulados:
-                grupos[a["ignorado"]] = grupos.get(a["ignorado"], 0) + 1
-            nomes = {"vazio": "vazios", "binário": "binários", "arquivo grande demais": "grandes demais"}
-            for motivo, n in grupos.items():
-                partes.append(
-                    f"<p class=\"onde\">{_fmt(n)} arquivos {html.escape(nomes.get(motivo, motivo))}.</p>")
+    partes.append(_http(relatorio["retornos"]))
+    partes.append(_pulados(relatorio))
     partes.append(_script_filtro())
     partes.append("</main>")
     return documento("Análise de logs", "".join(partes))
-
-
-def csv_achados(relatorio):
-    buf = io.StringIO()
-    w = csv.writer(buf)
-    w.writerow(["id", "classe", "nivel", "contagem", "titulo", "motivo", "arquivos"])
-    for a in relatorio.get("achados") or []:
-        w.writerow([
-            a.get("id", ""),
-            a.get("classe", ""),
-            a.get("nivel", ""),
-            a.get("contagem", 0),
-            a.get("titulo", ""),
-            a.get("motivo", ""),
-            " ".join(a.get("arquivos") or []),
-        ])
-    return buf.getvalue()
 
 
 def gravar(relatorio, saida):
     os.makedirs(saida, exist_ok=True)
     json_path = os.path.join(saida, "relatorio.json")
     html_path = os.path.join(saida, "painel.html")
-    csv_path = os.path.join(saida, "achados.csv")
+    xlsx_path = os.path.join(saida, "achados.xlsx")
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(relatorio, f, ensure_ascii=False, indent=2)
         f.write("\n")
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(html_painel(relatorio))
-    with open(csv_path, "w", encoding="utf-8", newline="") as f:
-        f.write(csv_achados(relatorio))
-    return json_path, html_path
+    with open(xlsx_path, "wb") as f:
+        f.write(planilha.xlsx_relatorio(relatorio))
+    return json_path, html_path, xlsx_path
 
 
-def _resumo_stdout(relatorio, html_path):
+def _resumo_stdout(relatorio, html_path, xlsx_path):
     r = relatorio["resumo"]
     print(f"arquivos: {r['arquivos']}")
     print(f"linhas: {r['linhas']}")
@@ -921,6 +1091,7 @@ def _resumo_stdout(relatorio, html_path):
     if r.get("niveis"):
         print(f"niveis: {r['niveis']}")
     print(f"painel: {html_path}")
+    print(f"planilha: {xlsx_path}")
 
 
 def main(argv):
@@ -961,8 +1132,8 @@ def main(argv):
     except (zipfile.BadZipFile, tarfile.TarError, gzip.BadGzipFile, OSError) as e:
         print(f"não foi possível ler a entrada: {e}", file=sys.stderr)
         return 1
-    _, html_path = gravar(relatorio, saida)
-    _resumo_stdout(relatorio, html_path)
+    _, html_path, xlsx_path = gravar(relatorio, saida)
+    _resumo_stdout(relatorio, html_path, xlsx_path)
     r = relatorio["resumo"]
     if estrito and (r["erros"] or r["falsos_negativos"]):
         return 2

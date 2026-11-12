@@ -14,6 +14,7 @@ import apoio
 sys.path.insert(0, os.path.join(apoio.RAIZ_REPO, "plugins", "logs", "scripts"))
 import analisar  # noqa: E402
 import guarda  # noqa: E402
+import planilha  # noqa: E402
 
 SCRIPT = os.path.join(apoio.RAIZ_REPO, "plugins", "logs", "scripts", "analisar.py")
 
@@ -144,6 +145,19 @@ class ClassificarTests(unittest.TestCase):
         for chave in ("", "falso_negativo", "erro", "aviso", "falso_positivo"):
             self.assertIn(f'data-classe-filtro="{chave}"', pagina)
         self.assertIn("Sem nível", pagina)
+        self.assertIn("Volume do arquivo", pagina)
+        dados = planilha.xlsx_relatorio(rel)
+        with zipfile.ZipFile(io.BytesIO(dados)) as z:
+            niveis = z.read("xl/worksheets/sheet3.xml").decode("utf-8")
+            achados = z.read("xl/worksheets/sheet1.xml").decode("utf-8")
+        self.assertIn("Sem nível", niveis)
+        self.assertIn(">1<", niveis)
+        self.assertIn("TypeError", achados)
+        self.assertNotIn("linha sem nivel", achados)
+        self.assertIn("O que mais aparece", pagina)
+        self.assertIn("Baixar Excel", pagina)
+        self.assertNotIn("Baixar JSON", pagina)
+        self.assertNotIn("Baixar CSV", pagina)
 
     def test_palavra_error_solta_nao_e_excecao(self):
         rel = analisar.montar([{"nome": "a.log", "texto": "INFO the word error is not a fault\n"}])
@@ -238,7 +252,7 @@ class EntradaTests(unittest.TestCase):
         self.assertIn("e mais 4", pagina)
         self.assertIn("Tudo cai em TypeError, 8 vezes.", pagina)
         self.assertNotIn("a7.log", pagina)
-        self.assertIn("<small>(8)</small>", pagina)
+        self.assertIn('class="n">8<', pagina)
 
     def test_metadado_de_macos_nao_entra(self):
         caminho = os.path.join(self.tmp, "mac.tar")
@@ -289,7 +303,7 @@ class EntradaTests(unittest.TestCase):
             [sys.executable, "-I", SCRIPT, *entradas, "--saida", saida],
             capture_output=True, text=True, check=False)
         self.assertEqual(r.returncode, 0, r.stderr)
-        self.assertEqual(sorted(os.listdir(saida)), ["achados.csv", "painel.html", "relatorio.json"])
+        self.assertEqual(sorted(os.listdir(saida)), ["achados.xlsx", "painel.html", "relatorio.json"])
         with open(os.path.join(saida, "relatorio.json"), encoding="utf-8") as f:
             rel = json.load(f)
         with open(os.path.join(saida, "painel.html"), encoding="utf-8") as f:
@@ -364,7 +378,7 @@ class EntradaTests(unittest.TestCase):
         self.assertEqual(classes(rel, "erro")[0]["arquivos"], ["api.log", "web.log"])
         codigos = {(r["codigo"], r["como"]): r["contagem"] for r in rel["retornos"]}
         self.assertEqual(codigos[(200, "status")], 1)
-        self.assertIn("<small>(3)</small>", pagina)
+        self.assertIn('class="n">3<', pagina)
         self.assertIn("api.log", pagina)
         self.assertIn("web.log", pagina)
         self.assertIn("Falso negativo", pagina)
