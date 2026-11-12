@@ -9,7 +9,7 @@ import os
 import re
 import time
 
-VERSAO = 1
+VERSAO = 2
 MAX_ITENS = 30
 
 

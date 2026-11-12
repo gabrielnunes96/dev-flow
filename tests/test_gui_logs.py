@@ -91,6 +91,8 @@ class GuiLogsTests(unittest.TestCase):
         status, html = self._post([("api.log", b"ERROR TypeError: quebrou\n")])
         self.assertEqual(status, 200)
         self.assertIn("TypeError", html)
+        self.assertIn("api.log", html)
+        self.assertNotIn("1-api.log", html)
         self.assertIn("Nova análise", html)
 
     def test_dois_zips_no_mesmo_envio(self):
