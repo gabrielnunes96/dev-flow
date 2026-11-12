@@ -15,10 +15,8 @@ NIVEL = {
     "outro": "Sem nível",
 }
 CLASSE = {
-    "falso_negativo": "Falso negativo",
     "erro": "Erro",
     "aviso": "Aviso",
-    "falso_positivo": "Falso positivo",
 }
 
 _TIPOS = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -166,10 +164,8 @@ def xlsx_relatorio(relatorio):
         ["Leitura", "Achados são problemas. Níveis são linhas do arquivo, saudáveis ou não."],
         ["Arquivos", int(resumo.get("arquivos") or 0)],
         ["Linhas", int(resumo.get("linhas") or 0)],
-        ["Falsos negativos", int(resumo.get("falsos_negativos") or 0)],
         ["Erros", int(resumo.get("erros") or 0)],
         ["Avisos", int(resumo.get("avisos") or 0)],
-        ["Falsos positivos", int(resumo.get("falsos_positivos") or 0)],
     ]
     niveis_linhas = [["Nível", "Linhas"]]
     for chave, rotulo in NIVEL.items():
