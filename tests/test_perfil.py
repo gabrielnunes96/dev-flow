@@ -48,6 +48,16 @@ class PerfilTests(unittest.TestCase):
         self.assertTrue(any("cobol" in a for a in avisos))
         self.assertTrue(any("comandos.teste" in a for a in avisos))
 
+    def test_validar_secao_design(self):
+        ok = perfil.validar({"nome": "x", "stacks": ["front"], "comandos": {"teste": "t"},
+                             "design": {"tokens": "src/tokens.css", "plataformas": ["web", "ios"]}})
+        self.assertEqual([m for n, m in ok if n == "erro"], [])
+        erros = [m for n, m in perfil.validar({"nome": "x", "stacks": ["front"], "design": {"tokens": 1, "plataformas": ["tv"]}}) if n == "erro"]
+        self.assertTrue(any("design.tokens" in e for e in erros))
+        self.assertTrue(any("'tv'" in e for e in erros))
+        erros = [m for n, m in perfil.validar({"nome": "x", "stacks": ["front"], "design": []}) if n == "erro"]
+        self.assertTrue(any(e.startswith("design:") for e in erros))
+
     def test_obter_campo_aninhado(self):
         p = {"git": {"push": "humano"}}
         self.assertEqual(perfil.obter(p, "git.push"), "humano")

@@ -25,6 +25,7 @@ demanda (você explica)
 | **stack-dotnet** | Convenções, armadilhas e checklist de revisão .NET; modelo `ApiEmMemoria.cs` para testes de contrato. |
 | **stack-sql** | Convenções SQL Server (idempotência, rollback pareado, lote) + modelos de script e rollback. |
 | **stack-front** | Convenções de front, verificação visual no navegador (desktop e mobile), checklist. |
+| **design** | Skill `design` e agente `designer`: direção visual, tema claro/escuro com tokens, telas e fluxos, animações limpas, acessibilidade e revisão visual; modelos `tokens.css` e `movimento.css`. |
 
 Instale o `fluxo` sempre; os demais conforme o projeto. As skills de stack são carregadas pelo ciclo da tarefa conforme `stacks` do perfil.
 
@@ -128,6 +129,7 @@ Tudo o que é específico de um projeto fica em `.claude/projeto.json` (schema: 
 | `git` | Branch base, formato do commit, coautor, push humano | task, pr, guard |
 | `protecao` | Textos/diretórios proibidos, arquivos gerados, segredos | guard (bloqueio real) |
 | `pare_e_pergunte` | Situações do projeto em que o ciclo para | task |
+| `design` | Arquivo de tokens, design system, plataformas (web, ios, android, desktop) e referências de marca | design |
 
 ## Documentos de uma demanda
 

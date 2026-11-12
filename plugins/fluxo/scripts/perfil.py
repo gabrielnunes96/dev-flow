@@ -17,6 +17,7 @@ STACKS = {"dotnet", "sql", "front", "node", "python", "outra"}
 RASTREADORES = {"local", "azure-boards"}
 VALIDACOES = {"http", "sql", "navegador", "comando", "nenhuma"}
 PUSH = {"humano", "permitido"}
+PLATAFORMAS = {"web", "ios", "android", "desktop"}
 
 
 def encontrar_raiz(inicio=None):
@@ -110,6 +111,18 @@ def validar(perfil):
                 re.compile(item["regex"])
             except re.error as e:
                 erro(f"protecao.{chave}[{i}].regex: {e}")
+
+    design = perfil.get("design")
+    if design is not None:
+        if not isinstance(design, dict):
+            erro("design: deve ser objeto.")
+        else:
+            for c in ("tokens", "sistema"):
+                if c in design and not isinstance(design[c], str):
+                    erro(f"design.{c}: deve ser texto.")
+            for p in design.get("plataformas") or []:
+                if p not in PLATAFORMAS:
+                    erro(f"design.plataformas: '{p}' inválida ({', '.join(sorted(PLATAFORMAS))}).")
     return problemas
 
 

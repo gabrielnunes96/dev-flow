@@ -1,0 +1,55 @@
+/* Movimento — keyframes e utilitários da skill design:design.
+   Depende dos tokens --dur-* e --curva-* de tokens.css. Só transform e opacity. */
+
+@keyframes fade       { from { opacity: 0; } }
+@keyframes fade-sair  { to   { opacity: 0; } }
+@keyframes surgir     { from { opacity: 0; transform: translateY(-4px) scale(0.97); } }
+@keyframes subir      { from { opacity: 0; transform: translateY(12px) scale(0.98); } }
+@keyframes subir-curto{ from { opacity: 0; transform: translateY(6px); } }
+@keyframes descer-sair{ to   { opacity: 0; transform: translateY(8px) scale(0.98); } }
+@keyframes de-direita { from { transform: translateX(100%); } }
+@keyframes de-baixo   { from { transform: translateY(100%); } }
+@keyframes pulso      { 50% { opacity: 0.55; } }
+@keyframes brilho     { from { background-position: 150% 0; } to { background-position: -50% 0; } }
+
+/* Entradas */
+.entra-fade   { animation: fade var(--dur-media) var(--curva-entrada) both; }
+.entra-surgir { animation: surgir var(--dur-media) var(--curva-entrada) both; transform-origin: var(--origem, top center); }
+.entra-subir  { animation: subir var(--dur-lenta) var(--curva-entrada) both; }
+.entra-lista > * { animation: subir-curto var(--dur-media) var(--curva-entrada) both; animation-delay: calc(var(--i, 0) * 30ms); }
+.entra-drawer { animation: de-direita var(--dur-lenta) var(--curva-entrada) both; }
+.entra-sheet  { animation: de-baixo var(--dur-lenta) var(--curva-entrada) both; }
+
+/* Saídas (~20% mais rápidas) */
+.sai-fade  { animation: fade-sair calc(var(--dur-media) * 0.8) var(--curva-saida) both; }
+.sai-descer{ animation: descer-sair calc(var(--dur-media) * 0.8) var(--curva-saida) both; }
+
+/* Interação */
+.pressionavel { transition: transform var(--dur-rapida) var(--curva-padrao), background-color var(--dur-instantanea) linear, color var(--dur-instantanea) linear; }
+.pressionavel:active { transform: scale(0.97); }
+.elevavel { position: relative; transition: transform var(--dur-media) var(--curva-padrao); }
+.elevavel::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: var(--sombra-2); opacity: 0; transition: opacity var(--dur-media) var(--curva-padrao); pointer-events: none; }
+.elevavel:hover { transform: translateY(-2px); }
+.elevavel:hover::after { opacity: 1; }
+
+/* Altura automática sem animar height */
+.recolhivel { display: grid; grid-template-rows: 0fr; transition: grid-template-rows var(--dur-media) var(--curva-padrao); }
+.recolhivel[data-aberto] { grid-template-rows: 1fr; }
+.recolhivel > * { overflow: hidden; min-height: 0; }
+
+/* Carregamento */
+.skeleton {
+  border-radius: var(--raio-p);
+  background: linear-gradient(90deg, var(--cor-sutil) 30%, var(--cor-borda) 50%, var(--cor-sutil) 70%) 0 0 / 200% 100%;
+  animation: brilho 1.4s linear infinite;
+}
+
+/* Movimento reduzido: deslocamento vira fade curto; loops param. */
+@media (prefers-reduced-motion: reduce) {
+  .entra-surgir, .entra-subir, .entra-lista > *, .entra-drawer, .entra-sheet { animation-name: fade; animation-duration: var(--dur-rapida); animation-delay: 0ms; }
+  .sai-descer { animation-name: fade-sair; }
+  .pressionavel:active, .elevavel:hover { transform: none; }
+  .recolhivel { transition: none; }
+  .skeleton { animation: none; }
+  html:focus-within { scroll-behavior: auto; }
+}

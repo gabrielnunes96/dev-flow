@@ -219,6 +219,7 @@ s.append(tabela(["Plugin", "O que traz", "Integra com"], [
     ["<b>stack-dotnet</b>", "Convenções, armadilhas e checklist .NET; modelo de API em memória para testes de contrato.", "dotnet build/test"],
     ["<b>stack-sql</b>", "Convenções SQL Server (idempotência, rollback pareado, lote); modelos de script e rollback.", "Banco de desenvolvimento"],
     ["<b>stack-front</b>", "Convenções de front, verificação visual no navegador (desktop e mobile), checklist.", "Navegador"],
+    ["<b>design</b>", "Designer de UX/UI: direção visual, tema claro/escuro com tokens, telas, animações limpas, acessibilidade e revisão visual.", "Navegador, stack-front"],
 ], [33 * mm, 87 * mm, 50 * mm]))
 s.append(P("Hooks (rodam sozinhos)", h2))
 s += bullets([
@@ -236,6 +237,7 @@ s.append(tabela(["Seção", "Para quê"], [
     [c("servico, validacao"), "Como subir a aplicação, token, URL, dados de teste, casos obrigatórios, máscaras de segredo"],
     [c("git"), "Branch base, formato do commit, coautor, push humano"],
     [c("protecao"), "Textos/diretórios proibidos, arquivos gerados, segredos (o guard aplica)"],
+    [c("design"), "Arquivo de tokens, design system, plataformas e referências de marca (plugin design)"],
     [c("pare_e_pergunte"), "Situações do projeto em que o ciclo para"],
 ], [45 * mm, 125 * mm]))
 s.append(PageBreak())
@@ -255,6 +257,7 @@ s.append(bloco_codigo(
     "claude plugin install stack-dotnet@dev-flow     # conforme as stacks que você usa\n"
     "claude plugin install stack-sql@dev-flow\n"
     "claude plugin install stack-front@dev-flow\n"
+    "claude plugin install design@dev-flow           # tema, telas e animações\n"
     "claude plugin install azure-boards@dev-flow     # se for usar o Boards\n"
     "claude plugin install azure-pipelines@dev-flow  # se for gerar pipelines"))
 s.append(P(f"Para conferir: {c('claude plugin list')}. Os plugins valem a partir da próxima sessão do Claude Code.", nota))

@@ -128,6 +128,16 @@
         }
       }
     },
+    "design": {
+      "type": "object",
+      "description": "Dados de design do projeto, lidos pela skill design:design.",
+      "properties": {
+        "tokens": { "type": "string", "description": "Arquivo de tokens/tema do projeto (ex.: src/styles/tokens.css)." },
+        "sistema": { "type": "string", "description": "Design system ou biblioteca de componentes em uso (ex.: shadcn/ui, MUI, próprio em src/ui)." },
+        "plataformas": { "type": "array", "items": { "enum": ["web", "ios", "android", "desktop"] } },
+        "referencias": { "type": "array", "items": { "type": "string" }, "description": "Guias de marca, telas de referência ou arquivos de design (caminho ou URL)." }
+      }
+    },
     "pare_e_pergunte": {
       "type": "array",
       "items": { "type": "string" },

@@ -1,0 +1,167 @@
+/* Tema base (claro e escuro) — ponto de partida da skill design:design.
+   Troque o matiz da marca (--matiz) e o croma do acento; o resto se ajusta.
+   Contraste AA conferido nos dois modos (texto ≥ 4,5:1; borda de campo e foco ≥ 3:1) com os valores padrão.
+   Componentes usam só os tokens semânticos (--cor-*, --texto-*, --espaco-*, --raio-*, --sombra-*, --dur-*, --curva-*). */
+
+:root {
+  --matiz: 255;          /* matiz da marca (0–360) */
+  --croma-acento: 0.17;  /* saturação do acento */
+  --croma-neutro: 0.012; /* "temperatura" dos cinzas */
+
+  /* Primitivos: neutros */
+  --n-0:   oklch(99.5% calc(var(--croma-neutro) * 0.5) var(--matiz));
+  --n-50:  oklch(98%   var(--croma-neutro) var(--matiz));
+  --n-100: oklch(96%   var(--croma-neutro) var(--matiz));
+  --n-200: oklch(92%   var(--croma-neutro) var(--matiz));
+  --n-300: oklch(87%   var(--croma-neutro) var(--matiz));
+  --n-400: oklch(75%   var(--croma-neutro) var(--matiz));
+  --n-500: oklch(60%   var(--croma-neutro) var(--matiz));
+  --n-600: oklch(47%   var(--croma-neutro) var(--matiz));
+  --n-700: oklch(37%   var(--croma-neutro) var(--matiz));
+  --n-800: oklch(27%   var(--croma-neutro) var(--matiz));
+  --n-900: oklch(21%   var(--croma-neutro) var(--matiz));
+  --n-950: oklch(16%   var(--croma-neutro) var(--matiz));
+  --n-1000: oklch(13%  var(--croma-neutro) var(--matiz));
+
+  /* Primitivos: acento */
+  --a-100: oklch(95% calc(var(--croma-acento) * 0.25) var(--matiz));
+  --a-300: oklch(82% calc(var(--croma-acento) * 0.6) var(--matiz));
+  --a-500: oklch(62% var(--croma-acento) var(--matiz));
+  --a-600: oklch(54% var(--croma-acento) var(--matiz));
+  --a-700: oklch(47% var(--croma-acento) var(--matiz));
+  --a-800: oklch(39% calc(var(--croma-acento) * 0.85) var(--matiz));
+
+  /* Semânticos — claro */
+  --cor-fundo: var(--n-50);
+  --cor-superficie: var(--n-0);
+  --cor-superficie-2: var(--n-0);
+  --cor-sutil: var(--n-100);
+  --cor-borda: var(--n-200);
+  --cor-borda-forte: var(--n-500);
+  --cor-texto: var(--n-900);
+  --cor-texto-suave: var(--n-600);
+  --cor-acento: var(--a-600);
+  --cor-acento-hover: var(--a-700);
+  --cor-acento-suave: var(--a-100);
+  --cor-sobre-acento: oklch(100% 0 0);
+  --cor-foco: var(--a-500);
+  --cor-perigo: oklch(55% 0.2 27);
+  --cor-perigo-suave: oklch(96% 0.03 27);
+  --cor-aviso: oklch(54% 0.13 70);
+  --cor-aviso-suave: oklch(97% 0.04 85);
+  --cor-sucesso: oklch(51% 0.14 150);
+  --cor-sucesso-suave: oklch(96% 0.04 150);
+
+  /* Tipografia (escala 1,25; base 16px) */
+  --fonte-texto: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --fonte-titulo: var(--fonte-texto);
+  --fonte-mono: ui-monospace, "JetBrains Mono", "SF Mono", Consolas, monospace;
+  --texto-xs: 0.75rem;   /* 12 */
+  --texto-sm: 0.875rem;  /* 14 */
+  --texto-md: 1rem;      /* 16 */
+  --texto-lg: 1.25rem;   /* 20 */
+  --texto-xl: 1.5625rem; /* 25 */
+  --texto-2xl: 1.9375rem;/* 31 */
+  --texto-3xl: 2.4375rem;/* 39 */
+  --altura-texto: 1.5;
+  --altura-titulo: 1.2;
+  --peso-normal: 400;
+  --peso-medio: 550;
+  --peso-forte: 650;
+
+  /* Espaço (base 4) */
+  --espaco-1: 4px;  --espaco-2: 8px;  --espaco-3: 12px; --espaco-4: 16px;
+  --espaco-5: 24px; --espaco-6: 32px; --espaco-7: 48px; --espaco-8: 64px; --espaco-9: 96px;
+
+  /* Forma */
+  --raio-p: 6px;
+  --raio-m: 10px;
+  --raio-g: 16px;
+  --raio-total: 999px;
+  --borda: 1px solid var(--cor-borda);
+
+  /* Profundidade (duas camadas, cor do neutro) */
+  --sombra-1: 0 1px 2px oklch(20% 0.02 var(--matiz) / 0.06), 0 1px 3px oklch(20% 0.02 var(--matiz) / 0.08);
+  --sombra-2: 0 2px 4px oklch(20% 0.02 var(--matiz) / 0.06), 0 8px 24px oklch(20% 0.02 var(--matiz) / 0.10);
+  --sombra-3: 0 4px 8px oklch(20% 0.02 var(--matiz) / 0.08), 0 24px 48px oklch(20% 0.02 var(--matiz) / 0.16);
+  --anel-foco: 0 0 0 2px var(--cor-fundo), 0 0 0 4px var(--cor-foco);
+
+  /* Movimento */
+  --dur-instantanea: 80ms;
+  --dur-rapida: 120ms;
+  --dur-media: 220ms;
+  --dur-lenta: 360ms;
+  --curva-entrada: cubic-bezier(0.16, 1, 0.3, 1);
+  --curva-saida: cubic-bezier(0.7, 0, 0.84, 0);
+  --curva-padrao: cubic-bezier(0.65, 0, 0.35, 1);
+  --curva-mola: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  color-scheme: light;
+}
+
+/* Semânticos — escuro (pela preferência do sistema, salvo escolha manual de claro) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --cor-fundo: var(--n-1000);
+    --cor-superficie: var(--n-950);
+    --cor-superficie-2: var(--n-900);
+    --cor-sutil: var(--n-900);
+    --cor-borda: var(--n-800);
+    --cor-borda-forte: oklch(52% var(--croma-neutro) var(--matiz));
+    --cor-texto: oklch(94% var(--croma-neutro) var(--matiz));
+    --cor-texto-suave: var(--n-400);
+    --cor-acento: oklch(72% calc(var(--croma-acento) * 0.85) var(--matiz));
+    --cor-acento-hover: oklch(78% calc(var(--croma-acento) * 0.8) var(--matiz));
+    --cor-acento-suave: oklch(28% calc(var(--croma-acento) * 0.4) var(--matiz));
+    --cor-sobre-acento: var(--n-1000);
+    --cor-foco: oklch(75% var(--croma-acento) var(--matiz));
+    --cor-perigo: oklch(70% 0.17 27);
+    --cor-perigo-suave: oklch(27% 0.06 27);
+    --cor-aviso: oklch(78% 0.14 75);
+    --cor-aviso-suave: oklch(28% 0.05 75);
+    --cor-sucesso: oklch(72% 0.14 150);
+    --cor-sucesso-suave: oklch(27% 0.05 150);
+    --sombra-1: 0 0 0 1px oklch(100% 0 0 / 0.06);
+    --sombra-2: 0 0 0 1px oklch(100% 0 0 / 0.08), 0 8px 24px oklch(0% 0 0 / 0.4);
+    --sombra-3: 0 0 0 1px oklch(100% 0 0 / 0.1), 0 24px 48px oklch(0% 0 0 / 0.5);
+    color-scheme: dark;
+  }
+}
+
+/* Escuro por escolha manual (mesmos valores do bloco acima) */
+:root[data-tema="escuro"] {
+  --cor-fundo: var(--n-1000);
+  --cor-superficie: var(--n-950);
+  --cor-superficie-2: var(--n-900);
+  --cor-sutil: var(--n-900);
+  --cor-borda: var(--n-800);
+  --cor-borda-forte: oklch(52% var(--croma-neutro) var(--matiz));
+  --cor-texto: oklch(94% var(--croma-neutro) var(--matiz));
+  --cor-texto-suave: var(--n-400);
+  --cor-acento: oklch(72% calc(var(--croma-acento) * 0.85) var(--matiz));
+  --cor-acento-hover: oklch(78% calc(var(--croma-acento) * 0.8) var(--matiz));
+  --cor-acento-suave: oklch(28% calc(var(--croma-acento) * 0.4) var(--matiz));
+  --cor-sobre-acento: var(--n-1000);
+  --cor-foco: oklch(75% var(--croma-acento) var(--matiz));
+  --cor-perigo: oklch(70% 0.17 27);
+  --cor-perigo-suave: oklch(27% 0.06 27);
+  --cor-aviso: oklch(78% 0.14 75);
+  --cor-aviso-suave: oklch(28% 0.05 75);
+  --cor-sucesso: oklch(72% 0.14 150);
+  --cor-sucesso-suave: oklch(27% 0.05 150);
+  --sombra-1: 0 0 0 1px oklch(100% 0 0 / 0.06);
+  --sombra-2: 0 0 0 1px oklch(100% 0 0 / 0.08), 0 8px 24px oklch(0% 0 0 / 0.4);
+  --sombra-3: 0 0 0 1px oklch(100% 0 0 / 0.1), 0 24px 48px oklch(0% 0 0 / 0.5);
+  color-scheme: dark;
+}
+
+/* Base */
+body {
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  font: var(--peso-normal) var(--texto-md) / var(--altura-texto) var(--fonte-texto);
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4 { font-family: var(--fonte-titulo); line-height: var(--altura-titulo); font-weight: var(--peso-forte); letter-spacing: -0.015em; }
+:focus-visible { outline: none; box-shadow: var(--anel-foco); border-radius: var(--raio-p); }
+::selection { background: var(--cor-acento-suave); }

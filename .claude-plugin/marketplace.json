@@ -3,14 +3,14 @@
   "owner": { "name": "Gabriel Nunes Campos" },
   "metadata": {
     "description": "Fluxo de desenvolvimento automatizado do time: da demanda à especificação funcional e técnica, plano, implementação task a task, revisão, validação, PR e CI/CD.",
-    "version": "0.1.1"
+    "version": "0.1.2"
   },
   "plugins": [
     {
       "name": "fluxo",
       "source": "./plugins/fluxo",
       "description": "Núcleo do processo: demanda → funcional → técnica → plano → tasks → PR, com portões humanos, guard de segurança e validação local.",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "category": "development"
     },
     {
@@ -47,6 +47,13 @@
       "description": "Convenções de front-end para o fluxo: lint, testes, build e verificação visual no navegador (desktop e mobile).",
       "version": "0.1.0",
       "category": "development"
+    },
+    {
+      "name": "design",
+      "source": "./plugins/design",
+      "description": "Designer de UX/UI: direção visual, temas claro/escuro com tokens, telas e fluxos, animações limpas, acessibilidade e revisão visual.",
+      "version": "0.1.0",
+      "category": "design"
     },
     {
       "name": "video",

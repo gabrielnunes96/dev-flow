@@ -1,6 +1,6 @@
 {
   "name": "fluxo",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Núcleo do fluxo de desenvolvimento: demanda → funcional → técnica → plano → tasks → PR, com portões humanos, guard de segurança e validação local.",
   "author": { "name": "Gabriel Nunes Campos" },
   "keywords": ["processo", "especificacao", "planejamento", "tasks", "revisao", "validacao"]
