@@ -1,0 +1,14 @@
+{
+  "name": "github-actions",
+  "version": "0.1.0",
+  "description": "Gera e ajusta workflows do GitHub Actions (CI, imagem com varredura, deploy por ambiente com OIDC e aprovação) e diagnostica execuções com o gh CLI.",
+  "author": {
+    "name": "Gabriel Nunes Campos"
+  },
+  "keywords": [
+    "github",
+    "actions",
+    "ci",
+    "cd"
+  ]
+}

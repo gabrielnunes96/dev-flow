@@ -1,0 +1,32 @@
+# CI de um projeto Python (uv). Para pip/poetry, troque os passos de instalação.
+trigger:
+  branches:
+    include: [main]
+pr:
+  branches:
+    include: [main]
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: "3.12"
+
+  - script: pip install uv==0.5.* && uv sync --frozen
+    displayName: Instalar
+
+  - script: uv run ruff check . && uv run ruff format --check .
+    displayName: Lint
+
+  - script: uv run pytest -q --junitxml=test-results.xml
+    displayName: Testes
+
+  - task: PublishTestResults@2
+    condition: succeededOrFailed()
+    inputs:
+      testResultsFiles: test-results.xml
+
+  - script: uv run pip-audit
+    displayName: Pacotes vulneráveis

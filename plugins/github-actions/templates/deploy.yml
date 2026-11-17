@@ -1,0 +1,41 @@
+# Deploy em sequência pelos ambientes de ci.ambientes. Produção exige revisores no environment
+# (Settings → Environments → prd → Required reviewers); isso não fica no YAML.
+name: deploy
+on:
+  workflow_run:
+    workflows: [imagem]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write # OIDC com a nuvem, sem chave de longa duração
+
+jobs:
+  dev:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment: dev
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Implantar
+        env:
+          IMAGEM_TAG: sha-${{ github.event.workflow_run.head_sha }}
+        run: ./deploy/implantar.sh dev "$IMAGEM_TAG" # ex.: helm upgrade / az containerapp update / kubectl set image
+
+  hml:
+    needs: dev
+    runs-on: ubuntu-latest
+    environment: hml
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./deploy/implantar.sh hml "sha-${{ github.event.workflow_run.head_sha }}"
+
+  prd:
+    needs: hml
+    runs-on: ubuntu-latest
+    environment: prd
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./deploy/implantar.sh prd "sha-${{ github.event.workflow_run.head_sha }}"

@@ -1,0 +1,13 @@
+{
+  "name": "stack-redis",
+  "version": "0.1.0",
+  "description": "Convenções de Redis para o fluxo: cache-aside com TTL, invalidação, atomicidade, locks, rate limit, streams e comandos proibidos.",
+  "author": {
+    "name": "Gabriel Nunes Campos"
+  },
+  "keywords": [
+    "redis",
+    "cache",
+    "fila"
+  ]
+}

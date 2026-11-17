@@ -1,0 +1,88 @@
+# Deployment + Service + PDB + HPA de base. Ajuste nome, imagem, porta, recursos e o caminho do healthcheck.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minha-api
+  labels: &labels
+    app.kubernetes.io/name: minha-api
+    app.kubernetes.io/part-of: meu-sistema
+spec:
+  replicas: 2
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxUnavailable: 0, maxSurge: 1 }
+  selector:
+    matchLabels: { app.kubernetes.io/name: minha-api }
+  template:
+    metadata:
+      labels: *labels
+    spec:
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile: { type: RuntimeDefault }
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels: { app.kubernetes.io/name: minha-api }
+      containers:
+        - name: app
+          image: meuregistro.exemplo/minha-api:1.0.0 # tag imutável (versão ou SHA)
+          ports: [{ name: http, containerPort: 8080 }]
+          envFrom:
+            - configMapRef: { name: minha-api-config }
+            - secretRef: { name: minha-api-secrets } # criado por External Secrets / Sealed Secrets
+          resources:
+            requests: { cpu: 100m, memory: 256Mi }
+            limits: { memory: 512Mi }
+          startupProbe:
+            httpGet: { path: /healthcheck, port: http }
+            failureThreshold: 30
+            periodSeconds: 2
+          readinessProbe:
+            httpGet: { path: /healthcheck/ready, port: http }
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /healthcheck/live, port: http } # não checa dependências externas
+            periodSeconds: 10
+          lifecycle:
+            preStop: { sleep: { seconds: 5 } }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          volumeMounts: [{ name: tmp, mountPath: /tmp }]
+      volumes: [{ name: tmp, emptyDir: {} }]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minha-api
+spec:
+  selector: { app.kubernetes.io/name: minha-api }
+  ports: [{ name: http, port: 80, targetPort: http }]
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: minha-api
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels: { app.kubernetes.io/name: minha-api }
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: minha-api
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: minha-api }
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+    - type: Resource
+      resource: { name: cpu, target: { type: Utilization, averageUtilization: 70 } }

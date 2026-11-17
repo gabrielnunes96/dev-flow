@@ -1,0 +1,14 @@
+{
+  "name": "stack-node",
+  "version": "0.1.0",
+  "description": "Convenções de back-end Node.js/TypeScript para o fluxo: Express/Fastify/NestJS, validação por schema, ORMs, async, supertest e npm audit.",
+  "author": {
+    "name": "Gabriel Nunes Campos"
+  },
+  "keywords": [
+    "node",
+    "typescript",
+    "express",
+    "nestjs"
+  ]
+}

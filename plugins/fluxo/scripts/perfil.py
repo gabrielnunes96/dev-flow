@@ -13,11 +13,17 @@ import re
 import sys
 
 ARQUIVO = os.path.join(".claude", "projeto.json")
-STACKS = {"dotnet", "sql", "front", "node", "python", "outra"}
+STACKS = {"dotnet", "sql", "front", "node", "python", "java", "go", "postgres", "mysql", "mongodb", "redis",
+          "docker", "kubernetes", "terraform", "outra"}
 RASTREADORES = {"local", "azure-boards"}
 VALIDACOES = {"http", "sql", "navegador", "comando", "nenhuma"}
 PUSH = {"humano", "permitido"}
 PLATAFORMAS = {"web", "ios", "android", "desktop"}
+PROVEDORES_CI = {"azure-pipelines", "github-actions", "gitlab-ci", "nenhum"}
+NUVENS = {"azure", "aws", "gcp", "on-premise", "outra"}
+EXECUCOES = {"kubernetes", "compose", "app-service", "container-apps", "ecs", "lambda", "functions", "cloud-run", "vm", "outra"}
+# Stack de infraestrutura que exige a declaração correspondente em infra.execucao.
+INFRA_EXIGE = {"kubernetes": "kubernetes"}
 
 
 def encontrar_raiz(inicio=None):
@@ -123,6 +129,41 @@ def validar(perfil):
             for p in design.get("plataformas") or []:
                 if p not in PLATAFORMAS:
                     erro(f"design.plataformas: '{p}' inválida ({', '.join(sorted(PLATAFORMAS))}).")
+
+    ci = perfil.get("ci")
+    if ci is not None:
+        if not isinstance(ci, dict):
+            erro("ci: deve ser objeto.")
+        else:
+            if ci.get("provedor", "nenhum") not in PROVEDORES_CI:
+                erro(f"ci.provedor: '{ci.get('provedor')}' inválido ({', '.join(sorted(PROVEDORES_CI))}).")
+            for c in ("arquivos", "ambientes"):
+                if c in ci and (not isinstance(ci[c], list) or not all(isinstance(x, str) for x in ci[c])):
+                    erro(f"ci.{c}: deve ser lista de textos.")
+            amb = ci.get("ambientes") or []
+            if len(set(amb)) != len(amb):
+                erro("ci.ambientes: há ambiente repetido.")
+
+    infra = perfil.get("infra")
+    if infra is not None:
+        if not isinstance(infra, dict):
+            erro("infra: deve ser objeto.")
+        else:
+            if "nuvem" in infra and infra["nuvem"] not in NUVENS:
+                erro(f"infra.nuvem: '{infra['nuvem']}' inválida ({', '.join(sorted(NUVENS))}).")
+            for e in infra.get("execucao") or []:
+                if e not in EXECUCOES:
+                    erro(f"infra.execucao: '{e}' inválida ({', '.join(sorted(EXECUCOES))}).")
+            for c in ("iac", "registro", "observabilidade"):
+                if c in infra and not isinstance(infra[c], str):
+                    erro(f"infra.{c}: deve ser texto.")
+    if isinstance(stacks, list):
+        execucao = (infra or {}).get("execucao") or [] if isinstance(infra, dict) else []
+        for s, e in INFRA_EXIGE.items():
+            if s in stacks and e not in execucao:
+                aviso(f"stacks: '{s}' declarada, mas infra.execucao não inclui '{e}'.")
+        if "terraform" in stacks and not (isinstance(infra, dict) and infra.get("iac")):
+            aviso("stacks: 'terraform' declarada sem infra.iac (pasta da infraestrutura como código).")
     return problemas
 
 
@@ -135,6 +176,8 @@ def resumo(raiz, perfil):
         f"Especificações: {perfil.get('docs', 'docs/demandas')}",
         f"Rastreador: {r.get('tipo')}" + (f" {r.get('org')}/{r.get('projeto')}, item raiz {r.get('item_raiz')}" if r.get("tipo") == "azure-boards" else ""),
         f"Validação: {v.get('tipo')}" + (f" em {v.get('base_url')}" if v.get("base_url") else ""),
+        f"CI: {obter(perfil, 'ci.provedor', 'nenhum')}" + (f" ({' → '.join(obter(perfil, 'ci.ambientes'))})" if obter(perfil, "ci.ambientes") else ""),
+        f"Infra: {obter(perfil, 'infra.nuvem', '-')}" + (f", {', '.join(obter(perfil, 'infra.execucao'))}" if obter(perfil, "infra.execucao") else ""),
         f"Git: base {obter(perfil, 'git.branch_base', 'main')}, push {obter(perfil, 'git.push', 'humano')}, commit por task {obter(perfil, 'git.commit_por_task', True)}",
     ]
     for nome, cmd in (perfil.get("comandos") or {}).items():

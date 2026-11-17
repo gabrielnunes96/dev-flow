@@ -10,8 +10,8 @@
     "stacks": {
       "type": "array",
       "minItems": 1,
-      "items": { "enum": ["dotnet", "sql", "front", "node", "python", "outra"] },
-      "description": "Define quais skills de stack (plugins stack-*) o ciclo da task carrega."
+      "items": { "enum": ["dotnet", "sql", "front", "node", "python", "java", "go", "postgres", "mysql", "mongodb", "redis", "docker", "kubernetes", "terraform", "outra"] },
+      "description": "Define quais skills de stack (plugins stack-*) o ciclo da task carrega: stack X → skill stack-X:X. Linguagens, bancos (sql = SQL Server) e infraestrutura."
     },
     "idioma": { "type": "string", "default": "pt-BR" },
     "docs": {
@@ -136,6 +136,26 @@
         "sistema": { "type": "string", "description": "Design system ou biblioteca de componentes em uso (ex.: shadcn/ui, MUI, próprio em src/ui)." },
         "plataformas": { "type": "array", "items": { "enum": ["web", "ios", "android", "desktop"] } },
         "referencias": { "type": "array", "items": { "type": "string" }, "description": "Guias de marca, telas de referência ou arquivos de design (caminho ou URL)." }
+      }
+    },
+    "ci": {
+      "type": "object",
+      "description": "Onde roda a integração e entrega contínuas; define a skill de pipeline usada pelo fluxo.",
+      "properties": {
+        "provedor": { "enum": ["azure-pipelines", "github-actions", "gitlab-ci", "nenhum"], "default": "nenhum" },
+        "arquivos": { "type": "array", "items": { "type": "string" }, "description": "Arquivos de pipeline do projeto (ex.: azure-pipelines.yml, .github/workflows/ci.yml)." },
+        "ambientes": { "type": "array", "items": { "type": "string" }, "description": "Ambientes de implantação em ordem (ex.: dev, hml, prd). O último exige aprovação manual." }
+      }
+    },
+    "infra": {
+      "type": "object",
+      "description": "Onde e como a aplicação roda; lido pela técnica, pelo arquiteto, pelo agente de segurança e pelas skills de infraestrutura.",
+      "properties": {
+        "nuvem": { "enum": ["azure", "aws", "gcp", "on-premise", "outra"] },
+        "execucao": { "type": "array", "items": { "enum": ["kubernetes", "compose", "app-service", "container-apps", "ecs", "lambda", "functions", "cloud-run", "vm", "outra"] } },
+        "iac": { "type": "string", "description": "Pasta da infraestrutura como código (ex.: infra/terraform)." },
+        "registro": { "type": "string", "description": "Registro de imagens (ex.: meuacr.azurecr.io)." },
+        "observabilidade": { "type": "string", "description": "Ferramenta de logs/métricas/traces (ex.: Application Insights, Grafana, Datadog)." }
       }
     },
     "pare_e_pergunte": {

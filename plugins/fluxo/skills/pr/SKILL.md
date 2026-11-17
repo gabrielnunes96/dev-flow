@@ -18,4 +18,4 @@ argument-hint: "[slug da demanda]"
 ## 3. Abrir (só depois do push do usuário)
 - O push é do usuário (`git.push = humano`). Se a branch ainda não está no remoto, entregar `pr.md` e o comando de push para ele rodar.
 - Com a branch no remoto e Azure DevOps: `az repos pr create --source-branch <branch> --target-branch {git.branch_base} --title ... --description @pr.md --work-items <wis>` (confirmar com o usuário antes: é ação visível para o time). GitHub: `gh pr create`.
-- Depois de aberto: acompanhar a pipeline com a skill `azure-pipelines:pipeline` (ler o status, diagnosticar falha), sem habilitar auto-merge.
+- Depois de aberto: acompanhar a pipeline com a skill do `ci.provedor` (`azure-pipelines:pipeline`, `github-actions:actions` ou `gitlab-ci:gitlab`) — ler o status, diagnosticar falha —, sem habilitar auto-merge. GitLab: `glab mr create`.

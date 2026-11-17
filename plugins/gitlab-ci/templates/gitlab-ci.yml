@@ -1,0 +1,78 @@
+# .gitlab-ci.yml de base: lint, testes, segurança, imagem e deploy por ambiente.
+# Comandos = os do perfil (.claude/projeto.json). Produção é manual e o ambiente é protegido na UI.
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
+
+stages: [verificar, testar, imagem, deploy]
+
+include:
+  - template: Jobs/SAST.gitlab-ci.yml
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+
+default:
+  image: node:22-alpine # troque pela imagem da stack, com versão fixa
+  interruptible: true
+  cache:
+    key: { files: [package-lock.json] }
+    paths: [.npm/]
+  before_script:
+    - npm ci --cache .npm --prefer-offline # comandos.restaurar
+
+lint:
+  stage: verificar
+  script: [npm run lint] # comandos.lint
+
+testes:
+  stage: testar
+  script: [npm test -- --ci --reporters=default --reporters=jest-junit] # comandos.teste
+  artifacts:
+    when: always
+    reports: { junit: junit.xml }
+
+vulnerabilidades:
+  stage: testar
+  script: [npm audit --omit=dev --audit-level=high] # comandos.vulnerabilidades
+
+imagem:
+  stage: imagem
+  image: docker:27
+  services: [docker:27-dind]
+  cache: []
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+  script:
+    - docker build -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" .
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+.deploy:
+  stage: deploy
+  cache: []
+  before_script: []
+  script: [./deploy/implantar.sh "$CI_ENVIRONMENT_NAME" "$CI_COMMIT_SHORT_SHA"]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+deploy-dev:
+  extends: .deploy
+  environment: { name: dev }
+
+deploy-hml:
+  extends: .deploy
+  needs: [deploy-dev]
+  environment: { name: hml }
+
+deploy-prd:
+  extends: .deploy
+  needs: [deploy-hml]
+  environment: { name: prd }
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
+  allow_failure: false

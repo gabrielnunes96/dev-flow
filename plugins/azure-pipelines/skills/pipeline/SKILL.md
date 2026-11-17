@@ -8,7 +8,7 @@ argument-hint: "[criar | ajustar | diagnosticar <run id>]"
 
 ## criar / ajustar
 1. Ler o perfil (`stacks`, `comandos`) e o que já existe (`azure-pipelines.yml`, `.azure-pipelines/`, `Dockerfile`). Ajustar o existente em vez de criar um paralelo.
-2. Partir dos modelos em `../../templates/` (relativo a esta skill): `dotnet.yml`, `front.yml`, `sql.yml` e `deploy-estagios.yml`. Monorepo → um pipeline por componente com `trigger.paths.include` da pasta dele.
+2. Partir dos modelos em `../../templates/` (relativo a esta skill): `dotnet.yml`, `front.yml` (serve também para node), `python.yml`, `java.yml`, `go.yml`, `sql.yml`, `docker.yml` (imagem no ACR com varredura), `terraform.yml` (plan em PR, apply com aprovação) e `deploy-estagios.yml`. Monorepo → um pipeline por componente com `trigger.paths.include` da pasta dele.
 3. Regras:
    - CI em PR e na branch base; CD só na branch base.
    - Mesmos comandos do perfil (`build`, `teste`, `lint`, `vulnerabilidades`), para o que passa local passar no CI.

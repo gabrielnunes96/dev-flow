@@ -1,0 +1,39 @@
+# Build da imagem em PR e publicação no Azure Container Registry na branch base, com varredura.
+# acrConexao = service connection do tipo Docker Registry (configurada pelo usuário no projeto).
+trigger:
+  branches:
+    include: [main]
+pr:
+  branches:
+    include: [main]
+
+variables:
+  acrConexao: acr-conexao
+  repositorio: minha-api
+  tag: $(Build.SourceVersion)
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - task: Docker@2
+    displayName: Build
+    inputs:
+      command: build
+      containerRegistry: $(acrConexao)
+      repository: $(repositorio)
+      tags: $(tag)
+
+  - script: |
+      docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:0.57.0 \
+        image --severity CRITICAL,HIGH --ignore-unfixed --exit-code 1 $(repositorio):$(tag)
+    displayName: Varredura (Trivy)
+
+  - task: Docker@2
+    displayName: Publicar
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    inputs:
+      command: push
+      containerRegistry: $(acrConexao)
+      repository: $(repositorio)
+      tags: $(tag)

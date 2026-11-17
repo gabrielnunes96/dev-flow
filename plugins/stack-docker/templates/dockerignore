@@ -1,0 +1,19 @@
+# Copie para .dockerignore na raiz do contexto de build.
+.git
+.gitignore
+.claude/local
+.env
+.env.*
+!.env.example
+**/node_modules
+**/bin
+**/obj
+**/.venv
+**/__pycache__
+**/target
+**/dist
+**/coverage
+**/*.log
+Dockerfile*
+compose*.yaml
+docker-compose*.yml

@@ -15,7 +15,7 @@ Esta skill só orquestra: cada etapa é a skill correspondente, com os portões 
 | 3. Plano | `tarefas.json` válido e `03-plano.md` aprovado | `fluxo:plano` |
 | 4. Tarefas | `plano.py proxima` diz "fila concluída" | `fluxo:task todas` |
 | 5. PR | `pr.md` pronto (e PR aberto, se o usuário fizer o push) | `fluxo:pr` |
-| 6. Pipeline | pipeline verde ou falhas diagnosticadas | `azure-pipelines:pipeline` |
+| 6. Pipeline | pipeline verde ou falhas diagnosticadas | skill do `ci.provedor`: `azure-pipelines:pipeline`, `github-actions:actions` ou `gitlab-ci:gitlab` |
 
 ## Regras
 - Descobrir a etapa atual pelos arquivos (aprovação no topo, estados em tarefas.json) e começar dali. Dizer ao usuário em uma linha onde está.

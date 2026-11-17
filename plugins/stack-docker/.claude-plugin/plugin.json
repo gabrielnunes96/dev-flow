@@ -1,0 +1,14 @@
+{
+  "name": "stack-docker",
+  "version": "0.1.0",
+  "description": "Convenções de Docker para o fluxo: multi-stage, base fixada, não root, .dockerignore, healthcheck, compose de desenvolvimento e Trivy; modelos por stack.",
+  "author": {
+    "name": "Gabriel Nunes Campos"
+  },
+  "keywords": [
+    "docker",
+    "container",
+    "compose",
+    "infra"
+  ]
+}

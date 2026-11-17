@@ -1,0 +1,24 @@
+# CI de um projeto Go.
+trigger:
+  branches:
+    include: [main]
+pr:
+  branches:
+    include: [main]
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - task: GoTool@0
+    inputs:
+      version: "1.23"
+
+  - script: test -z "$(gofmt -l .)" && go vet ./...
+    displayName: Formatação e vet
+
+  - script: go test ./... -race -count=1
+    displayName: Testes
+
+  - script: go install golang.org/x/vuln/cmd/govulncheck@latest && govulncheck ./...
+    displayName: Vulnerabilidades

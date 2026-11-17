@@ -1,0 +1,14 @@
+{
+  "name": "stack-python",
+  "version": "0.1.0",
+  "description": "Convenções de Python para o fluxo: FastAPI/Django/Flask, tipagem, pytest, ruff, async, SQLAlchemy/Alembic e pip-audit.",
+  "author": {
+    "name": "Gabriel Nunes Campos"
+  },
+  "keywords": [
+    "python",
+    "fastapi",
+    "django",
+    "pytest"
+  ]
+}

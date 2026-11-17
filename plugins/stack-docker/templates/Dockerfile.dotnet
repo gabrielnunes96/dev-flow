@@ -1,0 +1,20 @@
+# syntax=docker/dockerfile:1
+# ASP.NET Core em múltiplos estágios. Ajuste PROJETO e as versões ao projeto.
+ARG DOTNET=8.0
+FROM mcr.microsoft.com/dotnet/sdk:${DOTNET} AS build
+WORKDIR /src
+COPY *.sln ./
+COPY src/MeuProjeto.Api/*.csproj src/MeuProjeto.Api/
+RUN --mount=type=cache,target=/root/.nuget/packages dotnet restore src/MeuProjeto.Api/MeuProjeto.Api.csproj
+COPY . .
+RUN --mount=type=cache,target=/root/.nuget/packages \
+    dotnet publish src/MeuProjeto.Api/MeuProjeto.Api.csproj -c Release -o /app --no-restore /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:${DOTNET} AS runtime
+WORKDIR /app
+COPY --from=build --chown=app:app /app .
+USER app
+ENV ASPNETCORE_HTTP_PORTS=8080
+EXPOSE 8080
+# A imagem aspnet não traz curl/wget: use as probes do orquestrador (ou instale um cliente mínimo) para o healthcheck.
+ENTRYPOINT ["dotnet", "MeuProjeto.Api.dll"]

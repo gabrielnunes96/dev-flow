@@ -1,0 +1,45 @@
+# CI: lint, testes, vulnerabilidades e build com os comandos do perfil (.claude/projeto.json).
+# Fixe as ações por SHA (o comentário guarda a versão) e mantenha com Dependabot.
+name: ci
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4 # fixe por SHA
+
+      # Escolha o bloco da stack do projeto e apague os outros.
+      - uses: actions/setup-node@v4 # node/front
+        with: { node-version-file: .nvmrc, cache: npm }
+      # - uses: actions/setup-python@v5   # python
+      #   with: { python-version: "3.12", cache: pip }
+      # - uses: actions/setup-dotnet@v4   # dotnet
+      #   with: { global-json-file: global.json }
+      # - uses: actions/setup-java@v4     # java
+      #   with: { distribution: temurin, java-version: "21", cache: maven }
+      # - uses: actions/setup-go@v5       # go
+      #   with: { go-version-file: go.mod }
+
+      - name: Instalar
+        run: npm ci # comandos.restaurar
+      - name: Lint
+        run: npm run lint # comandos.lint
+      - name: Testes
+        run: npm test -- --ci # comandos.teste
+      - name: Pacotes vulneráveis
+        run: npm audit --omit=dev --audit-level=high # comandos.vulnerabilidades
+      - name: Build
+        run: npm run build # comandos.build

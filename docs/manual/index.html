@@ -1,0 +1,827 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Manual do dev-flow</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Layout: barra lateral fixa com busca + coluna de leitura; no celular a barra vira um menu recolhível no topo. */
+:root {
+  --bg: #f6f8f7;
+  --surface: #ffffff;
+  --surface-2: #eef3f2;
+  --fg: #16201f;
+  --muted: #586866;
+  --line: #d6e0de;
+  --accent: #0d6b66;
+  --accent-soft: #dcefed;
+  --gate: #a35a00;
+  --gate-soft: #fdf0dc;
+  --danger: #b3261e;
+  --danger-soft: #fbe5e3;
+  --ok: #1d7a3a;
+  --ok-soft: #e1f3e6;
+  --code-bg: #10201f;
+  --code-fg: #d9ecea;
+  --font-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", Consolas, "Liberation Mono", monospace;
+  --radius: 8px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1615; --surface: #142120; --surface-2: #1a2a29; --fg: #e3eeec; --muted: #9db2af; --line: #2a3d3b;
+    --accent: #5fd0c5; --accent-soft: #173936; --gate: #f2b35b; --gate-soft: #3a2a12; --danger: #ff8a80; --danger-soft: #3d1a17;
+    --ok: #7fd895; --ok-soft: #173322; --code-bg: #091110; --code-fg: #d9ecea; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1615; --surface: #142120; --surface-2: #1a2a29; --fg: #e3eeec; --muted: #9db2af; --line: #2a3d3b;
+  --accent: #5fd0c5; --accent-soft: #173936; --gate: #f2b35b; --gate-soft: #3a2a12; --danger: #ff8a80; --danger-soft: #3d1a17;
+  --ok: #7fd895; --ok-soft: #173322; --code-bg: #091110; --code-fg: #d9ecea; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 16px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 16px/1.6 var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible, label:focus-within {
+  outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px;
+}
+code, kbd, pre { font-family: var(--font-mono); font-size: .88em; }
+:not(pre) > code { background: var(--surface-2); border: 1px solid var(--line); padding: .05em .35em; border-radius: 4px; overflow-wrap: anywhere; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.2; text-wrap: balance; letter-spacing: -.01em; }
+h2 { font-size: 1.7rem; margin: 0 0 .4rem; }
+h3 { font-size: 1.15rem; margin: 1.8rem 0 .5rem; }
+p { margin: 0 0 1rem; }
+.eyebrow { font: 600 .72rem/1 var(--font-body); text-transform: uppercase; letter-spacing: .09em; color: var(--accent); margin-bottom: .6rem; display: block; }
+.lead { color: var(--muted); font-size: 1.05rem; max-width: 68ch; }
+
+/* Estrutura */
+.app { display: grid; grid-template-columns: 290px minmax(0, 1fr); min-height: 100vh; }
+.side {
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  background: var(--surface); border-right: 1px solid var(--line);
+  padding-block: 24px; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: 20px;
+  display: flex; flex-direction: column; gap: 18px;
+}
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--fg); }
+.brand-mark { width: 30px; height: 30px; flex: none; }
+.brand strong { font: 700 1.15rem/1 var(--font-display); }
+.brand span { display: block; font-size: .78rem; color: var(--muted); margin-top: 2px; }
+.search { position: relative; }
+.search input {
+  width: 100%; padding: 9px 12px 9px 34px; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--bg); color: var(--fg); font: inherit; font-size: .93rem;
+}
+.search svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--muted); }
+.results { display: flex; flex-direction: column; gap: 4px; }
+.results a { display: block; padding: 8px 10px; border-radius: 6px; text-decoration: none; color: var(--fg); background: var(--surface-2); font-size: .88rem; }
+.results a small { display: block; color: var(--muted); font-size: .78rem; line-height: 1.35; margin-top: 2px; }
+.results mark { background: var(--gate-soft); color: inherit; border-radius: 2px; }
+.results p { font-size: .85rem; color: var(--muted); margin: 0; }
+nav.toc { display: flex; flex-direction: column; gap: 14px; }
+.toc-group > span { font: 600 .7rem/1 var(--font-body); text-transform: uppercase; letter-spacing: .09em; color: var(--muted); display: block; margin: 0 0 6px 10px; }
+.toc a {
+  display: block; padding: 5px 10px; border-radius: 6px; text-decoration: none; color: var(--fg); font-size: .93rem;
+  border-left: 2px solid transparent;
+}
+.toc a:hover { background: var(--surface-2); }
+.toc a.ativo { background: var(--accent-soft); color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+.side-foot { margin-top: auto; display: flex; gap: 8px; align-items: center; font-size: .8rem; color: var(--muted); }
+.btn-theme {
+  border: 1px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 6px;
+  padding: 6px 10px; font: inherit; font-size: .8rem; cursor: pointer;
+}
+.menu-toggle { display: none; }
+
+main { min-width: 0; padding-block: 40px 80px; padding-left: max(40px, env(safe-area-inset-left, 0px)); padding-right: max(40px, env(safe-area-inset-right, 0px)); }
+.content { max-width: 900px; margin: 0 auto; }
+section.doc { padding: 28px 0 40px; border-bottom: 1px solid var(--line); }
+section.doc:last-of-type { border-bottom: 0; }
+.hidden-by-search { display: none; }
+
+/* Herói */
+.hero { padding: 8px 0 36px; border-bottom: 1px solid var(--line); }
+.hero h1 { font-size: clamp(2rem, 4.6vw, 3rem); margin: 0 0 .7rem; }
+.hero h1 em { font-style: normal; color: var(--accent); }
+.hero .lead { font-size: 1.12rem; }
+.hero-meta { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-top: 20px; font-size: .9rem; color: var(--muted); }
+.hero-meta b { color: var(--fg); font-family: var(--font-display); font-size: 1.25rem; display: block; line-height: 1.1; font-variant-numeric: tabular-nums; }
+
+/* Fluxo com portões */
+.flow { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0; margin: 22px 0 8px; }
+.stage {
+  flex: 1 1 140px; min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 12px 12px 14px; display: flex; flex-direction: column; gap: 4px;
+}
+.stage .cmd { font-family: var(--font-mono); font-size: .78rem; color: var(--accent); overflow-wrap: anywhere; }
+.stage b { font-family: var(--font-display); font-size: 1rem; }
+.stage small { color: var(--muted); font-size: .8rem; line-height: 1.4; }
+.link { flex: 0 0 34px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.link .arrow { width: 18px; height: 2px; background: var(--line); position: relative; }
+.link .arrow::after { content: ""; position: absolute; right: -1px; top: -4px; border: 5px solid transparent; border-left-color: var(--line); border-right: 0; }
+.gate { width: 14px; height: 14px; background: var(--gate); transform: rotate(45deg); border-radius: 2px; }
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: .84rem; color: var(--muted); margin-top: 10px; }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.legend .gate { width: 10px; height: 10px; }
+
+/* Blocos */
+.grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; min-width: 0; }
+.card h4 { margin: 0 0 6px; font: 600 1rem/1.3 var(--font-display); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.card p { margin: 0; font-size: .92rem; color: var(--muted); }
+.card ul { margin: 8px 0 0; padding-left: 18px; font-size: .9rem; }
+.card .when { font-size: .82rem; color: var(--fg); margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); }
+.tag { font: 500 .7rem/1 var(--font-mono); padding: 4px 6px; border-radius: 4px; background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); }
+.tag.ro { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
+.tag.rw { background: var(--gate-soft); color: var(--gate); border-color: transparent; }
+
+.callout { border-radius: var(--radius); padding: 14px 16px; margin: 16px 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; font-size: .94rem; }
+.callout p:last-child { margin: 0; }
+.callout.gate-c { background: var(--gate-soft); }
+.callout.info { background: var(--accent-soft); }
+.callout.stop { background: var(--danger-soft); }
+.callout .ico { font: 700 .95rem/1.5 var(--font-display); }
+.callout.gate-c .ico { color: var(--gate); }
+.callout.info .ico { color: var(--accent); }
+.callout.stop .ico { color: var(--danger); }
+
+.steps { counter-reset: s; list-style: none; padding: 0; margin: 16px 0; display: flex; flex-direction: column; gap: 10px; }
+.steps > li { counter-increment: s; position: relative; padding: 12px 14px 12px 54px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+.steps > li::before {
+  content: counter(s); position: absolute; left: 14px; top: 12px; width: 26px; height: 26px; border-radius: 50%;
+  background: var(--accent-soft); color: var(--accent); font: 600 .85rem/26px var(--font-display); text-align: center;
+}
+.steps > li b { font-family: var(--font-display); }
+.steps > li p { margin: 2px 0 0; font-size: .92rem; color: var(--muted); }
+
+.table-wrap { overflow-x: auto; margin: 14px 0; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 600 .74rem/1.2 var(--font-body); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); background: var(--surface-2); }
+tr:last-child td { border-bottom: 0; }
+td code { white-space: nowrap; }
+
+pre {
+  background: var(--code-bg); color: var(--code-fg); border-radius: var(--radius); padding: 14px 16px; margin: 0;
+  overflow-x: auto; line-height: 1.55; font-size: .84rem;
+}
+.code { position: relative; margin: 12px 0; }
+.copy {
+  position: absolute; top: 8px; right: 8px; border: 1px solid #ffffff2e; background: #ffffff14; color: var(--code-fg);
+  border-radius: 6px; padding: 4px 9px; font: 500 .75rem var(--font-body); cursor: pointer;
+}
+.copy:hover { background: #ffffff26; }
+
+details.faq { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); margin: 8px 0; }
+details.faq summary { cursor: pointer; padding: 12px 16px; font-weight: 500; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+details.faq summary::-webkit-details-marker { display: none; }
+details.faq summary::after { content: "+"; color: var(--muted); font-family: var(--font-mono); }
+details.faq[open] summary::after { content: "−"; }
+details.faq > div { padding: 0 16px 14px; font-size: .93rem; color: var(--muted); }
+details.faq > div p:last-child { margin: 0; }
+
+/* Catálogo */
+.filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+.chip {
+  border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 999px;
+  padding: 6px 13px; font: 500 .85rem var(--font-body); cursor: pointer;
+}
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.plugins { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+.plugin { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.plugin header { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.plugin h4 { margin: 0; font: 600 .98rem/1.3 var(--font-mono); overflow-wrap: anywhere; }
+.plugin .ver { font: .74rem var(--font-mono); color: var(--muted); }
+.plugin p { margin: 0; font-size: .88rem; color: var(--muted); }
+.plugin .skill { font: .78rem var(--font-mono); color: var(--accent); }
+
+/* Montador */
+.builder { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 18px; margin-top: 16px; }
+.builder fieldset { border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; margin: 0 0 12px; background: var(--surface); }
+.builder legend { font: 600 .74rem/1 var(--font-body); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); padding: 0 6px; }
+.opts { display: flex; flex-wrap: wrap; gap: 6px; }
+.opt { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 6px; font-size: .86rem; cursor: pointer; background: var(--bg); }
+.opt:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.opt input { accent-color: var(--accent); margin: 0; }
+.builder select { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--fg); font: inherit; font-size: .9rem; }
+.out h4 { margin: 0 0 6px; font: 600 .74rem/1 var(--font-body); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.out .code { margin: 0 0 14px; }
+
+.kbdrow { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+.ask { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; }
+.ask q { font-style: italic; quotes: "“" "”"; }
+.ask div { font-size: .86rem; color: var(--muted); margin-top: 4px; }
+
+footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
+
+@media (max-width: 1080px) { .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .builder { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 860px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .side {
+    position: sticky; top: env(safe-area-inset-top, 0px); height: auto; max-height: 100vh; z-index: 5; border-right: 0; border-bottom: 1px solid var(--line);
+    padding-block: 12px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); gap: 12px;
+  }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+  .side-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .menu-toggle { display: inline-flex; border: 1px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 6px; padding: 6px 12px; font: 500 .85rem var(--font-body); cursor: pointer; }
+  .side:not(.aberto) nav.toc, .side:not(.aberto) .side-foot { display: none; }
+  .side.aberto { overflow-y: auto; }
+  main { padding-block: 24px 60px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .grid-2, .grid-3 { grid-template-columns: minmax(0, 1fr); }
+  .flow { flex-direction: column; }
+  .link { flex-basis: 30px; flex-direction: row; }
+  .link .arrow { transform: rotate(90deg); }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side" id="side">
+    <div class="side-top">
+      <a class="brand" href="#inicio">
+        <svg class="brand-mark" viewBox="0 0 30 30" aria-hidden="true">
+          <rect x="1" y="1" width="28" height="28" rx="7" fill="var(--accent)"/>
+          <path d="M8 10h8M8 15h5M8 20h10" stroke="var(--bg)" stroke-width="2.2" stroke-linecap="round"/>
+          <rect x="18.5" y="12.5" width="5" height="5" transform="rotate(45 21 15)" fill="var(--gate)"/>
+        </svg>
+        <div><strong>dev-flow</strong><span>Manual do fluxo · v0.2</span></div>
+      </a>
+      <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="toc">Menu</button>
+    </div>
+    <div class="search">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="m11 11 3.5 3.5"/></svg>
+      <input id="busca" type="search" placeholder="Buscar no manual  ( / )" aria-label="Buscar no manual" autocomplete="off">
+    </div>
+    <div class="results" id="resultados" hidden></div>
+    <nav class="toc" id="toc" aria-label="Seções do manual">
+      <div class="toc-group"><span>Começar</span>
+        <a href="#inicio">Visão geral</a>
+        <a href="#instalar">Instalação</a>
+        <a href="#montador">Monte sua instalação</a>
+        <a href="#iniciar">Configurar um projeto</a>
+      </div>
+      <div class="toc-group"><span>Trabalhar</span>
+        <a href="#demanda">Ciclo de uma demanda</a>
+        <a href="#tarefa">Ciclo da tarefa</a>
+        <a href="#bugs">Corrigir bugs</a>
+        <a href="#arquitetura">Decisões de arquitetura</a>
+        <a href="#diaadia">Dia a dia</a>
+      </div>
+      <div class="toc-group"><span>Referência</span>
+        <a href="#agentes">Agentes especialistas</a>
+        <a href="#catalogo">Catálogo de plugins</a>
+        <a href="#perfil">O perfil do projeto</a>
+        <a href="#cicd">CI/CD</a>
+        <a href="#protecoes">Proteções</a>
+        <a href="#raciocinio">Método de raciocínio</a>
+      </div>
+      <div class="toc-group"><span>Ajuda</span>
+        <a href="#problemas">Problemas comuns</a>
+        <a href="#glossario">Glossário</a>
+      </div>
+    </nav>
+    <div class="side-foot">
+      <button class="btn-theme" id="tema" type="button">Alternar tema</button>
+      <span>pt-BR</span>
+    </div>
+  </aside>
+
+  <main>
+    <div class="content">
+
+      <section class="doc hero" id="inicio" data-titulo="Visão geral">
+        <span class="eyebrow">Manual do dev-flow</span>
+        <h1>Da demanda em texto ao <em>PR com pipeline verde</em>, com você nos portões.</h1>
+        <p class="lead">O dev-flow é um conjunto de plugins do Claude Code que transforma o jeito de trabalhar do time em processo repetível: especificar, desenhar, planejar, implementar tarefa a tarefa com testes, revisar, validar no ambiente e abrir o PR. Você aprova as decisões; o resto segue sozinho.</p>
+        <div class="flow" role="list" aria-label="Etapas do fluxo">
+          <div class="stage" role="listitem"><span class="cmd">/fluxo:demanda</span><b>Funcional</b><small>Regras, critérios de aceite e dúvidas</small></div>
+          <div class="link" aria-label="portão de aprovação"><span class="gate"></span></div>
+          <div class="stage" role="listitem"><span class="cmd">/fluxo:tecnica</span><b>Técnica</b><small>Desenho no código real, arquitetura e ameaças</small></div>
+          <div class="link" aria-label="portão de aprovação"><span class="gate"></span></div>
+          <div class="stage" role="listitem"><span class="cmd">/fluxo:plano</span><b>Plano</b><small>Tarefas pequenas, verificáveis e em ordem</small></div>
+          <div class="link" aria-label="portão de aprovação"><span class="gate"></span></div>
+          <div class="stage" role="listitem"><span class="cmd">/fluxo:task todas</span><b>Tarefas</b><small>Implementa, testa, revisa, valida, commita</small></div>
+          <div class="link" aria-hidden="true"><span class="arrow"></span></div>
+          <div class="stage" role="listitem"><span class="cmd">/fluxo:pr</span><b>PR e CI</b><small>Descrição, pipeline, deploy com aprovação</small></div>
+        </div>
+        <div class="legend"><span><i class="gate"></i> portão: só avança com a sua aprovação</span><span><code>/fluxo:entregar</code> percorre tudo e para só nos portões</span></div>
+        <div class="hero-meta">
+          <div><b>21</b>plugins</div>
+          <div><b>8</b>agentes especialistas</div>
+          <div><b>14</b>stacks: linguagens, bancos e infra</div>
+          <div><b>3</b>provedores de CI/CD</div>
+        </div>
+      </section>
+
+      <section class="doc" id="instalar" data-titulo="Instalação">
+        <span class="eyebrow">Começar</span>
+        <h2>Instalação</h2>
+        <p class="lead">Uma vez por máquina você adiciona o marketplace. Depois instala o núcleo e um plugin por stack que o projeto usa.</p>
+        <ol class="steps">
+          <li><b>Adicione o marketplace</b><p>Use o caminho local do repositório ou a URL git dele.</p>
+            <div class="code"><pre>claude plugin marketplace add &lt;caminho-ou-url-do-dev-flow&gt;</pre></div></li>
+          <li><b>Instale o núcleo</b><p>Sempre. Traz as skills do processo, os agentes, os hooks e os scripts.</p>
+            <div class="code"><pre>claude plugin install fluxo@dev-flow</pre></div></li>
+          <li><b>Instale as stacks e o CI do projeto</b><p>Stack <code>X</code> no perfil → plugin <code>stack-X</code>. Use o <a href="#montador">montador</a> abaixo para gerar os comandos.</p></li>
+          <li><b>Mantenha atualizado</b><p>Depois de qualquer mudança publicada no marketplace:</p>
+            <div class="code"><pre>claude plugin marketplace update dev-flow</pre></div></li>
+        </ol>
+        <div class="callout info"><span class="ico">i</span><div><p><b>Para o time inteiro de uma vez:</b> declare o marketplace e os plugins no <code>.claude/settings.json</code> versionado do projeto. Quem abrir o projeto recebe tudo. O montador abaixo também gera esse trecho.</p></div></div>
+      </section>
+
+      <section class="doc" id="montador" data-titulo="Monte sua instalação">
+        <span class="eyebrow">Começar</span>
+        <h2>Monte sua instalação</h2>
+        <p class="lead">Marque o que o seu projeto usa. Os comandos de instalação, o trecho do perfil e o <code>settings.json</code> do time aparecem prontos para copiar.</p>
+        <div class="builder">
+          <form id="montadorForm" onsubmit="return false">
+            <fieldset><legend>Linguagens e front</legend><div class="opts" data-grupo="linguagem"></div></fieldset>
+            <fieldset><legend>Bancos de dados</legend><div class="opts" data-grupo="banco"></div></fieldset>
+            <fieldset><legend>Infraestrutura</legend><div class="opts" data-grupo="infra"></div></fieldset>
+            <fieldset><legend>CI/CD</legend>
+              <select id="ciSel" aria-label="Provedor de CI/CD">
+                <option value="nenhum">Nenhum por enquanto</option>
+                <option value="azure-pipelines">Azure Pipelines</option>
+                <option value="github-actions" selected>GitHub Actions</option>
+                <option value="gitlab-ci">GitLab CI</option>
+              </select>
+            </fieldset>
+            <fieldset><legend>Extras</legend>
+              <div class="opts">
+                <label class="opt"><input type="checkbox" id="optBoards"> Azure Boards</label>
+                <label class="opt"><input type="checkbox" id="optDesign"> Design (UX/UI)</label>
+                <label class="opt"><input type="checkbox" id="optVideo"> Vídeo-resumo</label>
+              </div>
+            </fieldset>
+          </form>
+          <div class="out">
+            <h4>1 · Instalar</h4>
+            <div class="code"><pre id="outInstalar"></pre><button class="copy" data-alvo="outInstalar" type="button">Copiar</button></div>
+            <h4>2 · Trecho do .claude/projeto.json</h4>
+            <div class="code"><pre id="outPerfil"></pre><button class="copy" data-alvo="outPerfil" type="button">Copiar</button></div>
+            <h4>3 · .claude/settings.json do time (opcional)</h4>
+            <div class="code"><pre id="outSettings"></pre><button class="copy" data-alvo="outSettings" type="button">Copiar</button></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="doc" id="iniciar" data-titulo="Configurar um projeto">
+        <span class="eyebrow">Começar</span>
+        <h2>Configurar um projeto</h2>
+        <p class="lead">Abra o Claude Code na pasta do projeto (pode estar vazia) e rode <code>/fluxo:iniciar</code>. Ele lê o que dá para ler e pergunta só o que é seu.</p>
+        <div class="grid-2">
+          <div class="card"><h4>O que ele detecta sozinho</h4>
+            <ul><li>Stacks pelos arquivos: <code>*.csproj</code>, <code>package.json</code>, <code>pyproject.toml</code>, <code>pom.xml</code>, <code>go.mod</code>, <code>Dockerfile</code>, <code>*.tf</code>, manifestos Kubernetes, drivers de banco.</li>
+            <li>Comandos de build, teste, lint e vulnerabilidades.</li>
+            <li>Provedor de CI pelos arquivos de pipeline.</li>
+            <li>Nuvem e onde a aplicação roda.</li>
+            <li>Branch padrão e código gerado (candidato a proteção).</li></ul></div>
+          <div class="card"><h4>O que ele pergunta</h4>
+            <ul><li>Rastreador: local ou Azure Boards.</li>
+            <li>Onde guardar as especificações (versionadas ou locais).</li>
+            <li>Como validar: URL, token, VPN, dados de teste.</li>
+            <li>O que nunca pode ser tocado.</li></ul></div>
+        </div>
+        <h3>O que ele grava</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Arquivo</th><th>Conteúdo</th></tr></thead>
+          <tbody>
+            <tr><td><code>.claude/projeto.json</code></td><td>O perfil: contrato entre o processo genérico e o seu projeto. Validado com <code>perfil.py validar</code>.</td></tr>
+            <tr><td><code>CLAUDE.md</code></td><td>Só se não existir: arquitetura real e convenções, curto. Se existir, ele sugere o que mover para o perfil.</td></tr>
+            <tr><td><code>docs/demandas/</code></td><td>Pasta das especificações e filas de tarefas.</td></tr>
+            <tr><td>Permissões</td><td>Ele mostra a lista <code>permissions.allow</code> dos comandos seguros e <code>deny</code> para <code>git push</code>; você aplica em <code>.claude/settings.local.json</code>.</td></tr>
+          </tbody></table></div>
+        <div class="callout info"><span class="ico">i</span><div><p>Toda sessão começa com o hook de contexto dizendo o projeto, o caminho dos scripts e a <b>demanda ativa com a próxima tarefa pronta</b>. Você não precisa recapitular onde parou.</p></div></div>
+      </section>
+
+      <section class="doc" id="demanda" data-titulo="Ciclo de uma demanda">
+        <span class="eyebrow">Trabalhar</span>
+        <h2>Ciclo de uma demanda</h2>
+        <p class="lead">Tudo de uma vez com <code>/fluxo:entregar</code> e a demanda em texto livre, ou etapa por etapa. Cada etapa produz um arquivo em <code>{docs}/{slug}/</code>, então o trabalho sobrevive a sessões novas.</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Etapa</th><th>Comando</th><th>Gera</th><th>Quem participa</th><th>Você</th></tr></thead>
+          <tbody>
+            <tr><td>Funcional</td><td><code>/fluxo:demanda</code></td><td><code>01-funcional.md</code>: regras (RN), requisitos (RF), critérios de aceite (CA) em Dado/Quando/Então, fora de escopo, dúvidas</td><td>—</td><td>Responde até 4 perguntas por rodada e aprova</td></tr>
+            <tr><td>Técnica</td><td><code>/fluxo:tecnica</code></td><td><code>02-tecnica.md</code>: componentes, contratos antes/depois, dados, segurança, testes por CA, riscos, implantação, CI/CD; ADRs</td><td><code>analista</code> por repositório; <code>arquiteto</code> se há decisão estrutural; <code>seguranca</code> se há superfície de ataque</td><td>Decide custo, prazo e produto; aprova</td></tr>
+            <tr><td>Plano</td><td><code>/fluxo:plano</code></td><td><code>tarefas.json</code> + <code>03-plano.md</code>: uma tarefa = um commit = uma entrega verificável</td><td>Cards no Boards, se configurado</td><td>Aprova a ordem e o corte</td></tr>
+            <tr><td>Tarefas</td><td><code>/fluxo:task todas</code></td><td>Código, testes, <code>cards/{id}.html</code>, um commit por tarefa</td><td><code>testador</code>, <code>revisor</code>, <code>seguranca</code>, <code>validador</code>, <code>depurador</code></td><td>Autoriza cada commit</td></tr>
+            <tr><td>PR</td><td><code>/fluxo:pr</code></td><td><code>pr.md</code> e o PR aberto depois do seu push</td><td>Skill do CI para acompanhar a pipeline</td><td>Faz o push e o merge</td></tr>
+          </tbody></table></div>
+        <div class="callout gate-c"><span class="ico">◆</span><div><p><b>Portões são seus.</b> Nada é implementado antes de funcional, técnica e plano aprovados. A aprovação fica registrada no topo de cada documento (“aprovada em dd/mm/aaaa”). Entre portões, o fluxo segue sem pedir confirmação.</p></div></div>
+        <h3>Como escrever uma boa demanda</h3>
+        <p>Explique o problema e para quem, não a solução. Diga o que é sucesso, o que fica de fora e qualquer restrição de prazo ou volume. Exemplo:</p>
+        <div class="ask"><q>Os analistas precisam exportar os chargebacks do mês em CSV para conciliar com o banco. Hoje copiam da tela. Precisa respeitar o filtro de loja e não pode passar de 50 mil linhas por arquivo.</q><div>O fluxo pergunta o que falta (colunas, formato de data, permissão) e transforma em critérios verificáveis.</div></div>
+      </section>
+
+      <section class="doc" id="tarefa" data-titulo="Ciclo da tarefa">
+        <span class="eyebrow">Trabalhar</span>
+        <h2>Ciclo da tarefa</h2>
+        <p class="lead"><code>/fluxo:task</code> pega a próxima tarefa pronta (ou <code>/fluxo:task T3</code>, ou <code>todas</code>) e percorre os mesmos passos sempre.</p>
+        <ol class="steps">
+          <li><b>Pré-condições</b><p>Perfil válido, árvore git limpa, token renovado se houver, skill de cada stack carregada (stack <code>X</code> → <code>stack-X:X</code>).</p></li>
+          <li><b>Abrir a tarefa</b><p><code>plano.py proxima</code> escolhe a pronta (dependências feitas, não protegida); estado vira “andamento” (e no Boards também).</p></li>
+          <li><b>Pensar antes de codar</b><p>Pré-condição, pós-condição e invariante de cada unidade que muda; casos de borda que se aplicam. É daí que saem os testes.</p></li>
+          <li><b>Implementar</b><p>Pela skill da stack e pelas convenções do projeto, copiando a operação existente mais parecida. Nada de regra que a funcional não pediu.</p></li>
+          <li><b>Testar</b><p>Cada critério com pelo menos um teste que falharia sem a mudança. Regra combinatória → <code>testador</code> desenha a matriz.</p></li>
+          <li><b>Revisar</b><p><code>revisor</code> sempre; <code>seguranca</code> em paralelo quando o diff toca auth, dados pessoais, pagamento, upload, segredo ou infraestrutura. Achado crítico bloqueia o commit.</p></li>
+          <li><b>Validar no ambiente</b><p><code>validador</code> conforme <code>validacao.tipo</code>: lote HTTP, script SQL aplicado e revertido, comando, ou tela no navegador.</p></li>
+          <li><b>Commitar com permissão</b><p>Stage só dos arquivos da tarefa, e para. Commit depois do seu “pode commitar”. Nunca push.</p></li>
+          <li><b>Registrar e seguir</b><p><code>tarefas.json</code> marcado como feito com o hash, card salvo (e publicado no Boards), próxima tarefa.</p></li>
+        </ol>
+        <div class="callout stop"><span class="ico">■</span><div><p><b>O ciclo para e pergunta</b> quando: falta acesso ao ambiente, uma falha não tem causa clara, a regra é ambígua, algo sai do escopo, ou acontece um item de <code>pare_e_pergunte</code> do perfil.</p></div></div>
+        <h3>Com pressa: tarefas em paralelo</h3>
+        <p><code>plano.py prontas</code> lista as tarefas que não dependem entre si. Peça “faz as prontas em paralelo” e cada uma vai para um subagente em worktree isolada; os commits voltam na ordem do plano.</p>
+      </section>
+
+      <section class="doc" id="bugs" data-titulo="Corrigir bugs">
+        <span class="eyebrow">Trabalhar</span>
+        <h2>Corrigir bugs pela causa raiz</h2>
+        <p class="lead"><code>/fluxo:depurar</code> com a mensagem de erro ou a descrição. A regra: primeiro um teste que falha, depois a correção.</p>
+        <div class="grid-3">
+          <div class="card"><h4>1 · Registrar e reproduzir</h4><p>Sintoma literal em <code>bug.md</code>, o menor comando que mostra o erro. Sem reprodução não há correção, só palpite.</p></div>
+          <div class="card"><h4>2 · Investigar por hipóteses</h4><p>O <code>depurador</code> lista 2 a 4 hipóteses, testa da mais barata para a mais cara, usa <code>git bisect</code> quando há versão boa.</p></div>
+          <div class="card"><h4>3 · Provar e corrigir</h4><p>Teste de regressão que falha, correção mínima na causa, revisor, validador e commit com permissão.</p></div>
+        </div>
+        <div class="callout stop"><span class="ico">■</span><div><p><b>Bug em produção com impacto?</b> Mitigar vem antes de corrigir: rollback, feature flag ou desligar o job. Essa decisão é sua, e o fluxo pergunta antes.</p></div></div>
+      </section>
+
+      <section class="doc" id="arquitetura" data-titulo="Decisões de arquitetura">
+        <span class="eyebrow">Trabalhar</span>
+        <h2>Decisões de arquitetura</h2>
+        <p class="lead"><code>/fluxo:arquitetura</code> tem três modos. Todos usam o agente <code>arquiteto</code>, que só recomenda complexidade quando um requisito com número a exige.</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Modo</th><th>Para quê</th><th>Gera</th></tr></thead>
+          <tbody>
+            <tr><td><code>adr &lt;decisão&gt;</code></td><td>Registrar uma decisão com alternativas e consequências</td><td><code>docs/adr/NNNN-titulo.md</code> (proposta → aceita). ADR aceita não se edita: outra a substitui.</td></tr>
+            <tr><td><code>mapa</code></td><td>Documentar o sistema como ele é</td><td><code>docs/arquitetura.md</code>: contexto, containers, componentes, fluxos críticos, operação</td></tr>
+            <tr><td><code>revisar</code></td><td>Auditar contra requisitos de qualidade</td><td>Relatório com achados por severidade; recomendações viram ADR ou demanda</td></tr>
+          </tbody></table></div>
+      </section>
+
+      <section class="doc" id="diaadia" data-titulo="Dia a dia">
+        <span class="eyebrow">Trabalhar</span>
+        <h2>Dia a dia</h2>
+        <p class="lead">Os comandos mais usados e pedidos em linguagem natural que funcionam.</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Você quer…</th><th>Comando</th></tr></thead>
+          <tbody>
+            <tr><td>Saber onde parou</td><td><code>/fluxo:status</code></td></tr>
+            <tr><td>Próxima tarefa / uma específica / até acabar</td><td><code>/fluxo:task</code> · <code>/fluxo:task T3</code> · <code>/fluxo:task todas</code></td></tr>
+            <tr><td>A fala da daily</td><td><code>/fluxo:daily</code></td></tr>
+            <tr><td>Transformar uma correção sua em regra</td><td><code>/fluxo:aprender</code></td></tr>
+            <tr><td>Criar, ajustar ou diagnosticar a pipeline</td><td><code>/azure-pipelines:pipeline</code> · <code>/github-actions:actions</code> · <code>/gitlab-ci:gitlab</code></td></tr>
+            <tr><td>Tema ou revisão de interface</td><td><code>/design:design</code></td></tr>
+          </tbody></table></div>
+        <div class="grid-2">
+          <div class="ask"><q>Chama o arquiteto: vale usar fila ou chamada direta para notificar o estoque?</q><div>Recebe alternativas, trade-offs e uma ADR pronta.</div></div>
+          <div class="ask"><q>Passa o agente de segurança no diff antes de eu commitar.</q><div>Achados OWASP por severidade, com arquivo e linha.</div></div>
+          <div class="ask"><q>Monta a matriz de testes da regra de desconto da T4.</q><div>O testador cruza partições, limites e combinações.</div></div>
+          <div class="ask"><q>A pipeline do PR quebrou, descobre por quê.</q><div>A skill do seu CI lê o log e separa código de configuração.</div></div>
+        </div>
+      </section>
+
+      <section class="doc" id="agentes" data-titulo="Agentes especialistas">
+        <span class="eyebrow">Referência</span>
+        <h2>Agentes especialistas</h2>
+        <p class="lead">Cada agente trabalha em contexto isolado, com ferramentas restritas, e devolve só o resultado. As skills chamam no momento certo; você pode pedir direto pelo nome.</p>
+        <div class="grid-2" id="listaAgentes"></div>
+        <div class="legend"><span><i class="tag ro">leitura</i> não altera arquivos</span><span><i class="tag rw">escrita</i> pode alterar quando o pedido manda</span></div>
+      </section>
+
+      <section class="doc" id="catalogo" data-titulo="Catálogo de plugins">
+        <span class="eyebrow">Referência</span>
+        <h2>Catálogo de plugins</h2>
+        <p class="lead">Cada plugin de stack tem três partes: como implementar, como testar e um checklist de revisão que o <code>revisor</code> aplica item a item.</p>
+        <div class="filters" id="filtros" role="group" aria-label="Filtrar por categoria"></div>
+        <div class="plugins" id="listaPlugins"></div>
+      </section>
+
+      <section class="doc" id="perfil" data-titulo="O perfil do projeto">
+        <span class="eyebrow">Referência</span>
+        <h2>O perfil do projeto</h2>
+        <p class="lead">Tudo o que é específico de um projeto mora em <code>.claude/projeto.json</code>. As skills não têm nada fixo: trocar de projeto não exige mexer no plugin.</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Seção</th><th>Para quê</th><th>Exemplo</th></tr></thead>
+          <tbody>
+            <tr><td><code>stacks</code></td><td>Quais skills de stack carregar</td><td><code>["node", "postgres", "docker"]</code></td></tr>
+            <tr><td><code>convencoes</code></td><td>Arquivos que revisor e técnica leem</td><td><code>["CLAUDE.md", ".claude/rules/*.md"]</code></td></tr>
+            <tr><td><code>docs</code></td><td>Onde ficam especificações e filas</td><td><code>"docs/demandas"</code></td></tr>
+            <tr><td><code>rastreador</code></td><td>Local ou Azure Boards</td><td><code>{"tipo": "local"}</code></td></tr>
+            <tr><td><code>comandos</code></td><td>restaurar, build, teste, lint, vulnerabilidades e outros</td><td><code>{"teste": "pytest -q"}</code></td></tr>
+            <tr><td><code>servico</code></td><td>Subir e derrubar a aplicação local</td><td><code>{"healthcheck": "http://localhost:8080/health"}</code></td></tr>
+            <tr><td><code>validacao</code></td><td>Como provar no ambiente: http, sql, navegador, comando</td><td><code>{"tipo": "http", "base_url": "…"}</code></td></tr>
+            <tr><td><code>ci</code></td><td>Provedor, arquivos de pipeline, ambientes em ordem</td><td><code>{"provedor": "github-actions", "ambientes": ["dev","prd"]}</code></td></tr>
+            <tr><td><code>infra</code></td><td>Nuvem, onde roda, pasta de IaC, registro, observabilidade</td><td><code>{"nuvem": "aws", "execucao": ["kubernetes"]}</code></td></tr>
+            <tr><td><code>git</code></td><td>Branch base, formato do commit, coautor, push humano</td><td><code>{"push": "humano"}</code></td></tr>
+            <tr><td><code>protecao</code></td><td>O que o guard bloqueia de verdade</td><td><code>{"diretorios_proibidos": ["legado/"]}</code></td></tr>
+            <tr><td><code>pare_e_pergunte</code></td><td>Situações do projeto em que o ciclo para</td><td><code>["mudança no contrato público"]</code></td></tr>
+            <tr><td><code>design</code></td><td>Tokens, design system, plataformas</td><td><code>{"tokens": "src/tokens.css"}</code></td></tr>
+          </tbody></table></div>
+        <details class="faq"><summary>Exemplo completo: API Node com Postgres no Kubernetes</summary><div>
+          <div class="code"><pre id="exPerfil">{
+  "nome": "loja-api",
+  "stacks": ["node", "postgres", "redis", "docker", "kubernetes"],
+  "docs": "docs/demandas",
+  "rastreador": { "tipo": "local" },
+  "comandos": {
+    "restaurar": "npm ci",
+    "build": "npm run build",
+    "teste": "npm test",
+    "lint": "npm run lint",
+    "vulnerabilidades": "npm audit --omit=dev --audit-level=high"
+  },
+  "servico": {
+    "executar": "docker compose up -d --wait",
+    "healthcheck": "http://localhost:3000/healthcheck"
+  },
+  "validacao": {
+    "tipo": "http",
+    "base_url": "http://localhost:3000",
+    "casos_obrigatorios": ["sucesso", "400 de validação", "401 sem token"]
+  },
+  "ci": { "provedor": "github-actions", "ambientes": ["dev", "hml", "prd"] },
+  "infra": { "nuvem": "aws", "execucao": ["kubernetes"], "registro": "ghcr.io/minha-org" },
+  "git": { "branch_base": "main", "push": "humano", "formato_commit": "{mensagem} ({id})" },
+  "protecao": { "segredos": { "arquivos": [".env"] } }
+}</pre><button class="copy" data-alvo="exPerfil" type="button">Copiar</button></div>
+        </div></details>
+        <div class="callout info"><span class="ico">i</span><div><p>Mudou o perfil? Rode <code>python -I &lt;scripts&gt;/perfil.py validar</code>. O caminho dos scripts aparece no início de toda sessão. O validador também avisa incoerências, como <code>kubernetes</code> em <code>stacks</code> sem <code>infra.execucao</code>.</p></div></div>
+      </section>
+
+      <section class="doc" id="cicd" data-titulo="CI/CD">
+        <span class="eyebrow">Referência</span>
+        <h2>CI/CD</h2>
+        <p class="lead">Defina <code>ci.provedor</code> no perfil e instale o plugin correspondente. Os três seguem as mesmas regras: os comandos do perfil (o que passa local passa no CI), segredo só no cofre do provedor, produção com aprovação manual.</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th></th><th>Azure Pipelines</th><th>GitHub Actions</th><th>GitLab CI</th></tr></thead>
+          <tbody>
+            <tr><td>Plugin / skill</td><td><code>azure-pipelines:pipeline</code></td><td><code>github-actions:actions</code></td><td><code>gitlab-ci:gitlab</code></td></tr>
+            <tr><td>Modelos</td><td>dotnet, front/node, python, java, go, sql, docker, terraform, deploy por estágios</td><td>ci (matriz por stack), docker (GHCR + Trivy), deploy por environment</td><td>gitlab-ci (verificação, testes, SAST, imagem, deploy)</td></tr>
+            <tr><td>Segredos</td><td>Variable groups / Key Vault</td><td>Secrets do environment + OIDC</td><td>Variáveis protegidas e mascaradas + OIDC</td></tr>
+            <tr><td>Aprovação em produção</td><td>Approvals no environment</td><td>Required reviewers no environment</td><td><code>when: manual</code> + ambiente protegido</td></tr>
+            <tr><td>Diagnóstico</td><td><code>az pipelines runs show</code></td><td><code>gh run view --log-failed</code></td><td><code>glab ci trace</code></td></tr>
+          </tbody></table></div>
+        <div class="callout gate-c"><span class="ico">◆</span><div><p>Criar pipeline, secret ou environment e reexecutar uma execução são ações visíveis para o time: o fluxo prepara tudo e pede o seu “sim”. A aprovação de produção é configurada por você na interface do provedor, não no YAML.</p></div></div>
+      </section>
+
+      <section class="doc" id="protecoes" data-titulo="Proteções">
+        <span class="eyebrow">Referência</span>
+        <h2>Proteções</h2>
+        <p class="lead">Regra escrita em texto o modelo pode esquecer. As proteções abaixo são aplicadas pelo hook <code>guard</code>, que roda antes de cada ferramenta e bloqueia de verdade.</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Bloqueia</th><th>Configurado em</th></tr></thead>
+          <tbody>
+            <tr><td><code>git push</code></td><td><code>git.push = "humano"</code> (padrão)</td></tr>
+            <tr><td>Commit com JWT, chave privada, chave AWS ou token do GitHub nas linhas adicionadas</td><td>Sempre</td></tr>
+            <tr><td>Ler, buscar ou editar dentro de diretórios proibidos</td><td><code>protecao.diretorios_proibidos</code></td></tr>
+            <tr><td>Texto proibido em qualquer ferramenta</td><td><code>protecao.textos_proibidos</code></td></tr>
+            <tr><td>Editar à mão código gerado (SDK, proxy, migration gerada)</td><td><code>protecao.gerados</code></td></tr>
+            <tr><td>Ler arquivo de segredo pelo chat</td><td><code>protecao.segredos</code></td></tr>
+          </tbody></table></div>
+        <p>Além do hook, são regras do processo: commit só com o seu “pode commitar”, <code>terraform apply</code> e deploy em produção nunca pela sessão, validação de banco só em base de desenvolvimento.</p>
+      </section>
+
+      <section class="doc" id="raciocinio" data-titulo="Método de raciocínio">
+        <span class="eyebrow">Referência</span>
+        <h2>Método de raciocínio</h2>
+        <p class="lead">Implementar, revisar, testar e depurar seguem o mesmo método, escrito em <code>plugins/fluxo/referencias/raciocinio.md</code>. A qualidade não depende de o modelo lembrar de pensar nisso.</p>
+        <div class="grid-2">
+          <div class="card"><h4>Modelar antes de mexer</h4><p>Entrada, transformação e saída numa frase. Onde há estado e quem mais escreve nele. Onde estão as fronteiras de confiança.</p></div>
+          <div class="card"><h4>Contrato de cada unidade</h4><p>Pré-condição, pós-condição, invariante e o que acontece no erro. O que não se consegue escrever vira critério faltando.</p></div>
+          <div class="card"><h4>Casos de borda</h4><p>Cardinalidade (0, 1, muitos, máximo+1), ausência, números, texto, tempo e fuso, ordem, concorrência, falha parcial, dependência fora, permissão, volume.</p></div>
+          <div class="card"><h4>Custo</h4><p>O() do caminho principal; I/O vence CPU; N+1, laço aninhado e tudo em memória são os suspeitos. Otimizar só com número na mão.</p></div>
+          <div class="card"><h4>Execução simulada</h4><p>Caminho feliz, uma borda e um erro percorridos na cabeça com os valores. Diferença do esperado é bug antes de existir.</p></div>
+          <div class="card"><h4>Sem overengineering</h4><p>O menor código que atende os critérios, no padrão do projeto. Abstração, camada, cache, fila ou dependência só com requisito escrito. Teste: se eu apagar isto, qual critério falha?</p></div>
+          <div class="card"><h4>Depurar por hipóteses</h4><p>Reproduzir, observar o literal, listar hipóteses, derrubar a mais barata primeiro, causa raiz, teste que prova.</p></div>
+        </div>
+        <div class="callout gate-c"><span class="ico">◆</span><div><p><b>Antes de dizer “pronto”:</b> cada critério tem um teste que falharia se o critério quebrasse; build, lint e testes verdes nesta execução; validação feita ou registrada como pendente; e dito o que não foi verificado.</p></div></div>
+      </section>
+
+      <section class="doc" id="problemas" data-titulo="Problemas comuns">
+        <span class="eyebrow">Ajuda</span>
+        <h2>Problemas comuns</h2>
+        <details class="faq"><summary>O hook diz “Projeto sem .claude/projeto.json”</summary><div><p>Rode <code>/fluxo:iniciar</code> na raiz do projeto. Sem perfil, só a proteção de segredos no commit vale.</p></div></details>
+        <details class="faq"><summary>“perfil.py validar” aponta erro</summary><div><p>A mensagem diz o campo e os valores aceitos (ex.: <code>ci.provedor: 'jenkins' inválido</code>). Avisos não bloqueiam; erros bloqueiam o ciclo da tarefa.</p></div></details>
+        <details class="faq"><summary>O guard bloqueou uma ação que eu queria</summary><div><p>Ele está aplicando o perfil. Se a regra estiver errada, ajuste <code>protecao</code> no <code>.claude/projeto.json</code>; se o bloqueio for <code>git push</code>, faça o push você mesmo no terminal.</p></div></details>
+        <details class="faq"><summary>A skill da stack não carregou</summary><div><p>Confira se o plugin <code>stack-X</code> está instalado (<code>claude plugin install stack-X@dev-flow</code>) e se <code>X</code> está em <code>stacks</code> do perfil. Sem o plugin, o ciclo segue com as convenções do projeto e avisa no fechamento.</p></div></details>
+        <details class="faq"><summary>A validação diz “SEM ACESSO: token não gerado (VPN?)”</summary><div><p>O script de token saiu com código 2. Conecte a VPN e peça “valida a T3 de novo”. A tarefa fica registrada como não validada até lá.</p></div></details>
+        <details class="faq"><summary>Fiz uma mudança no marketplace e o projeto não viu</summary><div><p>Rode <code>claude plugin marketplace update dev-flow</code> e abra uma sessão nova. Skills e hooks são carregados no início da sessão.</p></div></details>
+        <details class="faq"><summary>Quero uma stack que não existe</summary><div><p>Use <code>"outra"</code> em <code>stacks</code> por enquanto e veja <code>docs/novo-plugin-de-stack.md</code>: um plugin pequeno com uma skill de três partes, registrado no schema e no marketplace. O teste <code>test_marketplace.py</code> confere a estrutura.</p></div></details>
+      </section>
+
+      <section class="doc" id="glossario" data-titulo="Glossário">
+        <span class="eyebrow">Ajuda</span>
+        <h2>Glossário</h2>
+        <div class="table-wrap"><table>
+          <tbody>
+            <tr><td><b>ADR</b></td><td>Registro de decisão de arquitetura: contexto, decisão, alternativas e consequências.</td></tr>
+            <tr><td><b>Agente</b></td><td>Especialista que roda em contexto isolado e devolve um resumo.</td></tr>
+            <tr><td><b>CA-n</b></td><td>Critério de aceite verificável, em Dado/Quando/Então.</td></tr>
+            <tr><td><b>Card</b></td><td>Descrição final de uma tarefa: implementação, testes, validação. Vai para o Boards quando configurado.</td></tr>
+            <tr><td><b>Guard</b></td><td>Hook que bloqueia ações proibidas pelo perfil antes de acontecerem.</td></tr>
+            <tr><td><b>Hook</b></td><td>Código executado pelo Claude Code em eventos (início de sessão, antes de uma ferramenta). É garantia, não sugestão.</td></tr>
+            <tr><td><b>Perfil</b></td><td><code>.claude/projeto.json</code>: o contrato entre o processo genérico e o projeto.</td></tr>
+            <tr><td><b>Portão</b></td><td>Ponto em que o fluxo só avança com a sua aprovação: funcional, técnica e plano.</td></tr>
+            <tr><td><b>Skill</b></td><td>Procedimento carregado sob demanda quando o pedido combina com a descrição dela.</td></tr>
+            <tr><td><b>Slug</b></td><td>Nome curto em kebab-case da demanda; nome da pasta dos documentos.</td></tr>
+            <tr><td><b>STRIDE</b></td><td>Roteiro de ameaças: falsificação, adulteração, repúdio, vazamento, negação de serviço, elevação de privilégio.</td></tr>
+            <tr><td><b>Tarefa pronta</b></td><td>A fazer, não protegida e com todas as dependências feitas.</td></tr>
+          </tbody></table></div>
+        <footer class="end">Manual do marketplace dev-flow v0.2. Fonte: <code>docs/manual/index.html</code> no repositório; atualize junto com o README ao mudar skills, agentes ou plugins.</footer>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var PLUGINS = [
+    { n: "fluxo", v: "0.2.0", c: "nucleo", d: "Processo completo: demanda, técnica, plano, tarefas, PR, depuração e arquitetura. Agentes, hooks, scripts e método de raciocínio.", s: "/fluxo:*" },
+    { n: "azure-boards", v: "0.1.0", c: "ci", d: "Item raiz e tasks no Azure Boards a partir de tarefas.json, estados e descrição do card.", s: "/azure-boards:boards" },
+    { n: "azure-pipelines", v: "0.2.0", c: "ci", d: "YAML do Azure DevOps para dotnet, node, python, java, go, sql, Docker e Terraform; diagnóstico.", s: "/azure-pipelines:pipeline" },
+    { n: "github-actions", v: "0.1.0", c: "ci", d: "Workflows de CI, imagem no GHCR com varredura e deploy por environment com OIDC.", s: "/github-actions:actions" },
+    { n: "gitlab-ci", v: "0.1.0", c: "ci", d: ".gitlab-ci.yml com testes, SAST, imagem e produção manual; diagnóstico com glab.", s: "/gitlab-ci:gitlab" },
+    { n: "stack-dotnet", v: "0.1.0", c: "linguagem", k: "dotnet", r: ".NET", d: "ASP.NET Core, Nullable em DTOs, rotas obsoletas, testes de contrato com a API em memória.", s: "stack-dotnet:dotnet" },
+    { n: "stack-node", v: "0.1.0", c: "linguagem", k: "node", r: "Node.js", d: "Express, Fastify, NestJS, TypeScript estrito, zod, Prisma, supertest.", s: "stack-node:node" },
+    { n: "stack-python", v: "0.1.0", c: "linguagem", k: "python", r: "Python", d: "FastAPI, Django, Flask, pydantic v2, SQLAlchemy, pytest, ruff, uv.", s: "stack-python:python" },
+    { n: "stack-java", v: "0.1.0", c: "linguagem", k: "java", r: "Java / Kotlin", d: "Spring Boot, JPA sem N+1, Bean Validation, JUnit 5, Testcontainers, Flyway.", s: "stack-java:java" },
+    { n: "stack-go", v: "0.1.0", c: "linguagem", k: "go", r: "Go", d: "Erros com wrap, context, goroutines sem vazamento, testes de tabela, -race.", s: "stack-go:go" },
+    { n: "stack-front", v: "0.1.0", c: "linguagem", k: "front", r: "Front-end", d: "React, Angular, Vue: estados de tela, contrato com o back, verificação visual.", s: "stack-front:front" },
+    { n: "stack-sql", v: "0.1.0", c: "banco", k: "sql", r: "SQL Server", d: "Idempotência, rollback pareado, XACT_ABORT, alteração em lotes.", s: "stack-sql:sql" },
+    { n: "stack-postgres", v: "0.1.0", c: "banco", k: "postgres", r: "PostgreSQL", d: "DDL sem travar (CONCURRENTLY, NOT VALID), timestamptz, numeric, EXPLAIN.", s: "stack-postgres:postgres" },
+    { n: "stack-mysql", v: "0.1.0", c: "banco", k: "mysql", r: "MySQL / MariaDB", d: "DDL online, utf8mb4 e collation, deadlocks, índices compostos.", s: "stack-mysql:mysql" },
+    { n: "stack-mongodb", v: "0.1.0", c: "banco", k: "mongodb", r: "MongoDB", d: "Modelagem por acesso, $jsonSchema, índices ESR, injeção de operador.", s: "stack-mongodb:mongodb" },
+    { n: "stack-redis", v: "0.1.0", c: "banco", k: "redis", r: "Redis", d: "Cache-aside com TTL, invalidação, locks com token, rate limit, streams.", s: "stack-redis:redis" },
+    { n: "stack-docker", v: "0.1.0", c: "infra", k: "docker", r: "Docker", d: "Multi-stage, base fixada, não root, compose de dev, Trivy; Dockerfiles por stack.", s: "stack-docker:docker" },
+    { n: "stack-kubernetes", v: "0.1.0", c: "infra", k: "kubernetes", r: "Kubernetes", d: "Probes, securityContext, rollout sem indisponibilidade, PDB, HPA, segredos externos.", s: "stack-kubernetes:kubernetes" },
+    { n: "stack-terraform", v: "0.1.0", c: "infra", k: "terraform", r: "Terraform", d: "Estado remoto, plan revisado, prevent_destroy, moved/import, menor privilégio.", s: "stack-terraform:terraform" },
+    { n: "design", v: "0.1.0", c: "extra", d: "Direção visual, tema claro/escuro com tokens, telas, animações, acessibilidade.", s: "/design:design" },
+    { n: "video", v: "0.1.0", c: "extra", d: "Vídeo-resumo narrado de uma entrega a partir de um roteiro JSON.", s: "/video:video" }
+  ];
+  var CATS = [["todos", "Todos"], ["nucleo", "Núcleo"], ["ci", "Rastreador e CI/CD"], ["linguagem", "Linguagens"], ["banco", "Bancos"], ["infra", "Infraestrutura"], ["extra", "Extras"]];
+  var AGENTES = [
+    { n: "analista", m: "ro", d: "Mapeia onde a demanda entra no código: fluxo real do dado, arquivos com linha, padrão a copiar e raio de impacto contado.", w: "Técnica, um por repositório, em paralelo." },
+    { n: "arquiteto", m: "ro", d: "Compara alternativas de desenho por consistência, falhas, escala, segurança, custo e reversibilidade; entrega ADRs.", w: "Técnica com decisão estrutural; /fluxo:arquitetura." },
+    { n: "seguranca", m: "ro", d: "Modela ameaças com STRIDE ou revisa o diff contra OWASP, segredos, dependências e IaC, por severidade.", w: "Técnica e tarefas que tocam auth, dados, pagamento, upload ou infra." },
+    { n: "testador", m: "rw", d: "Monta a matriz de testes (partições, limites, decisão, estados, propriedades) e escreve os testes no padrão do projeto.", w: "Tarefas com regra combinatória, cálculo ou estados." },
+    { n: "revisor", m: "ro", d: "Confere critério a critério, simula a execução, procura N+1, concorrência e bugs reais, aplica o checklist da stack.", w: "Toda tarefa, antes do commit." },
+    { n: "depurador", m: "ro", d: "Reproduz, testa hipóteses, usa git bisect e chega à causa raiz com evidência e teste de regressão proposto.", w: "/fluxo:depurar e falhas sem causa clara." },
+    { n: "validador", m: "ro", d: "Prova no ambiente: lote HTTP, script SQL aplicado e revertido, comando ou tela no navegador.", w: "Toda tarefa, depois da revisão." },
+    { n: "design:designer", m: "rw", d: "Tema claro/escuro com tokens, telas, animações e revisão visual com achados priorizados.", w: "Trabalho de interface à parte." }
+  ];
+
+  function el(tag, attrs, html) { var e = document.createElement(tag); for (var k in attrs || {}) e.setAttribute(k, attrs[k]); if (html != null) e.innerHTML = html; return e; }
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+  // Agentes
+  var la = document.getElementById("listaAgentes");
+  AGENTES.forEach(function (a) {
+    la.appendChild(el("div", { "class": "card" },
+      "<h4><code>" + esc(a.n) + "</code><span class=\"tag " + a.m + "\">" + (a.m === "ro" ? "leitura" : "escrita") + "</span></h4><p>" + esc(a.d) + "</p><div class=\"when\"><b>Entra:</b> " + esc(a.w) + "</div>"));
+  });
+
+  // Catálogo
+  var filtros = document.getElementById("filtros"), lista = document.getElementById("listaPlugins"), catAtual = "todos";
+  function desenharCatalogo() {
+    lista.innerHTML = "";
+    PLUGINS.filter(function (p) { return catAtual === "todos" || p.c === catAtual; }).forEach(function (p) {
+      lista.appendChild(el("article", { "class": "plugin" },
+        "<header><h4>" + esc(p.n) + "</h4><span class=\"ver\">v" + esc(p.v) + "</span></header><p>" + esc(p.d) + "</p><span class=\"skill\">" + esc(p.s) + "</span>"));
+    });
+  }
+  CATS.forEach(function (c) {
+    var b = el("button", { "class": "chip", type: "button", "aria-pressed": c[0] === catAtual ? "true" : "false" }, esc(c[1]));
+    b.addEventListener("click", function () {
+      catAtual = c[0];
+      Array.prototype.forEach.call(filtros.children, function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+      desenharCatalogo();
+    });
+    filtros.appendChild(b);
+  });
+  desenharCatalogo();
+
+  // Montador
+  var padrao = { node: true, postgres: true, docker: true };
+  PLUGINS.filter(function (p) { return p.k; }).forEach(function (p) {
+    var alvo = document.querySelector('.opts[data-grupo="' + p.c + '"]');
+    var lab = el("label", { "class": "opt" }, "<input type=\"checkbox\" id=\"st-" + p.k + "\" value=\"" + p.k + "\"" + (padrao[p.k] ? " checked" : "") + "> " + esc(p.r));
+    alvo.appendChild(lab);
+  });
+  function montar() {
+    var stacks = Array.prototype.map.call(document.querySelectorAll('.opts input[id^="st-"]:checked'), function (i) { return i.value; });
+    var ci = document.getElementById("ciSel").value;
+    var plugins = ["fluxo"].concat(stacks.map(function (s) { return "stack-" + s; }));
+    if (ci !== "nenhum") plugins.push(ci);
+    if (document.getElementById("optBoards").checked) plugins.push("azure-boards");
+    if (document.getElementById("optDesign").checked) plugins.push("design");
+    if (document.getElementById("optVideo").checked) plugins.push("video");
+    document.getElementById("outInstalar").textContent = ["claude plugin marketplace add <caminho-ou-url-do-dev-flow>"]
+      .concat(plugins.map(function (p) { return "claude plugin install " + p + "@dev-flow"; })).join("\n");
+    var perfil = { stacks: stacks.length ? stacks : ["outra"], ci: { provedor: ci } };
+    if (ci !== "nenhum") perfil.ci.ambientes = ["dev", "hml", "prd"];
+    var exec = [];
+    if (stacks.indexOf("kubernetes") >= 0) exec.push("kubernetes");
+    if (stacks.indexOf("docker") >= 0 && !exec.length) exec.push("compose");
+    if (exec.length || stacks.indexOf("terraform") >= 0) {
+      perfil.infra = {};
+      if (exec.length) perfil.infra.execucao = exec;
+      if (stacks.indexOf("terraform") >= 0) perfil.infra.iac = "infra/terraform";
+    }
+    if (document.getElementById("optBoards").checked) perfil.rastreador = { tipo: "azure-boards", org: "https://dev.azure.com/<org>", projeto: "<projeto>" };
+    var txt = JSON.stringify(perfil, null, 2);
+    document.getElementById("outPerfil").textContent = txt.slice(1, -1).replace(/^\n/, "").replace(/\n$/, "");
+    var en = {}; plugins.forEach(function (p) { en[p + "@dev-flow"] = true; });
+    document.getElementById("outSettings").textContent = JSON.stringify({
+      extraKnownMarketplaces: { "dev-flow": { source: { source: "git", url: "<url do repositório dev-flow>" } } },
+      enabledPlugins: en
+    }, null, 2);
+  }
+  document.getElementById("montadorForm").addEventListener("change", montar);
+  montar();
+
+  // Copiar
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest(".copy"); if (!b) return;
+    var alvo = document.getElementById(b.getAttribute("data-alvo")); var t = alvo.textContent;
+    function ok() { b.textContent = "Copiado"; setTimeout(function () { b.textContent = "Copiar"; }, 1400); }
+    function selecionar() { var r = document.createRange(); r.selectNodeContents(alvo); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = "Selecionado"; setTimeout(function () { b.textContent = "Copiar"; }, 1400); }
+    try { navigator.clipboard.writeText(t).then(ok, selecionar); } catch (e) { selecionar(); }
+  });
+  // Botões de copiar nos blocos de comando fixos
+  Array.prototype.forEach.call(document.querySelectorAll(".code"), function (c, i) {
+    if (c.querySelector(".copy")) return;
+    var pre = c.querySelector("pre"); if (!pre.id) pre.id = "bloco-" + i;
+    c.appendChild(el("button", { "class": "copy", type: "button", "data-alvo": pre.id }, "Copiar"));
+  });
+
+  // Tema
+  var raiz = document.documentElement;
+  try { var salvo = localStorage.getItem("devflow-tema"); if (salvo) raiz.setAttribute("data-theme", salvo); } catch (e) {}
+  document.getElementById("tema").addEventListener("click", function () {
+    var atual = raiz.getAttribute("data-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    var novo = atual === "dark" ? "light" : "dark";
+    raiz.setAttribute("data-theme", novo);
+    try { localStorage.setItem("devflow-tema", novo); } catch (e) {}
+  });
+
+  // Menu no celular
+  var side = document.getElementById("side"), mt = document.getElementById("menuToggle");
+  mt.addEventListener("click", function () { var a = side.classList.toggle("aberto"); mt.setAttribute("aria-expanded", a ? "true" : "false"); });
+  document.getElementById("toc").addEventListener("click", function (e) { if (e.target.tagName === "A") { side.classList.remove("aberto"); mt.setAttribute("aria-expanded", "false"); } });
+
+  // Seção ativa no índice
+  var links = {}; Array.prototype.forEach.call(document.querySelectorAll(".toc a"), function (a) { links[a.getAttribute("href").slice(1)] = a; });
+  var secoes = Array.prototype.slice.call(document.querySelectorAll("section.doc"));
+  function marcar() {
+    var y = window.scrollY + 120, atual = secoes[0].id;
+    secoes.forEach(function (s) { if (s.offsetTop <= y) atual = s.id; });
+    for (var k in links) links[k].classList.toggle("ativo", k === atual);
+  }
+  window.addEventListener("scroll", marcar, { passive: true }); marcar();
+
+  // Busca
+  var busca = document.getElementById("busca"), res = document.getElementById("resultados");
+  function norm(t) { return t.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(); }
+  var indice = secoes.map(function (s) { return { id: s.id, titulo: s.getAttribute("data-titulo"), texto: s.innerText.replace(/\s+/g, " ") }; });
+  busca.addEventListener("input", function () {
+    var q = norm(busca.value.trim());
+    if (q.length < 2) { res.hidden = true; res.innerHTML = ""; return; }
+    var achados = indice.map(function (s) {
+      var n = norm(s.texto), i = n.indexOf(q), cont = 0, p = -1;
+      while ((p = n.indexOf(q, p + 1)) >= 0) cont++;
+      return { s: s, i: i, cont: cont };
+    }).filter(function (x) { return x.i >= 0; }).sort(function (a, b) { return b.cont - a.cont; });
+    res.hidden = false;
+    if (!achados.length) { res.innerHTML = "<p>Nada encontrado para “" + esc(busca.value) + "”.</p>"; return; }
+    res.innerHTML = "";
+    achados.slice(0, 6).forEach(function (x) {
+      var ini = Math.max(0, x.i - 40), trecho = x.s.texto.slice(ini, x.i + q.length + 60);
+      var at = x.i - ini;
+      var html = (ini ? "…" : "") + esc(trecho.slice(0, at)) + "<mark>" + esc(trecho.slice(at, at + q.length)) + "</mark>" + esc(trecho.slice(at + q.length)) + "…";
+      var a = el("a", { href: "#" + x.s.id }, esc(x.s.titulo) + " <small>" + html + "</small>");
+      a.addEventListener("click", function () { side.classList.remove("aberto"); });
+      res.appendChild(a);
+    });
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "/" && document.activeElement !== busca && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) { e.preventDefault(); busca.focus(); }
+    if (e.key === "Escape" && document.activeElement === busca) { busca.value = ""; busca.dispatchEvent(new Event("input")); }
+  });
+})();
+</script>
+</body>
+</html>

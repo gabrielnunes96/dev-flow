@@ -14,13 +14,15 @@ Argumento: `$ARGUMENTS` — vazio = próxima pronta da demanda ativa; um id (`T3
 1. `python -I S/perfil.py validar` — erro → parar e mostrar. Ler o perfil (`perfil.py mostrar`) e os arquivos de `convencoes`.
 2. `git status --short`: limpo. Alteração pendente que não é sua → parar e perguntar.
 3. Se `validacao.token.script` existir, rodar (`fluxo:x.py` = `S/x.py`; sem prefixo = relativo à raiz do projeto). Código 2 (sem VPN) → avisar e seguir implementando; a validação espera. Código 3 → parar.
-4. Carregar a skill de cada stack do perfil (`stack-dotnet:dotnet`, `stack-sql:sql`, `stack-front:front`). Sem o plugin da stack → seguir só com as convenções do projeto e avisar no fechamento.
+4. Carregar a skill de cada stack do perfil e da `stack` da tarefa: stack `X` → skill `stack-X:X` (ex.: `stack-dotnet:dotnet`, `stack-postgres:postgres`, `stack-docker:docker`). Sem o plugin da stack → seguir só com as convenções do projeto e avisar no fechamento.
+5. Método de raciocínio: `../../referencias/raciocinio.md` (relativo a esta skill). Vale para os passos 2 a 4.
 
 ## 1. Escolher e abrir a tarefa
 - Fila = `{docs}/{demanda}/tarefas.json`. `python -I S/plano.py proxima <arq>` (ou a do argumento). Código 1 → a mensagem diz por quê (fila concluída, dependência, protegida); reportar e parar.
 - Nunca pegar tarefa `protegida` nem item listado em `rastreador.protegidos`.
 - `plano.py marcar <arq> <id> andamento`. Com `rastreador.tipo = azure-boards`, mover o WI para `estados.andamento` (skill `azure-boards:boards`).
 - Reler na funcional os critérios (`criterios`) e na técnica a seção do componente. A tarefa implementa **só** isso.
+- Antes de codar, escrever para si (seção 2 do método): pré-condição, pós-condição e invariante de cada unidade que muda, e as bordas da seção 3 que se aplicam. É daí que saem os testes.
 
 ## 2. Implementar
 - Seguir a skill da stack e as convenções do projeto (padrão para adicionar uma operação, nomes, erros).
@@ -29,13 +31,18 @@ Argumento: `$ARGUMENTS` — vazio = próxima pronta da demanda ativa; um id (`T3
 - Edição por script: ler o conteúdo inteiro antes de abrir o arquivo para escrita e conferir que o trecho a trocar existe (`assert`). Abrir em modo escrita antes de ler zera o arquivo se o script falhar no meio.
 - Monorepo: rodar os `comandos` do perfil a partir da raiz do projeto, não da pasta em que o último comando parou.
 - Sem regra que a funcional não pediu. Ambiguidade de regra → parar e perguntar.
+- Sem overengineering (seção 8 do método): o menor código que atende os critérios, no padrão do projeto. Nada de abstração, camada, configuração ou dependência "para o futuro".
 
 ## 3. Testes
 - Cada critério da tarefa tem pelo menos um teste. Siga o padrão de testes que o projeto já tem.
+- Critério com regra combinada, cálculo, estados ou muitas bordas → delegar o desenho (e, se útil, a escrita) dos testes ao subagente `fluxo:testador` com os critérios, os arquivos alterados e o caminho `S`.
+- Teste que nunca falhou não prova nada: confira que ele falharia sem a mudança (inverta a condição mentalmente ou rode antes de implementar).
 - Derrubar a aplicação antes de compilar (`python -I S/servico.py derrubar`, se houver `servico`), então `comandos.teste`. Tudo verde antes de seguir.
 
 ## 4. Revisão
 - Delegar ao subagente `fluxo:revisor` com: id e critérios da tarefa, stacks, e o que mudou. Corrigir os achados procedentes e rodar os testes de novo. Achado que você descarta → dizer por quê no fechamento.
+- Diff que toca autenticação, autorização, dado pessoal, pagamento, upload, segredo ou infraestrutura (IaC, Dockerfile, manifesto, pipeline) → também o subagente `fluxo:seguranca` em modo revisão, em paralelo com o revisor. Achado crítico/alto bloqueia o commit até ser corrigido ou o usuário aceitar o risco por escrito.
+- Teste falhando sem causa clara depois de duas tentativas → subagente `fluxo:depurador`, em vez de tentar variações às cegas.
 
 ## 5. Validação no ambiente
 - Conforme `validacao.tipo`, delegar ao subagente `fluxo:validador` com o lote: os `casos_obrigatorios` do perfil + o que os critérios pedem. Dados de teste em `validacao.dados`.

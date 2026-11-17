@@ -58,6 +58,27 @@ class PerfilTests(unittest.TestCase):
         erros = [m for n, m in perfil.validar({"nome": "x", "stacks": ["front"], "design": []}) if n == "erro"]
         self.assertTrue(any(e.startswith("design:") for e in erros))
 
+    def test_stacks_novas_sem_aviso(self):
+        perfil_ok = {"nome": "x", "comandos": {"teste": "t"},
+                     "stacks": ["java", "go", "postgres", "mysql", "mongodb", "redis", "docker", "kubernetes", "terraform"],
+                     "infra": {"nuvem": "aws", "execucao": ["kubernetes"], "iac": "infra/terraform"}}
+        self.assertEqual(perfil.validar(perfil_ok), [])
+
+    def test_validar_secoes_ci_e_infra(self):
+        erros = [m for n, m in perfil.validar({
+            "nome": "x", "stacks": ["go"],
+            "ci": {"provedor": "jenkins", "ambientes": ["dev", "dev"], "arquivos": "ci.yml"},
+            "infra": {"nuvem": "marte", "execucao": ["mainframe"], "iac": 3},
+        }) if n == "erro"]
+        for trecho in ("ci.provedor", "ci.ambientes", "ci.arquivos", "infra.nuvem", "'mainframe'", "infra.iac"):
+            self.assertTrue(any(trecho in e for e in erros), trecho)
+        self.assertTrue(any(e.startswith("ci:") for n, e in perfil.validar({"nome": "x", "stacks": ["go"], "ci": "github"}) if n == "erro"))
+
+    def test_avisa_stack_de_infra_sem_declaracao(self):
+        avisos = [m for n, m in perfil.validar({"nome": "x", "stacks": ["kubernetes", "terraform"], "comandos": {"teste": "t"}}) if n == "aviso"]
+        self.assertTrue(any("infra.execucao" in a for a in avisos))
+        self.assertTrue(any("infra.iac" in a for a in avisos))
+
     def test_obter_campo_aninhado(self):
         p = {"git": {"push": "humano"}}
         self.assertEqual(perfil.obter(p, "git.push"), "humano")

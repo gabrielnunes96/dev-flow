@@ -5,9 +5,10 @@ O aprendizado central do PBI 1001: cada peça do Claude Code resolve um problema
 | Peça | O que é | Use para | Não use para | No fluxo |
 | --- | --- | --- | --- | --- |
 | **CLAUDE.md / rules** | Contexto carregado **sempre** | Fatos do projeto: arquitetura, convenções, armadilhas | Processo passo a passo (vira skill); proibições (viram hook) | `CLAUDE.md` do projeto, `.claude/rules/` |
-| **Skill** | Procedimento carregado **sob demanda** quando a descrição bate com o pedido; leva modelos e scripts | "Como fazer X": especificar, planejar, o ciclo da tarefa | Fatos do projeto (ficam no perfil/CLAUDE.md) | `fluxo:*`, `stack-*`, `azure-*` |
+| **Skill** | Procedimento carregado **sob demanda** quando a descrição bate com o pedido; leva modelos e scripts | "Como fazer X": especificar, planejar, o ciclo da tarefa, depurar, decidir arquitetura | Fatos do projeto (ficam no perfil/CLAUDE.md) | `fluxo:*`, `stack-*`, `azure-*`, `github-actions`, `gitlab-ci` |
+| **Referência** | Texto que skills e agentes leem quando precisam | Método comum (raciocínio, casos de borda, depuração) sem repetir em cada skill | Procedimento (vira skill) | `fluxo/referencias/raciocinio.md` |
 | **Script** | Código determinístico chamado pela skill | Tudo que não precisa de raciocínio: token, subir app, lote HTTP, fila de tarefas | Decisões | `scripts/*.py` |
-| **Agente** | Contexto isolado, ferramentas restritas, devolve um resumo | Trabalho barulhento ou que deve ser independente: revisão, validação, análise de impacto, tarefas em paralelo | Coisas que precisam da conversa toda | `analista`, `revisor`, `validador` |
+| **Agente** | Contexto isolado, ferramentas restritas, devolve um resumo | Trabalho barulhento ou que deve ser independente: revisão, validação, análise de impacto, arquitetura, segurança, desenho de testes, depuração, tarefas em paralelo | Coisas que precisam da conversa toda | `analista`, `arquiteto`, `revisor`, `seguranca`, `testador`, `depurador`, `validador` |
 | **Hook** | Executado pelo harness, não pelo modelo — **garantia** | O que nunca pode acontecer; contexto automático no início da sessão | Orientação que admite exceção | `guard.py`, `contexto.py` |
 | **MCP** | Conexão com sistema externo | Ler/escrever em Boards, banco, APIs internas | Processo (não é lugar de "como trabalhar") | MCP do Azure DevOps |
 | **Plugin / marketplace** | Pacote versionado de skills, agentes, hooks e MCP | Reaproveitar tudo isso entre projetos e com o time | — | este repositório |
@@ -26,6 +27,8 @@ MCP dá ao modelo **acesso** a sistemas. O fluxo de desenvolvimento é **conheci
 5. **Proteção por hook, dirigida pelo perfil.** Diretório excluído, código gerado, segredo, push: o guard bloqueia de verdade, e cada projeto declara os seus.
 6. **Determinístico onde dá.** `plano.py` (fila, dependências, ciclos), `http_lote.py` (lote com status esperado e tabela do card), `servico.py` (subir/derrubar com healthcheck), `token_login.py` (login com certificado fixado). Testados em `tests/`.
 7. **Aprender é uma etapa.** `/fluxo:aprender` classifica cada correção no lugar certo (perfil, CLAUDE.md, dados do ambiente, skill de stack, plugin) — por exemplo, "o sandbox aceita qualquer ID" foi parar nos dados do ambiente, não como impedimento na daily.
+8. **Raciocínio explícito.** Contrato (pré/pós-condição, invariante), casos de borda, custo e execução simulada estão escritos em `referencias/raciocinio.md` e são lidos por quem implementa, revisa, testa e depura — a qualidade não depende de o modelo "lembrar" de pensar nisso.
+9. **Especialista por assunto, no momento certo.** Arquiteto e segurança entram na técnica quando há decisão estrutural ou superfície de ataque; testador e depurador no ciclo da tarefa quando a regra é combinatória ou a falha não tem causa clara. Cada um devolve um resumo, não o barulho.
 
 ## Onde o tempo é ganho
 

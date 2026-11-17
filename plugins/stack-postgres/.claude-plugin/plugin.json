@@ -1,0 +1,14 @@
+{
+  "name": "stack-postgres",
+  "version": "0.1.0",
+  "description": "Convenções de PostgreSQL para o fluxo: migrations com rollback, DDL sem travar (CONCURRENTLY, NOT VALID), tipos, índices por EXPLAIN e lotes.",
+  "author": {
+    "name": "Gabriel Nunes Campos"
+  },
+  "keywords": [
+    "postgres",
+    "postgresql",
+    "banco",
+    "migrations"
+  ]
+}

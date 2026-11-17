@@ -1,90 +1,197 @@
 # dev-flow
 
-Marketplace de plugins do Claude Code com o fluxo de desenvolvimento do time: **da demanda explicada em texto até o PR e a pipeline**, passando por especificação funcional, técnica, plano, implementação tarefa a tarefa, revisão e validação — com portões de aprovação humana e proteções que não dependem da memória do modelo.
+Marketplace de plugins do Claude Code com o fluxo de desenvolvimento do time: **da demanda explicada em texto até o PR e a pipeline**, com especificação funcional e técnica, plano, implementação tarefa a tarefa, revisão, segurança, validação no ambiente e CI/CD — com portões de aprovação humana e proteções que não dependem da memória do modelo.
 
-Nasceu da forma de trabalho do PBI 1001 (Acme.API.Ponte), extraída para servir a qualquer projeto: back-end, front-end, scripts SQL ou vários repositórios na mesma demanda.
+> 📘 **Manual completo, navegável e com busca:** abra [`docs/manual/index.html`](docs/manual/index.html) no navegador.
 
-```
-demanda (você explica)
-  → /fluxo:demanda  → 01-funcional.md                ◆ você aprova
-  → /fluxo:tecnica  → 02-tecnica.md (código real)    ◆ você aprova
-  → /fluxo:plano    → tarefas.json + 03-plano.md      ◆ você aprova  (+ cards no Boards, opcional)
-  → /fluxo:task todas → por tarefa: implementa → testa → revisor → validador → commit → feito
-  → /fluxo:pr       → pr.md (+ PR aberto depois do seu push)
-  → azure-pipelines → CI verde; deploy em produção com aprovação no environment
+```text
+você explica a demanda
+  → /fluxo:demanda   01-funcional.md   (regras, critérios de aceite)        ◆ você aprova
+  → /fluxo:tecnica   02-tecnica.md     (analista + arquiteto + segurança)   ◆ você aprova
+  → /fluxo:plano     tarefas.json      (tarefas pequenas, em ordem)         ◆ você aprova
+  → /fluxo:task todas  por tarefa: implementa → testa → revisor (+segurança) → validador → commit
+  → /fluxo:pr        pr.md  (+ PR aberto depois do seu push)
+  → pipeline         CI verde; produção com aprovação no environment
 /fluxo:entregar faz tudo isso em sequência, parando só nos ◆.
 ```
 
-## Plugins
+## Comece em 3 minutos
 
-| Plugin | O que traz |
-| --- | --- |
-| **fluxo** (núcleo) | Skills `iniciar`, `demanda`, `tecnica`, `plano`, `task`, `entregar`, `pr`, `status`, `daily`, `aprender`; agentes `analista`, `revisor`, `validador`; hooks `guard` (proteções do perfil) e `contexto` (resumo do projeto no início da sessão); scripts determinísticos (`perfil.py`, `plano.py`, `servico.py`, `http_lote.py`, `token_login.py`); modelos de documento. |
-| **azure-boards** | Skill `boards`: item raiz e tasks a partir de `tarefas.json`, estados, descrição do card — limitado ao item raiz do perfil. |
-| **azure-pipelines** | Skill `pipeline` + modelos YAML (dotnet, front, sql, deploy por ambiente). |
-| **stack-dotnet** | Convenções, armadilhas e checklist de revisão .NET; modelo `ApiEmMemoria.cs` para testes de contrato. |
-| **stack-sql** | Convenções SQL Server (idempotência, rollback pareado, lote) + modelos de script e rollback. |
-| **stack-front** | Convenções de front, verificação visual no navegador (desktop e mobile), checklist. |
-| **design** | Skill `design` e agente `designer`: direção visual, tema claro/escuro com tokens, telas e fluxos, animações limpas, acessibilidade e revisão visual; modelos `tokens.css` e `movimento.css`. |
-
-Instale o `fluxo` sempre; os demais conforme o projeto. As skills de stack são carregadas pelo ciclo da tarefa conforme `stacks` do perfil.
-
-## Instalação
+**1. Adicione o marketplace e instale o núcleo** (uma vez por máquina):
 
 ```bash
-claude plugin marketplace add C:/caminho/para/dev-flow
+claude plugin marketplace add <caminho-ou-url-do-dev-flow>
+```
+
+```bash
 claude plugin install fluxo@dev-flow
-claude plugin install stack-dotnet@dev-flow
 ```
 
-Quando o repositório tiver remoto (Azure Repos), troque o caminho pela URL git. Para o time receber automaticamente num projeto, declare no `.claude/settings.json` versionado do projeto:
+**2. Instale as stacks do seu projeto** (exemplo: API Node com Postgres, Docker e GitHub Actions):
 
-```json
-{
-  "extraKnownMarketplaces": { "dev-flow": { "source": { "source": "git", "url": "<url do repositório>" } } },
-  "enabledPlugins": { "fluxo@dev-flow": true, "stack-dotnet@dev-flow": true }
-}
+```bash
+claude plugin install stack-node@dev-flow
 ```
 
-Atualizar depois de mudar o plugin: `claude plugin marketplace update dev-flow`.
+```bash
+claude plugin install stack-postgres@dev-flow
+```
 
-Boards: o plugin `azure-boards` usa o MCP do Azure DevOps já configurado na máquina (`claude mcp add azure-devops -- cmd /c npx -y @azure-devops/mcp <org> -d core work work-items`). Sem ele, o fluxo roda com `rastreador.tipo = local` (tudo em `tarefas.json`).
+```bash
+claude plugin install stack-docker@dev-flow
+```
 
-## Manual de uso
+```bash
+claude plugin install github-actions@dev-flow
+```
 
-### 1. Projeto novo (uma vez)
-1. Abra o Claude Code na pasta do projeto (pode estar vazia).
-2. `/fluxo:iniciar`: detecta a stack (.NET, SQL, front), cria `.claude/projeto.json` (perfil), um `CLAUDE.md` enxuto e faz `git init` se precisar.
-3. Revise o `projeto.json`: comandos de build/teste, como validar e o que é proibido mexer.
+**3. No projeto**, abra o Claude Code e rode `/fluxo:iniciar`. Ele detecta stacks, comandos, CI e infraestrutura e cria `.claude/projeto.json`.
 
-### 2. Cada demanda
-Tudo de uma vez: `/fluxo:entregar` e explique a demanda em texto livre. Ou passo a passo:
+**4. Traga uma demanda:** `/fluxo:entregar` e explique o que precisa em texto livre. Ou um bug: `/fluxo:depurar <erro>`.
 
-| Comando | Gera | Você |
+> Atualizar depois de uma mudança no marketplace: `claude plugin marketplace update dev-flow`.
+
+## Catálogo de plugins
+
+### Núcleo e processo
+| Plugin | O que traz |
+| --- | --- |
+| **fluxo** | Skills `iniciar`, `demanda`, `tecnica`, `plano`, `task`, `entregar`, `pr`, `status`, `daily`, `aprender`, `depurar`, `arquitetura`. Agentes especialistas (abaixo). Hooks `guard` (bloqueios do perfil) e `contexto` (resumo do projeto ao abrir a sessão). Scripts determinísticos e modelos de documento. Método de raciocínio em `referencias/raciocinio.md`. |
+
+### Rastreador e CI/CD
+| Plugin | O que traz |
+| --- | --- |
+| **azure-boards** | Item raiz e tasks a partir de `tarefas.json`, estados, descrição do card — limitado ao item raiz do perfil. |
+| **azure-pipelines** | YAML para dotnet, node/front, python, java, go, sql, Docker (ACR + Trivy), Terraform (plan em PR, apply com aprovação) e deploy por estágios; diagnóstico de execuções. |
+| **github-actions** | Workflows de CI, imagem no GHCR com varredura e deploy por environment com OIDC; diagnóstico com `gh`. |
+| **gitlab-ci** | `.gitlab-ci.yml` com verificação, testes, SAST/segredos, imagem e produção manual; diagnóstico com `glab`. |
+
+### Linguagens
+| Plugin | Cobre |
+| --- | --- |
+| **stack-dotnet** | ASP.NET Core, Nullable em DTOs, rotas, testes de contrato com a API em memória, SDKs gerados. |
+| **stack-node** | Express, Fastify, NestJS, TypeScript estrito, zod, Prisma/TypeORM, supertest. |
+| **stack-python** | FastAPI, Django, Flask, pydantic v2, SQLAlchemy/Alembic, pytest, ruff, uv/poetry. |
+| **stack-java** | Spring Boot, JPA sem N+1, Bean Validation, JUnit 5, MockMvc, Testcontainers, Flyway. Kotlin incluso. |
+| **stack-go** | Erros com wrap, `context`, goroutines sem vazamento, testes de tabela, `-race`, govulncheck. |
+| **stack-front** | React, Angular, Vue: estados de tela, contrato com o back, verificação visual desktop e mobile. |
+
+### Bancos de dados
+| Plugin | Cobre |
+| --- | --- |
+| **stack-sql** | SQL Server: idempotência, rollback pareado, transação com `XACT_ABORT`, lotes. |
+| **stack-postgres** | Migrations, DDL sem travar (`CONCURRENTLY`, `NOT VALID`), `timestamptz`/`numeric`, `EXPLAIN`. |
+| **stack-mysql** | MySQL/MariaDB: DDL online, `utf8mb4` e collation, deadlocks, índices compostos. |
+| **stack-mongodb** | Modelagem por acesso, `$jsonSchema`, índices ESR, operadores atômicos, injeção de operador. |
+| **stack-redis** | Cache-aside com TTL, invalidação, locks com token, rate limit, streams, comandos proibidos. |
+
+### Infraestrutura
+| Plugin | Cobre |
+| --- | --- |
+| **stack-docker** | Multi-stage, base fixada, não root, `.dockerignore`, compose de dev; modelos de Dockerfile para dotnet, node, python, java e go. |
+| **stack-kubernetes** | Requests/limits, probes, `securityContext`, rollout sem indisponibilidade, PDB/HPA, segredos externos; manifesto base. |
+| **stack-terraform** | Estado remoto, versões fixadas, plan revisado (nunca apply pela sessão), `prevent_destroy`, `moved`/`import`. |
+
+### Extras
+| Plugin | O que traz |
+| --- | --- |
+| **design** | Designer de UX/UI: direção visual, tema claro/escuro com tokens, telas, animações, acessibilidade. |
+| **video** | Vídeo-resumo narrado de uma entrega a partir de um roteiro JSON. |
+
+**Qual instalar?** Sempre `fluxo`. Depois, um plugin por item de `stacks` do perfil (stack `X` → `stack-X`) e o do seu `ci.provedor`. O ciclo da tarefa carrega a skill da stack sozinho.
+
+## Agentes especialistas
+
+Cada agente roda em contexto isolado, com ferramentas restritas, e devolve só o resultado. As skills chamam no momento certo; você também pode pedir direto ("chama o arquiteto para…").
+
+| Agente | Quando entra | Devolve |
 | --- | --- | --- |
-| `/fluxo:demanda` | `01-funcional.md` (regras, critérios de aceite, dúvidas) | responde as dúvidas e aprova |
-| `/fluxo:tecnica` | `02-tecnica.md` (desenho em cima do código real) | aprova |
-| `/fluxo:plano` | `tarefas.json` + `03-plano.md` (tarefas pequenas, em ordem) | aprova |
-| `/fluxo:task todas` | por tarefa: implementa, testa, revisa, valida, commita | acompanha |
-| `/fluxo:pr` | `pr.md` (descrição do PR) | push e PR, se houver remoto |
+| `analista` | Técnica, análise de impacto | Fluxo real do dado, arquivos com linha, padrão a copiar, raio de impacto |
+| `arquiteto` | Técnica com decisão estrutural; `/fluxo:arquitetura` | Alternativas com trade-offs, recomendação, ADRs prontos |
+| `seguranca` | Técnica (ameaças STRIDE) e tarefa que toca auth, dados, pagamento, upload ou infra | Ameaças e mitigações; achados OWASP por severidade |
+| `testador` | Tarefa com regra combinatória, cálculo ou estados | Matriz de testes (partições, limites, decisão, estados) e, se pedido, os testes |
+| `revisor` | Toda tarefa, antes do commit | Achados com `arquivo:linha`, execução simulada, N+1, concorrência |
+| `depurador` | `/fluxo:depurar`; teste falhando sem causa clara | Causa raiz com evidência, hipóteses testadas, teste de regressão |
+| `validador` | Toda tarefa, no ambiente | Tabela de resultados (HTTP, SQL, comando ou navegador) |
+| `design:designer` | Trabalho de UI à parte | Tema, telas, animações, revisão visual |
 
-Nada é implementado antes das três aprovações.
+Todos seguem o **método de raciocínio** do plugin ([`plugins/fluxo/referencias/raciocinio.md`](plugins/fluxo/referencias/raciocinio.md)): modelar entrada/estado/fronteiras, contrato (pré/pós-condição e invariante), lista de casos de borda, custo (O() e I/O), execução simulada, **simplicidade sem overengineering** (nada de abstração, camada ou infraestrutura sem requisito), depuração por hipóteses e verificação antes de dizer "pronto".
 
-### 3. No dia a dia
-- `/fluxo:status`: onde paramos e o que falta.
-- `/fluxo:task` (próxima) ou `/fluxo:task T3` (específica).
-- `/fluxo:daily`: relatório da daily.
-- `/fluxo:aprender`: transforma uma correção ("isso não é assim") em regra durável.
+## Comandos do dia a dia
 
-### 4. Regras fixas
-- Push, merge e deploy em produção são do usuário (o guard bloqueia `git push`).
-- Boards é opcional: só com `rastreador.tipo = azure-boards` no perfil; sem isso, tudo fica em `tarefas.json`.
-- Mudança de processo para todos os projetos → este repositório. Mudança de um projeto só → `projeto.json` ou `CLAUDE.md` dele. Vale a partir da próxima sessão.
+| Você quer… | Comando |
+| --- | --- |
+| Configurar um projeto | `/fluxo:iniciar` |
+| Levar uma demanda até o PR | `/fluxo:entregar <demanda>` |
+| Só a especificação funcional | `/fluxo:demanda` |
+| Só a técnica | `/fluxo:tecnica <slug>` |
+| Quebrar em tarefas | `/fluxo:plano <slug>` |
+| Próxima tarefa / uma específica / todas | `/fluxo:task` · `/fluxo:task T3` · `/fluxo:task todas` |
+| Corrigir um bug pela causa raiz | `/fluxo:depurar <erro ou descrição>` |
+| Registrar uma decisão de arquitetura | `/fluxo:arquitetura adr <decisão>` |
+| Documentar ou revisar a arquitetura | `/fluxo:arquitetura mapa` · `/fluxo:arquitetura revisar` |
+| Onde paramos? | `/fluxo:status` |
+| Relatório da daily | `/fluxo:daily` |
+| Descrição do PR | `/fluxo:pr` |
+| Pipeline (criar, ajustar, diagnosticar) | `/azure-pipelines:pipeline` · `/github-actions:actions` · `/gitlab-ci:gitlab` |
+| Transformar uma correção em regra | `/fluxo:aprender` |
 
-### 5. Publicar no Azure Boards
-Pré-requisitos: plugin `azure-boards` instalado e MCP do Azure DevOps configurado (ver [Instalação](#instalação)).
+## O perfil do projeto
 
-**Configurar o projeto (uma vez):** preencher `rastreador` no `.claude/projeto.json` (ou pedir "configura o Boards neste projeto, iteração X"):
+Tudo o que é específico de um projeto fica em `.claude/projeto.json` ([schema](plugins/fluxo/schema/projeto.schema.json)); as skills não têm nada fixo. Exemplo real: [`exemplos/ponte/projeto.json`](exemplos/ponte/projeto.json).
+
+| Seção | Para quê | Quem usa |
+| --- | --- | --- |
+| `stacks`, `convencoes` | Quais skills de stack e quais arquivos de convenção valem | task, técnica, revisor, testador |
+| `docs` | Onde ficam especificações e `tarefas.json` | todas as skills, hook de contexto |
+| `rastreador` | Local ou Azure Boards (org, item raiz, protegidos, estados) | plano, task, status, boards |
+| `comandos` | restaurar, build, teste, lint, vulnerabilidades (e os que quiser) | task, pr, pipelines |
+| `servico`, `validacao` | Subir a aplicação, token, URL, dados de teste, casos obrigatórios, máscaras | validador, scripts |
+| `ci` | Provedor (`azure-pipelines`, `github-actions`, `gitlab-ci`), arquivos e ambientes | técnica, entregar, pr |
+| `infra` | Nuvem, onde roda (kubernetes, compose, app-service…), pasta de IaC, registro, observabilidade | técnica, arquiteto, segurança |
+| `git` | Branch base, formato do commit, coautor, push humano | task, pr, guard |
+| `protecao` | Textos/diretórios proibidos, arquivos gerados, segredos | guard (bloqueio real) |
+| `pare_e_pergunte` | Situações do projeto em que o ciclo para | task |
+| `design` | Tokens, design system, plataformas, referências | design |
+
+Valide sempre que mudar: `python -I <scripts>/perfil.py validar` (o hook de início de sessão mostra o caminho dos scripts).
+
+## Regras fixas (garantidas por hook, não por memória)
+
+- **Push, merge, deploy em produção e `terraform apply` são seus.** O guard bloqueia `git push` quando `git.push = humano`.
+- Commit **só com o seu "pode commitar"**, uma tarefa por vez.
+- Diretórios proibidos, arquivos gerados e arquivos de segredo declarados em `protecao` não são lidos nem editados.
+- Commit com JWT, chave privada, chave AWS ou token do GitHub nas linhas adicionadas é bloqueado sempre.
+- Nada é implementado antes das três aprovações (funcional, técnica, plano).
+
+## Documentos de uma demanda
+
+```text
+{docs}/{slug}/
+  00-demanda.md     texto original do pedido
+  01-funcional.md   RN, RF, critérios de aceite (CA-n), fora de escopo, dúvidas
+  02-tecnica.md     componentes, contratos, dados, segurança, testes por CA, riscos, implantação
+  03-plano.md       ordem, paralelismo, definição de pronto
+  tarefas.json      fila (fonte da verdade): id, critérios, dependências, estado, wi, commit
+  cards/{id}.html   descrição final de cada tarefa
+  pr.md             descrição do PR
+{docs}/bug-{resumo}/bug.md   sintoma, hipóteses, causa raiz, correção e prova
+docs/adr/NNNN-*.md            decisões de arquitetura
+```
+
+Como tudo é arquivo, o contexto sobrevive a compactações e a sessões novas: o hook de contexto mostra a demanda ativa e a próxima tarefa ao abrir a sessão.
+
+## Azure Boards (opcional)
+
+Pré-requisitos: plugin `azure-boards` e o MCP do Azure DevOps configurado na máquina:
+
+```bash
+claude mcp add azure-devops -- npx -y @azure-devops/mcp <org> -d core work work-items
+```
+
+No Windows: `-- cmd /c npx …`.
+
+No perfil:
 
 ```json
 "rastreador": {
@@ -93,64 +200,36 @@ Pré-requisitos: plugin `azure-boards` instalado e MCP do Azure DevOps configura
   "projeto": "MeuProjeto",
   "area": "MeuProjeto\\Equipe",
   "iteracao": "MeuProjeto\\Sprint 12",
-  "responsavel": "fulano@exemplo.com",
   "item_raiz": null,
   "protegidos": [],
   "estados": { "a_fazer": "To Do", "andamento": "In Progress", "feito": "Done" }
 }
 ```
 
-`item_raiz` vazio → o PBI é criado a partir da funcional. PBI que já existe → coloque o número; se ele já tem tasks, peça "importa o PBI 2000" para trazê-las ao `tarefas.json`.
+`item_raiz` vazio → o PBI é criado a partir da funcional; PBI existente → coloque o número ("importa o PBI 2000" traz as tasks dele). Plano aprovado cria as tasks (depois do seu "sim"); cada tarefa move para "In Progress" ao começar e para "Done" ao terminar, com a descrição do card. Só o PBI do perfil e as tasks filhas são tocados; itens em `protegidos` nunca.
 
-**O que acontece no fluxo:**
+## Para o time inteiro
 
-| Momento | No Boards |
-| --- | --- |
-| `/fluxo:plano` aprovado | mostra a lista de PBI e tasks e só cria depois do "sim" |
-| Início de cada tarefa | move a task para "In Progress" |
-| Fim de cada tarefa | publica a descrição do card (implementação, testes, validação) e marca Done |
-| `/fluxo:status` | compara o Boards com o `tarefas.json` e aponta divergências |
+Declare no `.claude/settings.json` versionado do projeto, e quem abrir o projeto recebe os plugins:
 
-**Pedidos avulsos:** "cria os cards no Boards", "publica o card da T3", "move a task 2010 para In Progress".
-
-**Limites:** só o PBI do perfil e as tasks filhas; itens em `protegidos` não são tocados; sem `rastreador` (ou `tipo: local`) nada vai para o Azure.
-
-## O perfil do projeto
-
-Tudo o que é específico de um projeto fica em `.claude/projeto.json` (schema: [`plugins/fluxo/schema/projeto.schema.json`](plugins/fluxo/schema/projeto.schema.json)); as skills não têm nada fixo. `/fluxo:iniciar` detecta a stack e cria o perfil. Exemplo real: [`exemplos/ponte/projeto.json`](exemplos/ponte/projeto.json).
-
-| Seção | Para quê | Quem usa |
-| --- | --- | --- |
-| `stacks`, `convencoes` | Quais skills de stack e quais arquivos de convenção valem | task, técnica, revisor |
-| `docs` | Onde ficam as especificações e `tarefas.json` | todas as skills, hook de contexto |
-| `rastreador` | Local ou Azure Boards (org, item raiz, protegidos, estados) | plano, task, status, boards |
-| `comandos` | build, teste, lint, vulnerabilidades | task, pr, pipeline |
-| `servico`, `validacao` | Subir a aplicação, token, URL, dados de teste, casos obrigatórios, máscaras | validador, scripts |
-| `git` | Branch base, formato do commit, coautor, push humano | task, pr, guard |
-| `protecao` | Textos/diretórios proibidos, arquivos gerados, segredos | guard (bloqueio real) |
-| `pare_e_pergunte` | Situações do projeto em que o ciclo para | task |
-| `design` | Arquivo de tokens, design system, plataformas (web, ios, android, desktop) e referências de marca | design |
-
-## Documentos de uma demanda
-
-```
-{docs}/{slug}/
-  00-demanda.md     texto original do pedido
-  01-funcional.md   RN, RF, critérios de aceite (CA-n), fora de escopo, dúvidas
-  02-tecnica.md     componentes, contratos, dados, testes por CA, riscos, implantação
-  03-plano.md       ordem, paralelismo, definição de pronto
-  tarefas.json      fila (fonte da verdade): id, critérios, dependências, estado, wi, commit
-  cards/{id}.html   descrição final de cada tarefa
-  pr.md             descrição do PR
+```json
+{
+  "extraKnownMarketplaces": { "dev-flow": { "source": { "source": "git", "url": "<url do repositório>" } } },
+  "enabledPlugins": { "fluxo@dev-flow": true, "stack-node@dev-flow": true, "stack-postgres@dev-flow": true }
+}
 ```
 
-Como são arquivos, o contexto sobrevive a compactações e a sessões novas: o hook de contexto mostra a demanda ativa e a próxima tarefa ao abrir a sessão.
-
-## Desenvolvimento do plugin
+## Desenvolvimento deste repositório
 
 ```bash
 python -m unittest discover -s tests
+```
+
+```bash
 claude plugin validate .
 ```
 
-Conceitos (rules, skills, agentes, hooks, MCP, plugins e quando usar cada um): [`docs/conceitos.md`](docs/conceitos.md). Migração da Ponte: [`docs/migracao-projeto-piloto.md`](docs/migracao-projeto-piloto.md). Novo plugin de stack: [`docs/novo-plugin-de-stack.md`](docs/novo-plugin-de-stack.md).
+- Mudança de comportamento de script ou hook → teste em `tests/`. Dado novo que uma skill precisa → schema + `perfil.py validar` + teste.
+- Nova stack: [`docs/novo-plugin-de-stack.md`](docs/novo-plugin-de-stack.md) (o `test_marketplace.py` confere que toda stack do schema tem plugin com checklist).
+- Publicar: subir `version` no `plugin.json` alterado e no `marketplace.json`.
+- Conceitos (rules, skills, agentes, hooks, MCP, plugins e quando usar cada um): [`docs/conceitos.md`](docs/conceitos.md). Migração do projeto piloto: [`docs/migracao-projeto-piloto.md`](docs/migracao-projeto-piloto.md).

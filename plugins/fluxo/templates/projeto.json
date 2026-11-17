@@ -40,6 +40,14 @@
       "400 de validação"
     ]
   },
+  "ci": {
+    "provedor": "nenhum",
+    "ambientes": [
+      "dev",
+      "hml",
+      "prd"
+    ]
+  },
   "git": {
     "branch_base": "main",
     "commit_por_task": true,

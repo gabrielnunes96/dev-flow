@@ -1,16 +1,18 @@
 {
   "name": "dev-flow",
-  "owner": { "name": "Gabriel Nunes Campos" },
+  "owner": {
+    "name": "Gabriel Nunes Campos"
+  },
   "metadata": {
-    "description": "Fluxo de desenvolvimento automatizado do time: da demanda à especificação funcional e técnica, plano, implementação task a task, revisão, validação, PR e CI/CD.",
-    "version": "0.1.2"
+    "description": "Fluxo de desenvolvimento automatizado do time: da demanda à especificação funcional e técnica, plano, implementação task a task com agentes especialistas, revisão, segurança, validação, PR e CI/CD — com stacks de linguagem, banco e infraestrutura.",
+    "version": "0.2.0"
   },
   "plugins": [
     {
       "name": "fluxo",
       "source": "./plugins/fluxo",
-      "description": "Núcleo do processo: demanda → funcional → técnica → plano → tasks → PR, com portões humanos, guard de segurança e validação local.",
-      "version": "0.1.2",
+      "description": "Núcleo do processo: demanda → funcional → técnica → plano → tasks → PR, com agentes especialistas (arquiteto, segurança, testador, depurador), método de raciocínio, portões humanos, guard e validação local.",
+      "version": "0.2.0",
       "category": "development"
     },
     {
@@ -23,7 +25,21 @@
     {
       "name": "azure-pipelines",
       "source": "./plugins/azure-pipelines",
-      "description": "Gera e ajusta pipelines YAML do Azure DevOps (build, testes, publicação, deploy com aprovação) e diagnostica execuções.",
+      "description": "Gera e ajusta pipelines YAML do Azure DevOps (dotnet, node/front, python, java, go, sql, Docker, Terraform, deploy com aprovação) e diagnostica execuções.",
+      "version": "0.2.0",
+      "category": "development"
+    },
+    {
+      "name": "github-actions",
+      "source": "./plugins/github-actions",
+      "description": "Gera e ajusta workflows do GitHub Actions (CI, imagem com varredura, deploy por ambiente com OIDC e aprovação) e diagnostica execuções com o gh CLI.",
+      "version": "0.1.0",
+      "category": "development"
+    },
+    {
+      "name": "gitlab-ci",
+      "source": "./plugins/gitlab-ci",
+      "description": "Gera e ajusta o .gitlab-ci.yml (verificação, testes, segurança, imagem, deploy manual em produção) e diagnostica pipelines com o glab CLI.",
       "version": "0.1.0",
       "category": "development"
     },
@@ -35,9 +51,30 @@
       "category": "development"
     },
     {
-      "name": "stack-sql",
-      "source": "./plugins/stack-sql",
-      "description": "Convenções de scripts SQL Server para o fluxo: idempotência, rollback pareado, transação, lote e validação em base de desenvolvimento.",
+      "name": "stack-node",
+      "source": "./plugins/stack-node",
+      "description": "Convenções de back-end Node.js/TypeScript para o fluxo: Express/Fastify/NestJS, validação por schema, ORMs, async, supertest e npm audit.",
+      "version": "0.1.0",
+      "category": "development"
+    },
+    {
+      "name": "stack-python",
+      "source": "./plugins/stack-python",
+      "description": "Convenções de Python para o fluxo: FastAPI/Django/Flask, tipagem, pytest, ruff, async, SQLAlchemy/Alembic e pip-audit.",
+      "version": "0.1.0",
+      "category": "development"
+    },
+    {
+      "name": "stack-java",
+      "source": "./plugins/stack-java",
+      "description": "Convenções de Java/Kotlin para o fluxo: Spring Boot, JPA sem N+1, Bean Validation, JUnit 5, MockMvc, Testcontainers e Flyway.",
+      "version": "0.1.0",
+      "category": "development"
+    },
+    {
+      "name": "stack-go",
+      "source": "./plugins/stack-go",
+      "description": "Convenções de Go para o fluxo: erros com wrap, context, goroutines sem vazamento, testes de tabela, race detector e govulncheck.",
       "version": "0.1.0",
       "category": "development"
     },
@@ -45,6 +82,62 @@
       "name": "stack-front",
       "source": "./plugins/stack-front",
       "description": "Convenções de front-end para o fluxo: lint, testes, build e verificação visual no navegador (desktop e mobile).",
+      "version": "0.1.0",
+      "category": "development"
+    },
+    {
+      "name": "stack-sql",
+      "source": "./plugins/stack-sql",
+      "description": "Convenções de scripts SQL Server para o fluxo: idempotência, rollback pareado, transação, lote e validação em base de desenvolvimento.",
+      "version": "0.1.0",
+      "category": "development"
+    },
+    {
+      "name": "stack-postgres",
+      "source": "./plugins/stack-postgres",
+      "description": "Convenções de PostgreSQL para o fluxo: migrations com rollback, DDL sem travar (CONCURRENTLY, NOT VALID), tipos, índices por EXPLAIN e lotes.",
+      "version": "0.1.0",
+      "category": "development"
+    },
+    {
+      "name": "stack-mysql",
+      "source": "./plugins/stack-mysql",
+      "description": "Convenções de MySQL/MariaDB para o fluxo: migrations, DDL online, utf8mb4, InnoDB e deadlocks, índices por EXPLAIN e lotes.",
+      "version": "0.1.0",
+      "category": "development"
+    },
+    {
+      "name": "stack-mongodb",
+      "source": "./plugins/stack-mongodb",
+      "description": "Convenções de MongoDB para o fluxo: modelagem por acesso, $jsonSchema, índices ESR, operadores atômicos, transações e injeção de operador.",
+      "version": "0.1.0",
+      "category": "development"
+    },
+    {
+      "name": "stack-redis",
+      "source": "./plugins/stack-redis",
+      "description": "Convenções de Redis para o fluxo: cache-aside com TTL, invalidação, atomicidade, locks, rate limit, streams e comandos proibidos.",
+      "version": "0.1.0",
+      "category": "development"
+    },
+    {
+      "name": "stack-docker",
+      "source": "./plugins/stack-docker",
+      "description": "Convenções de Docker para o fluxo: multi-stage, base fixada, não root, .dockerignore, healthcheck, compose de desenvolvimento e Trivy; modelos por stack.",
+      "version": "0.1.0",
+      "category": "development"
+    },
+    {
+      "name": "stack-kubernetes",
+      "source": "./plugins/stack-kubernetes",
+      "description": "Convenções de Kubernetes/Helm/Kustomize para o fluxo: recursos, probes, securityContext, rollout sem indisponibilidade, PDB/HPA, segredos e kubeconform.",
+      "version": "0.1.0",
+      "category": "development"
+    },
+    {
+      "name": "stack-terraform",
+      "source": "./plugins/stack-terraform",
+      "description": "Convenções de Terraform/OpenTofu para o fluxo: estado remoto, versões fixadas, plan revisado, prevent_destroy, moved/import, menor privilégio e checkov.",
       "version": "0.1.0",
       "category": "development"
     },
