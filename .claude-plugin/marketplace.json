@@ -11,7 +11,7 @@
     {
       "name": "fluxo",
       "source": "./plugins/fluxo",
-      "description": "Núcleo do processo: demanda → funcional → técnica → plano → tasks → PR, com agentes especialistas (arquiteto, segurança, testador, depurador), método de raciocínio, portões humanos, guard e validação local.",
+      "description": "Núcleo do processo: demanda → funcional → técnica → plano → tasks → PR, com agentes especialistas (arquiteto, segurança, testador, depurador), método de raciocínio, pontos de aprovação humana, guard e validação local.",
       "version": "0.2.0",
       "category": "development"
     },

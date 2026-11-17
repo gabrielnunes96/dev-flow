@@ -45,4 +45,4 @@ Ordem de deploy entre componentes, feature flag, migração de dados, como desfa
 ## 11. CI/CD
 Pipelines afetadas ou novas, ambientes, aprovações.
 
-> Portão: o plano só começa com esta especificação aprovada (registrada no topo).
+> Aprovação: o plano só começa com esta especificação aprovada (registrada no topo).

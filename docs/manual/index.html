@@ -118,7 +118,7 @@ section.doc:last-of-type { border-bottom: 0; }
 .hero-meta { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-top: 20px; font-size: .9rem; color: var(--muted); }
 .hero-meta b { color: var(--fg); font-family: var(--font-display); font-size: 1.25rem; display: block; line-height: 1.1; font-variant-numeric: tabular-nums; }
 
-/* Fluxo com portões */
+/* Fluxo com pontos de aprovação */
 .flow { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0; margin: 22px 0 8px; }
 .stage {
   flex: 1 1 140px; min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
@@ -303,20 +303,20 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
 
       <section class="doc hero" id="inicio" data-titulo="Visão geral">
         <span class="eyebrow">Manual do dev-flow</span>
-        <h1>Da demanda em texto ao <em>PR com pipeline verde</em>, com você nos portões.</h1>
+        <h1>Da demanda em texto ao <em>PR com pipeline verde</em>, com você aprovando cada etapa.</h1>
         <p class="lead">O dev-flow é um conjunto de plugins do Claude Code que transforma o jeito de trabalhar do time em processo repetível: especificar, desenhar, planejar, implementar tarefa a tarefa com testes, revisar, validar no ambiente e abrir o PR. Você aprova as decisões; o resto segue sozinho.</p>
         <div class="flow" role="list" aria-label="Etapas do fluxo">
           <div class="stage" role="listitem"><span class="cmd">/fluxo:demanda</span><b>Funcional</b><small>Regras, critérios de aceite e dúvidas</small></div>
-          <div class="link" aria-label="portão de aprovação"><span class="gate"></span></div>
+          <div class="link" aria-label="ponto de aprovação"><span class="gate"></span></div>
           <div class="stage" role="listitem"><span class="cmd">/fluxo:tecnica</span><b>Técnica</b><small>Desenho no código real, arquitetura e ameaças</small></div>
-          <div class="link" aria-label="portão de aprovação"><span class="gate"></span></div>
+          <div class="link" aria-label="ponto de aprovação"><span class="gate"></span></div>
           <div class="stage" role="listitem"><span class="cmd">/fluxo:plano</span><b>Plano</b><small>Tarefas pequenas, verificáveis e em ordem</small></div>
-          <div class="link" aria-label="portão de aprovação"><span class="gate"></span></div>
+          <div class="link" aria-label="ponto de aprovação"><span class="gate"></span></div>
           <div class="stage" role="listitem"><span class="cmd">/fluxo:task todas</span><b>Tarefas</b><small>Implementa, testa, revisa, valida, commita</small></div>
           <div class="link" aria-hidden="true"><span class="arrow"></span></div>
           <div class="stage" role="listitem"><span class="cmd">/fluxo:pr</span><b>PR e CI</b><small>Descrição, pipeline, deploy com aprovação</small></div>
         </div>
-        <div class="legend"><span><i class="gate"></i> portão: só avança com a sua aprovação</span><span><code>/fluxo:entregar</code> percorre tudo e para só nos portões</span></div>
+        <div class="legend"><span><i class="gate"></i> ponto de aprovação: só avança com o seu “ok”</span><span><code>/fluxo:entregar</code> percorre tudo e para só nas aprovações</span></div>
         <div class="hero-meta">
           <div><b>21</b>plugins</div>
           <div><b>8</b>agentes especialistas</div>
@@ -419,7 +419,7 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
             <tr><td>Tarefas</td><td><code>/fluxo:task todas</code></td><td>Código, testes, <code>cards/{id}.html</code>, um commit por tarefa</td><td><code>testador</code>, <code>revisor</code>, <code>seguranca</code>, <code>validador</code>, <code>depurador</code></td><td>Autoriza cada commit</td></tr>
             <tr><td>PR</td><td><code>/fluxo:pr</code></td><td><code>pr.md</code> e o PR aberto depois do seu push</td><td>Skill do CI para acompanhar a pipeline</td><td>Faz o push e o merge</td></tr>
           </tbody></table></div>
-        <div class="callout gate-c"><span class="ico">◆</span><div><p><b>Portões são seus.</b> Nada é implementado antes de funcional, técnica e plano aprovados. A aprovação fica registrada no topo de cada documento (“aprovada em dd/mm/aaaa”). Entre portões, o fluxo segue sem pedir confirmação.</p></div></div>
+        <div class="callout gate-c"><span class="ico">◆</span><div><p><b>As aprovações são suas.</b> Nada é implementado antes de funcional, técnica e plano aprovados. A aprovação fica registrada no topo de cada documento (“aprovada em dd/mm/aaaa”). Entre uma aprovação e outra, o fluxo segue sem pedir confirmação.</p></div></div>
         <h3>Como escrever uma boa demanda</h3>
         <p>Explique o problema e para quem, não a solução. Diga o que é sucesso, o que fica de fora e qualquer restrição de prazo ou volume. Exemplo:</p>
         <div class="ask"><q>Os analistas precisam exportar os chargebacks do mês em CSV para conciliar com o banco. Hoje copiam da tela. Precisa respeitar o filtro de loja e não pode passar de 50 mil linhas por arquivo.</q><div>O fluxo pergunta o que falta (colunas, formato de data, permissão) e transforma em critérios verificáveis.</div></div>
@@ -633,7 +633,7 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
             <tr><td><b>Guard</b></td><td>Hook que bloqueia ações proibidas pelo perfil antes de acontecerem.</td></tr>
             <tr><td><b>Hook</b></td><td>Código executado pelo Claude Code em eventos (início de sessão, antes de uma ferramenta). É garantia, não sugestão.</td></tr>
             <tr><td><b>Perfil</b></td><td><code>.claude/projeto.json</code>: o contrato entre o processo genérico e o projeto.</td></tr>
-            <tr><td><b>Portão</b></td><td>Ponto em que o fluxo só avança com a sua aprovação: funcional, técnica e plano.</td></tr>
+            <tr><td><b>Ponto de aprovação</b></td><td>Etapa em que o fluxo para e só avança com o seu “ok”: funcional, técnica e plano.</td></tr>
             <tr><td><b>Skill</b></td><td>Procedimento carregado sob demanda quando o pedido combina com a descrição dela.</td></tr>
             <tr><td><b>Slug</b></td><td>Nome curto em kebab-case da demanda; nome da pasta dos documentos.</td></tr>
             <tr><td><b>STRIDE</b></td><td>Roteiro de ameaças: falsificação, adulteração, repúdio, vazamento, negação de serviço, elevação de privilégio.</td></tr>

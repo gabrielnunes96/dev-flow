@@ -24,7 +24,7 @@ Regras de corte (as mesmas que funcionaram na Ponte):
 - `python -I ../../scripts/plano.py validar <arq>` até sair "tarefas ok".
 - `03-plano.md` pelo modelo, com a tabela de `plano.py tabela <arq>`, ordem/paralelismo e riscos.
 
-## 4. Portão
+## 4. Aprovação
 - Mostrar ao usuário a tabela e a ordem. Aprovação → "aprovado em dd/mm/aaaa" no topo.
 
 ## 5. Rastreador (só se `rastreador.tipo = azure-boards`)

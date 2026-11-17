@@ -163,7 +163,7 @@ s.append(bloco_codigo(
     "  → azure-pipelines → CI verde; deploy em produção com aprovação no environment\n\n"
     "/fluxo:entregar faz tudo isso em sequência, parando só nos (*)."))
 s.append(Spacer(1, 6))
-s.append(tabela(["Etapa", "Entrada", "Saída", "Portão"], [
+s.append(tabela(["Etapa", "Entrada", "Saída", "Aprovação"], [
     [c("/fluxo:demanda"), "Seu texto (pedido, e-mail, print, conversa)", "01-funcional.md: regras de negócio, requisitos, critérios de aceite (CA-n), fora de escopo, dúvidas", "Você aprova"],
     [c("/fluxo:tecnica"), "Funcional aprovada + código dos repositórios afetados (agente analista)", "02-tecnica.md: componentes, contratos, dados, integrações, segurança, testes por CA, riscos, implantação/CI", "Você aprova"],
     [c("/fluxo:plano"), "Técnica aprovada", "tarefas.json (fila) + 03-plano.md: tarefas pequenas, dependências, critérios e validação de cada uma", "Você aprova"],

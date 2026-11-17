@@ -1,6 +1,6 @@
 # dev-flow
 
-Marketplace de plugins do Claude Code com o fluxo de desenvolvimento do time: **da demanda explicada em texto até o PR e a pipeline**, com especificação funcional e técnica, plano, implementação tarefa a tarefa, revisão, segurança, validação no ambiente e CI/CD — com portões de aprovação humana e proteções que não dependem da memória do modelo.
+Marketplace de plugins do Claude Code com o fluxo de desenvolvimento do time: **da demanda explicada em texto até o PR e a pipeline**, com especificação funcional e técnica, plano, implementação tarefa a tarefa, revisão, segurança, validação no ambiente e CI/CD — com pontos de aprovação humana e proteções que não dependem da memória do modelo.
 
 > 📘 **Manual completo, navegável e com busca:** abra [`docs/manual/index.html`](docs/manual/index.html) no navegador.
 

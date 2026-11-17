@@ -22,7 +22,7 @@ Objetivo: sair com um `01-funcional.md` que outra pessoa leria e entenderia **o 
 - Fora de escopo explícito. Impacto em consumidores existentes.
 - Dúvidas que você não conseguiu resolver vão para a seção 10 com para quem perguntar.
 
-## 4. Portão
+## 4. Aprovação
 - Mostrar ao usuário: objetivo, critérios de aceite e dúvidas em aberto (não o documento inteiro).
 - Só marcar "aprovada em dd/mm/aaaa" no topo quando o usuário aprovar. Ajustes → nova versão (v2) no mesmo arquivo.
 - Aprovada → sugerir `/fluxo:tecnica {slug}`.

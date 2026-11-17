@@ -48,4 +48,4 @@ Quem chama/usa o que muda e o que precisa ser alinhado com eles.
 | --- | --- | --- | --- |
 | D-1 | | | |
 
-> Portão: a especificação técnica só começa com esta seção vazia (ou com as dúvidas restantes marcadas como não bloqueantes) e com a aprovação registrada no topo.
+> Aprovação: a especificação técnica só começa com esta seção vazia (ou com as dúvidas restantes marcadas como não bloqueantes) e com a aprovação registrada no topo.

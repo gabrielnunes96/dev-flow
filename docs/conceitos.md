@@ -22,7 +22,7 @@ MCP dá ao modelo **acesso** a sistemas. O fluxo de desenvolvimento é **conheci
 
 1. **Processo genérico, projeto no perfil.** A `proxima-task` original tinha "PBI 1001", "porta 5009" e "V6/Extended" no texto; a `fluxo:task` lê tudo do perfil. Um projeto novo não exige mexer no plugin.
 2. **Especificações e fila como arquivo.** `tarefas.json` é a fonte da verdade; o Boards é um espelho opcional. A fila sobrevive a compactação, troca de sessão e falta de conexão.
-3. **Portões humanos explícitos.** Funcional, técnica e plano só avançam com aprovação registrada no topo do documento. Entre portões, o fluxo segue sem pedir confirmação. Push, merge e deploy em produção são do usuário.
+3. **Pontos de aprovação explícitos.** Funcional, técnica e plano só avançam com aprovação registrada no topo do documento. Entre uma aprovação e outra, o fluxo segue sem pedir confirmação. Push, merge e deploy em produção são do usuário.
 4. **Definição de pronto verificável.** Critério de aceite → teste → validação no ambiente → commit → registro. O revisor confere critério a critério.
 5. **Proteção por hook, dirigida pelo perfil.** Diretório excluído, código gerado, segredo, push: o guard bloqueia de verdade, e cada projeto declara os seus.
 6. **Determinístico onde dá.** `plano.py` (fila, dependências, ciclos), `http_lote.py` (lote com status esperado e tabela do card), `servico.py` (subir/derrubar com healthcheck), `token_login.py` (login com certificado fixado). Testados em `tests/`.

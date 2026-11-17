@@ -28,6 +28,6 @@ argument-hint: "[slug da demanda]"
 - **Resiliência**: para cada integração, timeout, retry (só com idempotência), e o que acontece se ela estiver fora.
 - **Implantação e CI/CD**: ordem entre componentes, migrations com rollback, feature flag quando liberar for diferente de implantar, pipelines afetadas no provedor de `ci.provedor`, e a infraestrutura (`infra`) que muda — container, manifesto, IaC — com a skill da stack correspondente.
 
-## 4. Portão
+## 4. Aprovação
 - Mostrar ao usuário: componentes afetados, contratos que mudam, decisões tomadas e as que precisam dele.
 - Aprovação → "aprovada em dd/mm/aaaa" no topo e sugerir `/fluxo:plano {slug}`.
