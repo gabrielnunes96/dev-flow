@@ -318,7 +318,7 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
         </div>
         <div class="legend"><span><i class="gate"></i> ponto de aprovação: só avança com o seu “ok”</span><span><code>/fluxo:entregar</code> percorre tudo e para só nas aprovações</span></div>
         <div class="hero-meta">
-          <div><b>21</b>plugins</div>
+          <div><b>22</b>plugins</div>
           <div><b>8</b>agentes especialistas</div>
           <div><b>14</b>stacks: linguagens, bancos e infra</div>
           <div><b>3</b>provedores de CI/CD</div>
@@ -363,6 +363,7 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
                 <label class="opt"><input type="checkbox" id="optBoards"> Azure Boards</label>
                 <label class="opt"><input type="checkbox" id="optDesign"> Design (UX/UI)</label>
                 <label class="opt"><input type="checkbox" id="optVideo"> Vídeo-resumo</label>
+                <label class="opt"><input type="checkbox" id="optLogs"> Análise de logs</label>
               </div>
             </fieldset>
           </form>
@@ -670,7 +671,8 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
     { n: "stack-kubernetes", v: "0.1.0", c: "infra", k: "kubernetes", r: "Kubernetes", d: "Probes, securityContext, rollout sem indisponibilidade, PDB, HPA, segredos externos.", s: "stack-kubernetes:kubernetes" },
     { n: "stack-terraform", v: "0.1.0", c: "infra", k: "terraform", r: "Terraform", d: "Estado remoto, plan revisado, prevent_destroy, moved/import, menor privilégio.", s: "stack-terraform:terraform" },
     { n: "design", v: "0.1.0", c: "extra", d: "Direção visual, tema claro/escuro com tokens, telas, animações, acessibilidade.", s: "/design:design" },
-    { n: "video", v: "0.1.0", c: "extra", d: "Vídeo-resumo narrado de uma entrega a partir de um roteiro JSON.", s: "/video:video" }
+    { n: "video", v: "0.1.0", c: "extra", d: "Vídeo-resumo narrado de uma entrega a partir de um roteiro JSON.", s: "/video:video" },
+    { n: "logs", v: "0.1.8", c: "extra", d: "Analisa arquivos, zips e tars de log numa interface local: erros, avisos, retornos HTTP e painel exportável.", s: "/logs:logs" }
   ];
   var CATS = [["todos", "Todos"], ["nucleo", "Núcleo"], ["ci", "Rastreador e CI/CD"], ["linguagem", "Linguagens"], ["banco", "Bancos"], ["infra", "Infraestrutura"], ["extra", "Extras"]];
   var AGENTES = [
@@ -729,6 +731,7 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
     if (document.getElementById("optBoards").checked) plugins.push("azure-boards");
     if (document.getElementById("optDesign").checked) plugins.push("design");
     if (document.getElementById("optVideo").checked) plugins.push("video");
+    if (document.getElementById("optLogs").checked) plugins.push("logs");
     document.getElementById("outInstalar").textContent = ["claude plugin marketplace add <caminho-ou-url-do-dev-flow>"]
       .concat(plugins.map(function (p) { return "claude plugin install " + p + "@dev-flow"; })).join("\n");
     var perfil = { stacks: stacks.length ? stacks : ["outra"], ci: { provedor: ci } };

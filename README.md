@@ -97,6 +97,7 @@ claude plugin install github-actions@dev-flow
 | --- | --- |
 | **design** | Designer de UX/UI: direção visual, tema claro/escuro com tokens, telas, animações, acessibilidade. |
 | **video** | Vídeo-resumo narrado de uma entrega a partir de um roteiro JSON. |
+| **logs** | Skill `logs` e agente `analista-de-logs`: interface no navegador (`gui.py`) ou script. Um arquivo, vários, ou vários zips e tars. Separa erro e aviso, conta os retornos HTTP e mostra o painel com todos os arquivos do achado. |
 
 **Qual instalar?** Sempre `fluxo`. Depois, um plugin por item de `stacks` do perfil (stack `X` → `stack-X`) e o do seu `ci.provedor`. O ciclo da tarefa carrega a skill da stack sozinho.
 
