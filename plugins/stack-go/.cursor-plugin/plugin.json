@@ -1,0 +1,12 @@
+{
+  "name": "stack-go",
+  "description": "Convenções de Go para o fluxo: erros com wrap, context, goroutines sem vazamento, testes de tabela, race detector e govulncheck.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Gabriel Nunes Campos"
+  },
+  "keywords": [
+    "go",
+    "golang"
+  ]
+}

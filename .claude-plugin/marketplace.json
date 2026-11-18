@@ -5,14 +5,14 @@
   },
   "metadata": {
     "description": "Fluxo de desenvolvimento automatizado do time: da demanda à especificação funcional e técnica, plano, implementação task a task com agentes especialistas, revisão, segurança, validação, PR e CI/CD — com stacks de linguagem, banco e infraestrutura.",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   "plugins": [
     {
       "name": "fluxo",
       "source": "./plugins/fluxo",
       "description": "Núcleo do processo: demanda → funcional → técnica → plano → tasks → PR, com agentes especialistas (arquiteto, segurança, testador, depurador), método de raciocínio, pontos de aprovação humana, guard e validação local.",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "category": "development"
     },
     {

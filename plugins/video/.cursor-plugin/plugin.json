@@ -1,0 +1,14 @@
+{
+  "name": "video",
+  "description": "Vídeo-resumo animado (1080p) de uma entrega a partir de um roteiro JSON: cenas sincronizadas com a narração, transições, trilha e efeitos.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Gabriel Nunes Campos"
+  },
+  "keywords": [
+    "video",
+    "relatorio",
+    "apresentacao",
+    "narracao"
+  ]
+}

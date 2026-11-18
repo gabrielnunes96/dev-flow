@@ -1,0 +1,13 @@
+{
+  "name": "gitlab-ci",
+  "description": "Gera e ajusta o .gitlab-ci.yml (verificação, testes, segurança, imagem, deploy manual em produção) e diagnostica pipelines com o glab CLI.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Gabriel Nunes Campos"
+  },
+  "keywords": [
+    "gitlab",
+    "ci",
+    "cd"
+  ]
+}

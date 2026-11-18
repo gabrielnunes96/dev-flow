@@ -1,0 +1,15 @@
+{
+  "name": "stack-kubernetes",
+  "description": "Convenções de Kubernetes/Helm/Kustomize para o fluxo: recursos, probes, securityContext, rollout sem indisponibilidade, PDB/HPA, segredos e kubeconform.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Gabriel Nunes Campos"
+  },
+  "keywords": [
+    "kubernetes",
+    "k8s",
+    "helm",
+    "kustomize",
+    "infra"
+  ]
+}

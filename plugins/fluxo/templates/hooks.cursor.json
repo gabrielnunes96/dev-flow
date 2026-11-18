@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "matcher": "Shell|Read|Grep|Write|Task",
+        "command": "python -I \"${DEV_FLOW_FLUXO}/hooks/guard.py\"",
+        "timeout": 30
+      }
+    ],
+    "sessionStart": [
+      {
+        "command": "python -I \"${DEV_FLOW_FLUXO}/hooks/contexto.py\"",
+        "timeout": 15
+      }
+    ]
+  }
+}

@@ -1,0 +1,123 @@
+{
+  "name": "dev-flow",
+  "owner": {
+    "name": "Gabriel Nunes Campos"
+  },
+  "metadata": {
+    "description": "Fluxo de desenvolvimento automatizado do time: da demanda à especificação funcional e técnica, plano, implementação task a task com agentes especialistas, revisão, segurança, validação, PR e CI/CD — com stacks de linguagem, banco e infraestrutura.",
+    "version": "0.3.0",
+    "pluginRoot": "plugins"
+  },
+  "plugins": [
+    {
+      "name": "fluxo",
+      "source": "fluxo",
+      "description": "Núcleo do processo: demanda → funcional → técnica → plano → tasks → PR, com agentes especialistas (arquiteto, segurança, testador, depurador), método de raciocínio, pontos de aprovação humana, guard e validação local."
+    },
+    {
+      "name": "azure-boards",
+      "source": "azure-boards",
+      "description": "Sincroniza o plano da demanda com o Azure Boards (PBI e tasks, estados, descrição do card) via MCP do Azure DevOps."
+    },
+    {
+      "name": "azure-pipelines",
+      "source": "azure-pipelines",
+      "description": "Gera e ajusta pipelines YAML do Azure DevOps (dotnet, node/front, python, java, go, sql, Docker, Terraform, deploy com aprovação) e diagnostica execuções."
+    },
+    {
+      "name": "github-actions",
+      "source": "github-actions",
+      "description": "Gera e ajusta workflows do GitHub Actions (CI, imagem com varredura, deploy por ambiente com OIDC e aprovação) e diagnostica execuções com o gh CLI."
+    },
+    {
+      "name": "gitlab-ci",
+      "source": "gitlab-ci",
+      "description": "Gera e ajusta o .gitlab-ci.yml (verificação, testes, segurança, imagem, deploy manual em produção) e diagnostica pipelines com o glab CLI."
+    },
+    {
+      "name": "stack-dotnet",
+      "source": "stack-dotnet",
+      "description": "Convenções de .NET para o fluxo: build/teste, testes de contrato com a API em memória, pacotes vulneráveis e SDKs gerados."
+    },
+    {
+      "name": "stack-node",
+      "source": "stack-node",
+      "description": "Convenções de back-end Node.js/TypeScript para o fluxo: Express/Fastify/NestJS, validação por schema, ORMs, async, supertest e npm audit."
+    },
+    {
+      "name": "stack-python",
+      "source": "stack-python",
+      "description": "Convenções de Python para o fluxo: FastAPI/Django/Flask, tipagem, pytest, ruff, async, SQLAlchemy/Alembic e pip-audit."
+    },
+    {
+      "name": "stack-java",
+      "source": "stack-java",
+      "description": "Convenções de Java/Kotlin para o fluxo: Spring Boot, JPA sem N+1, Bean Validation, JUnit 5, MockMvc, Testcontainers e Flyway."
+    },
+    {
+      "name": "stack-go",
+      "source": "stack-go",
+      "description": "Convenções de Go para o fluxo: erros com wrap, context, goroutines sem vazamento, testes de tabela, race detector e govulncheck."
+    },
+    {
+      "name": "stack-front",
+      "source": "stack-front",
+      "description": "Convenções de front-end para o fluxo: lint, testes, build e verificação visual no navegador (desktop e mobile)."
+    },
+    {
+      "name": "stack-sql",
+      "source": "stack-sql",
+      "description": "Convenções de scripts SQL Server para o fluxo: idempotência, rollback pareado, transação, lote e validação em base de desenvolvimento."
+    },
+    {
+      "name": "stack-postgres",
+      "source": "stack-postgres",
+      "description": "Convenções de PostgreSQL para o fluxo: migrations com rollback, DDL sem travar (CONCURRENTLY, NOT VALID), tipos, índices por EXPLAIN e lotes."
+    },
+    {
+      "name": "stack-mysql",
+      "source": "stack-mysql",
+      "description": "Convenções de MySQL/MariaDB para o fluxo: migrations, DDL online, utf8mb4, InnoDB e deadlocks, índices por EXPLAIN e lotes."
+    },
+    {
+      "name": "stack-mongodb",
+      "source": "stack-mongodb",
+      "description": "Convenções de MongoDB para o fluxo: modelagem por acesso, $jsonSchema, índices ESR, operadores atômicos, transações e injeção de operador."
+    },
+    {
+      "name": "stack-redis",
+      "source": "stack-redis",
+      "description": "Convenções de Redis para o fluxo: cache-aside com TTL, invalidação, atomicidade, locks, rate limit, streams e comandos proibidos."
+    },
+    {
+      "name": "stack-docker",
+      "source": "stack-docker",
+      "description": "Convenções de Docker para o fluxo: multi-stage, base fixada, não root, .dockerignore, healthcheck, compose de desenvolvimento e Trivy; modelos por stack."
+    },
+    {
+      "name": "stack-kubernetes",
+      "source": "stack-kubernetes",
+      "description": "Convenções de Kubernetes/Helm/Kustomize para o fluxo: recursos, probes, securityContext, rollout sem indisponibilidade, PDB/HPA, segredos e kubeconform."
+    },
+    {
+      "name": "stack-terraform",
+      "source": "stack-terraform",
+      "description": "Convenções de Terraform/OpenTofu para o fluxo: estado remoto, versões fixadas, plan revisado, prevent_destroy, moved/import, menor privilégio e checkov."
+    },
+    {
+      "name": "design",
+      "source": "design",
+      "description": "Designer de UX/UI: direção visual, temas claro/escuro com tokens, telas e fluxos, animações limpas, acessibilidade e revisão visual."
+    },
+    {
+      "name": "video",
+      "source": "video",
+      "description": "Vídeo-resumo animado e narrado de uma entrega a partir de um roteiro JSON: cenas sincronizadas com a fala, transições, trilha e efeitos."
+    },
+    {
+      "name": "logs",
+      "source": "logs",
+      "description": "Analisa um conjunto de logs (arquivo, pasta, zip ou tar) numa interface local ou pelo script: erro, aviso, códigos de retorno e um painel HTML."
+    }
+  ]
+}

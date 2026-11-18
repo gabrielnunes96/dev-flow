@@ -1,0 +1,14 @@
+{
+  "name": "stack-terraform",
+  "description": "Convenções de Terraform/OpenTofu para o fluxo: estado remoto, versões fixadas, plan revisado, prevent_destroy, moved/import, menor privilégio e checkov.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Gabriel Nunes Campos"
+  },
+  "keywords": [
+    "terraform",
+    "opentofu",
+    "iac",
+    "infra"
+  ]
+}
