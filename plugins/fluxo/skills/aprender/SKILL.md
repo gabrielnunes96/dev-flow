@@ -19,5 +19,5 @@ Para cada aprendizado (do argumento ou levantado na conversa: correções do usu
    | Jeito de trabalhar que vale para qualquer projeto | skill do plugin `fluxo` |
    | Preferência pessoal do usuário | memória do Claude |
 2. **Conferir** se já existe algo que cobre: atualizar em vez de duplicar; remover o que ficou errado (ex.: um "impedimento" que não era).
-3. **Aplicar** as mudanças no projeto. Mudança em plugin (repositório `dev-flow`) → fazer no repositório do plugin, com commit próprio, e lembrar o usuário de atualizar (`claude plugin marketplace update dev-flow`).
+3. **Aplicar** as mudanças no projeto. Mudança em plugin (repositório `dev-flow`) → fazer no repositório do plugin, com commit próprio, e lembrar o usuário de atualizar (`claude plugin marketplace update dev-flow` ou refresh do Team Marketplace no Cursor; se vendor, rodar de novo `scripts/exportar_skills.py`).
 4. **Responder** com uma linha por aprendizado: o que foi registrado e onde.

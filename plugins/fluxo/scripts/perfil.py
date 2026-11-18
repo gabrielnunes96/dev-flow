@@ -197,7 +197,7 @@ def main(argv):
         print(e)
         return 1
     if not raiz:
-        print("Sem .claude/projeto.json a partir deste diretório. Rode /fluxo:iniciar.")
+        print("Sem .claude/projeto.json a partir deste diretório. Rode a skill iniciar (/fluxo:iniciar).")
         return 2
     if acao == "raiz":
         print(raiz)

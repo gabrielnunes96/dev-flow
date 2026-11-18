@@ -1,6 +1,8 @@
 # dev-flow
 
-Marketplace de plugins do Claude Code com o fluxo de desenvolvimento do time: **da demanda explicada em texto até o PR e a pipeline**, com especificação funcional e técnica, plano, implementação tarefa a tarefa, revisão, segurança, validação no ambiente e CI/CD — com pontos de aprovação humana e proteções que não dependem da memória do modelo.
+Marketplace de plugins com o fluxo de desenvolvimento do time: **da demanda explicada em texto até o PR e a pipeline**, com especificação funcional e técnica, plano, implementação tarefa a tarefa, revisão, segurança, validação no ambiente e CI/CD — com pontos de aprovação humana e proteções que não dependem da memória do modelo.
+
+Funciona no **Claude Code**, no **Cursor** (Team Marketplace / Third-Party Imports) e em qualquer agente que carregue **Agent Skills** (modo vendor). Fonte canônica dos manifests: `.claude-plugin/`; o espelho Cursor é gerado por `python -I scripts/sincronizar_hosts.py`.
 
 > 📘 **Manual completo, navegável e com busca:** abra [`docs/manual/index.html`](docs/manual/index.html) no navegador.
 
@@ -16,6 +18,8 @@ você explica a demanda
 ```
 
 ## Comece em 3 minutos
+
+### Claude Code
 
 **1. Adicione o marketplace e instale o núcleo** (uma vez por máquina):
 
@@ -45,11 +49,46 @@ claude plugin install stack-docker@dev-flow
 claude plugin install github-actions@dev-flow
 ```
 
-**3. No projeto**, abra o Claude Code e rode `/fluxo:iniciar`. Ele detecta stacks, comandos, CI e infraestrutura e cria `.claude/projeto.json`.
+**3. No projeto**, rode `/fluxo:iniciar` (ou “configurar o fluxo aqui”). Cria `.claude/projeto.json`.
 
-**4. Traga uma demanda:** `/fluxo:entregar` e explique o que precisa em texto livre. Ou um bug: `/fluxo:depurar <erro>`.
+**4. Demanda:** `/fluxo:entregar` ou “levar esta demanda até o PR”. Bug: `/fluxo:depurar <erro>`.
 
-> Atualizar depois de uma mudança no marketplace: `claude plugin marketplace update dev-flow`.
+> Atualizar: `claude plugin marketplace update dev-flow`.
+
+### Cursor
+
+**Opção A — Team Marketplace** (Teams/Enterprise): em Dashboard → Plugins & MCPs → Import from Repo use `https://github.com/gabrielnunes96/dev-flow`. O manifesto é `.cursor-plugin/marketplace.json`. Instale `fluxo` e as stacks no Customize.
+
+**Opção B — Third-Party Imports:** instale os plugins pelo Claude Code (acima) e deixe ligado *Settings → Agents → Third-Party Imports → Include Third-Party Plugins, Skills, and Other Configs*. O Cursor carrega skills/hooks do Claude.
+
+**Opção C — Vendor no projeto** (Cloud Agents / Azure DevOps / qualquer remoto):
+
+```bash
+# na pasta do marketplace dev-flow — um comando por produto
+python -I scripts/instalar_em_projeto.py --projeto /caminho/do/produto --azure --plugins fluxo,stack-dotnet
+```
+
+`--azure` inclui `azure-boards` e `azure-pipelines`. Se o produto já tem `.claude/projeto.json`, pode omitir `--plugins` (lê stacks/CI/rastreador).
+
+Exemplo doublecheck:
+
+```bash
+python -I scripts/instalar_em_projeto.py \
+  --projeto /caminho/doublecheck-v2-core \
+  --azure \
+  --plugins fluxo,stack-dotnet
+# no produto: git add .agents/skills .cursor/hooks.json && commit && push
+# Cursor Agents → New Agent nesse repo → "iniciar o fluxo"
+```
+
+Baixo nível (só export): `scripts/exportar_skills.py`. Perfil: `.claude/projeto.json`. Hosts/hooks: `plugins/fluxo/referencias/hosts.md`.
+
+Depois de mudar manifests Claude, regenere o espelho Cursor:
+
+```bash
+python -I scripts/sincronizar_hosts.py
+python -I scripts/sincronizar_hosts.py --check
+```
 
 ## Catálogo de plugins
 

@@ -248,11 +248,12 @@ s.append(PageBreak())
 s.append(P("5. Instalação e primeiro uso", h1))
 s.append(P("Pré-requisitos", h2))
 s += bullets([
-    "Claude Code (terminal, app desktop ou extensão de IDE) e Python 3 no PATH (os scripts usam só a biblioteca padrão).",
+    "Python 3 no PATH (os scripts usam só a biblioteca padrão, exceto o plugin video).",
+    "Claude Code e/ou Cursor (ou outro host com Agent Skills).",
     "Acesso ao repositório do dev-flow.",
     "Para Boards: MCP do Azure DevOps configurado na máquina (seção 6).",
 ])
-s.append(P("Instalar (uma vez por máquina)", h2))
+s.append(P("Instalar no Claude Code (uma vez por máquina)", h2))
 s.append(bloco_codigo(
     "claude plugin marketplace add <caminho ou URL do repositório dev-flow>\n"
     "claude plugin install fluxo@dev-flow\n"
@@ -264,7 +265,14 @@ s.append(bloco_codigo(
     "claude plugin install video@dev-flow            # vídeo-resumo; o uso está na skill\n"
     "claude plugin install azure-boards@dev-flow     # se for usar o Boards\n"
     "claude plugin install azure-pipelines@dev-flow  # se for gerar pipelines"))
-s.append(P(f"Para conferir: {c('claude plugin list')}. Os plugins valem a partir da próxima sessão do Claude Code.", nota))
+s.append(P(f"Para conferir: {c('claude plugin list')}. Os plugins valem a partir da próxima sessão.", nota))
+s.append(P("Instalar no Cursor", h2))
+s += bullets([
+    "Team Marketplace: importar o repositório (manifesto .cursor-plugin/marketplace.json) e instalar fluxo + stacks no Customize.",
+    "Ou Third-Party Imports ligado + plugins instalados via Claude Code.",
+    f"Ou vendor: {c('python -I scripts/exportar_skills.py --destino <projeto>/.agents/dev-flow --plugins fluxo,stack-python')}.",
+])
+s.append(P(f"Depois de alterar manifests Claude, rode {c('python -I scripts/sincronizar_hosts.py')} para regenerar o espelho Cursor.", nota))
 s.append(P("Preparar um projeto (uma vez por projeto)", h2))
 s += bullets([
     "Abra o Claude Code na pasta do projeto (pode estar vazia).",

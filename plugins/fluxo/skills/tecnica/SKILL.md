@@ -11,11 +11,11 @@ argument-hint: "[slug da demanda]"
 - Perfil e convenções (`convencoes` do perfil) lidos. Para cada stack, carregar a skill da stack.
 
 ## 2. Levantar o impacto no código real
-- Delegar ao subagente `fluxo:analista` (um por repositório quando forem vários, em paralelo): requisitos e critérios da funcional + pergunta "onde e como isso entra no código existente". Ele devolve arquivos-chave com linha, padrões a seguir, contratos atuais e riscos.
+- Disparar o especialista `../../agents/analista.md` (um por repositório quando forem vários, em paralelo): requisitos e critérios da funcional + pergunta "onde e como isso entra no código existente". Ele devolve arquivos-chave com linha, padrões a seguir, contratos atuais e riscos. Como disparar em cada host: `../../referencias/hosts.md`.
 - Repositório fora da sessão → pedir o caminho ao usuário (não adivinhar).
 - Em paralelo com o analista, quando couber:
-  - **Decisão estrutural** (componente ou serviço novo, mudança de modelo de dados, integração assíncrona, cache, requisito de volume/latência/disponibilidade) → subagente `fluxo:arquiteto` com a funcional e o que se sabe do código. As decisões dele viram ADRs (modelo `../../templates/adr.md`), citadas na seção 9.
-  - **Superfície de segurança** (autenticação, autorização, dado pessoal, pagamento, upload, integração externa, infraestrutura exposta) → subagente `fluxo:seguranca` em modo ameaças. As mitigações entram na seção 6 e viram critérios de teste na seção 8.
+  - **Decisão estrutural** (componente ou serviço novo, mudança de modelo de dados, integração assíncrona, cache, requisito de volume/latência/disponibilidade) → especialista `../../agents/arquiteto.md` com a funcional e o que se sabe do código. As decisões dele viram ADRs (modelo `../../templates/adr.md`), citadas na seção 9.
+  - **Superfície de segurança** (autenticação, autorização, dado pessoal, pagamento, upload, integração externa, infraestrutura exposta) → especialista `../../agents/seguranca.md` em modo ameaças. As mitigações entram na seção 6 e viram critérios de teste na seção 8.
 - Método de raciocínio: `../../referencias/raciocinio.md` (seções 1, 2, 4 e 7).
 
 ## 3. Escrever `02-tecnica.md`
@@ -30,4 +30,4 @@ argument-hint: "[slug da demanda]"
 
 ## 4. Aprovação
 - Mostrar ao usuário: componentes afetados, contratos que mudam, decisões tomadas e as que precisam dele.
-- Aprovação → "aprovada em dd/mm/aaaa" no topo e sugerir `/fluxo:plano {slug}`.
+- Aprovação → "aprovada em dd/mm/aaaa" no topo e sugerir a skill `plano` para `{slug}` (`/fluxo:plano` ou “montar o plano”).

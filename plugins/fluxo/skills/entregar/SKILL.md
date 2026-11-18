@@ -23,4 +23,4 @@ Esta skill só orquestra: cada etapa é a skill correspondente, com as aprovaç�
 - Enquanto espera uma aprovação, nada de implementar à frente.
 - Push, merge e deploy em produção são do usuário.
 - Ao terminar cada etapa, uma linha de status: etapa, artefato, próximo passo.
-- No fim: sugerir `/fluxo:aprender` para registrar o que esta demanda ensinou.
+- No fim: sugerir a skill `aprender` para registrar o que esta demanda ensinou.

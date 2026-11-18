@@ -1,0 +1,14 @@
+{
+  "name": "azure-pipelines",
+  "description": "Gera e ajusta pipelines YAML do Azure DevOps (dotnet, node/front, python, java, go, sql, Docker, Terraform, deploy com aprovação) e diagnostica execuções.",
+  "version": "0.2.0",
+  "author": {
+    "name": "Gabriel Nunes Campos"
+  },
+  "keywords": [
+    "azure-devops",
+    "pipelines",
+    "ci",
+    "cd"
+  ]
+}

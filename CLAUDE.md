@@ -3,9 +3,12 @@
 Este repositório é o marketplace `dev-flow`: plugins do Claude Code com o fluxo de desenvolvimento do time. Ele se desenvolve pelo próprio fluxo (perfil em `.claude/projeto.json`).
 
 ## Estrutura
-- `.claude-plugin/marketplace.json` lista os plugins de `plugins/`.
-- `plugins/fluxo`: núcleo (skills, agentes, hooks, scripts, modelos, schema do perfil). Os demais são adaptadores de rastreador e CI (`azure-*`, `github-actions`, `gitlab-ci`), stacks (`stack-*`: linguagens, bancos e infraestrutura) e extras (`design`, `video`).
-- `tests/`: unittest dos scripts, hooks e da consistência do marketplace (`test_marketplace.py`: toda stack do schema tem plugin; versões batem).
+- `.claude-plugin/marketplace.json` lista os plugins de `plugins/` (**fonte canônica**).
+- `.cursor-plugin/marketplace.json` e `plugins/*/.cursor-plugin/plugin.json` são **gerados** por `python -I scripts/sincronizar_hosts.py` (não editar à mão).
+- `scripts/exportar_skills.py`: vendor de plugins/skills para um projeto (Agent Skills / Cloud Agents).
+- `scripts/instalar_em_projeto.py`: instala no produto (`.agents/skills` + hooks Cursor); `--azure` inclui Boards e Pipelines.
+- `plugins/fluxo`: núcleo (skills, agentes, hooks, scripts, modelos, schema do perfil). Os demais são adaptadores de rastreador e CI (`azure-*`, `github-actions`, `gitlab-ci`), stacks (`stack-*`: linguagens, bancos e infraestrutura) e extras (`design`, `video`, `logs`).
+- `tests/`: unittest dos scripts, hooks e da consistência do marketplace (`test_marketplace.py`, `test_portabilidade.py`).
 - `docs/manual/index.html`: manual navegável (abre direto no navegador); atualizar junto com o README ao mudar skills, agentes ou plugins.
 - `exemplos/`: perfis reais; o teste valida todos.
 
@@ -19,7 +22,9 @@ Este repositório é o marketplace `dev-flow`: plugins do Claude Code com o flux
 
 ## Comandos
 ```bash
+python -I scripts/sincronizar_hosts.py
+python -I scripts/sincronizar_hosts.py --check
 python -m unittest discover -s tests
 claude plugin validate .
 ```
-Versão: subir `version` no `plugin.json` alterado e no `marketplace.json` ao publicar mudança.
+Versão: subir `version` no `plugin.json` alterado e no `marketplace.json` ao publicar mudança; depois rodar `sincronizar_hosts.py`.

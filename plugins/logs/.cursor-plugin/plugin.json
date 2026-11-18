@@ -1,0 +1,17 @@
+{
+  "name": "logs",
+  "description": "Analisa um conjunto de logs (arquivo, pasta, zip ou tar): erro, aviso, códigos de retorno e um painel HTML.",
+  "version": "0.1.8",
+  "author": {
+    "name": "Gabriel Nunes Campos"
+  },
+  "keywords": [
+    "logs",
+    "erro",
+    "aviso",
+    "http",
+    "zip",
+    "tar",
+    "painel"
+  ]
+}

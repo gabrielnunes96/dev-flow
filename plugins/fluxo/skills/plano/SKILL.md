@@ -29,4 +29,4 @@ Regras de corte (as mesmas que funcionaram na Ponte):
 
 ## 5. Rastreador (só se `rastreador.tipo = azure-boards`)
 - Com o plano aprovado, delegar à skill `azure-boards:boards` (`criar`): item raiz (se `item_raiz` vazio) e uma task por tarefa, gravando o `wi` de volta em tarefas.json. Sem o plugin ou sem conexão → manter local e avisar.
-- Sugerir `/fluxo:task todas` (ou `/fluxo:entregar` para seguir até o PR).
+- Sugerir a skill `task` com `todas` (ou `entregar` para seguir até o PR).
