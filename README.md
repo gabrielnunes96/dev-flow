@@ -61,15 +61,27 @@ claude plugin install github-actions@dev-flow
 
 **Opção B — Third-Party Imports:** instale os plugins pelo Claude Code (acima) e deixe ligado *Settings → Agents → Third-Party Imports → Include Third-Party Plugins, Skills, and Other Configs*. O Cursor carrega skills/hooks do Claude.
 
-**Opção C — Vendor no projeto** (Cloud Agents / qualquer host com Agent Skills):
+**Opção C — Vendor no projeto** (Cloud Agents / Azure DevOps / qualquer remoto):
 
 ```bash
-python -I scripts/exportar_skills.py --destino /caminho/do/projeto/.agents/dev-flow --plugins fluxo,stack-python
-# ou skills achatadas:
-python -I scripts/exportar_skills.py --destino /caminho/do/projeto/.agents/skills --plugins fluxo,stack-python --formato agents-skills
+# na pasta do marketplace dev-flow — um comando por produto
+python -I scripts/instalar_em_projeto.py --projeto /caminho/do/produto --azure --plugins fluxo,stack-dotnet
 ```
 
-Perfil continua em `.claude/projeto.json`. Detalhes de hosts/hooks: `plugins/fluxo/referencias/hosts.md`.
+`--azure` inclui `azure-boards` e `azure-pipelines`. Se o produto já tem `.claude/projeto.json`, pode omitir `--plugins` (lê stacks/CI/rastreador).
+
+Exemplo doublecheck:
+
+```bash
+python -I scripts/instalar_em_projeto.py \
+  --projeto /caminho/doublecheck-v2-core \
+  --azure \
+  --plugins fluxo,stack-dotnet
+# no produto: git add .agents/skills .cursor/hooks.json && commit && push
+# Cursor Agents → New Agent nesse repo → "iniciar o fluxo"
+```
+
+Baixo nível (só export): `scripts/exportar_skills.py`. Perfil: `.claude/projeto.json`. Hosts/hooks: `plugins/fluxo/referencias/hosts.md`.
 
 Depois de mudar manifests Claude, regenere o espelho Cursor:
 

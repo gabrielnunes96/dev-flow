@@ -6,6 +6,7 @@ Este repositório é o marketplace `dev-flow`: plugins do Claude Code com o flux
 - `.claude-plugin/marketplace.json` lista os plugins de `plugins/` (**fonte canônica**).
 - `.cursor-plugin/marketplace.json` e `plugins/*/.cursor-plugin/plugin.json` são **gerados** por `python -I scripts/sincronizar_hosts.py` (não editar à mão).
 - `scripts/exportar_skills.py`: vendor de plugins/skills para um projeto (Agent Skills / Cloud Agents).
+- `scripts/instalar_em_projeto.py`: instala no produto (`.agents/skills` + hooks Cursor); `--azure` inclui Boards e Pipelines.
 - `plugins/fluxo`: núcleo (skills, agentes, hooks, scripts, modelos, schema do perfil). Os demais são adaptadores de rastreador e CI (`azure-*`, `github-actions`, `gitlab-ci`), stacks (`stack-*`: linguagens, bancos e infraestrutura) e extras (`design`, `video`, `logs`).
 - `tests/`: unittest dos scripts, hooks e da consistência do marketplace (`test_marketplace.py`, `test_portabilidade.py`).
 - `docs/manual/index.html`: manual navegável (abre direto no navegador); atualizar junto com o README ao mudar skills, agentes ou plugins.
