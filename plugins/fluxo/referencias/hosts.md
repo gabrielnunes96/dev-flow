@@ -16,7 +16,7 @@ Arquivos em `../../agents/<especialista>.md` (relativo à skill). Dispare um sub
 ## Hooks
 - Claude Code: `hooks/hooks.json` (`${CLAUDE_PLUGIN_ROOT}`).
 - Cursor (plugin): `hooks/hooks.cursor.json` (`${CURSOR_PLUGIN_ROOT}`).
-- Cursor (projeto vendor): copie `templates/hooks.cursor.json` para `.cursor/hooks.json` e defina `DEV_FLOW_FLUXO` apontando para a pasta do plugin `fluxo` exportada.
+- Cursor (projeto vendor): rode `python -I scripts/instalar_em_projeto.py --projeto <produto>` (cria `.agents/skills` + `.cursor/hooks.json` com paths relativos ao `_runtime/fluxo`). Alternativa manual: copie `templates/hooks.cursor.json` e defina `DEV_FLOW_FLUXO` para a pasta do plugin `fluxo` exportada.
 - Hosts sem hooks: o `guard` não roda sozinho — as skills ainda pedem as mesmas restrições; a garantia automática some.
 
 ## Perfil

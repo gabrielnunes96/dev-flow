@@ -1,4 +1,4 @@
-"""Portabilidade: manifests Cursor espelham o Claude; export de skills funciona."""
+"""Portabilidade: manifests Cursor espelham o Claude; export e instalador funcionam."""
 import json
 import os
 import subprocess
@@ -73,7 +73,6 @@ class PortabilidadeTests(unittest.TestCase):
             self.assertTrue(os.path.isfile(os.path.join(tmp, "fluxo", "skills", "iniciar", "SKILL.md")))
             self.assertTrue(os.path.isfile(os.path.join(tmp, "fluxo", "scripts", "perfil.py")))
             self.assertTrue(os.path.isfile(os.path.join(tmp, "stack-python", "skills", "python", "SKILL.md")))
-            # path relativo da skill continua válido
             skill = os.path.join(tmp, "fluxo", "skills", "iniciar", "SKILL.md")
             scripts = os.path.normpath(os.path.join(os.path.dirname(skill), "../../scripts/perfil.py"))
             self.assertTrue(os.path.isfile(scripts))
@@ -124,8 +123,48 @@ class PortabilidadeTests(unittest.TestCase):
             self.assertTrue(os.path.isfile(os.path.join(skills, "boards", "SKILL.md")))
             self.assertTrue(os.path.isfile(os.path.join(skills, "pipeline", "SKILL.md")))
             hooks = _json(os.path.join(projeto, ".cursor", "hooks.json"))
-            self.assertIn("guard.py", hooks["hooks"]["preToolUse"][0]["command"])
+            cmd = hooks["hooks"]["preToolUse"][0]["command"]
+            self.assertIn("guard.py", cmd)
+            self.assertIn(".agents/skills/_runtime/fluxo/hooks/guard.py", cmd)
+            self.assertNotIn("DEV_FLOW_FLUXO", cmd)
             self.assertTrue(os.path.isfile(os.path.join(skills, "_runtime", "fluxo", "hooks", "guard.py")))
+            self.assertIn("Próximos passos", r.stdout)
+
+    def test_instalar_em_projeto_sem_perfil_aviso(self):
+        with tempfile.TemporaryDirectory(prefix="proj-vazio-") as projeto:
+            r = subprocess.run(
+                [sys.executable, "-I", INSTALAR, "--projeto", projeto],
+                cwd=RAIZ_REPO,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+            self.assertIn("sem .claude/projeto.json", r.stderr)
+            self.assertTrue(os.path.isfile(os.path.join(projeto, ".agents", "skills", "iniciar", "SKILL.md")))
+            self.assertTrue(os.path.isfile(os.path.join(projeto, ".cursor", "hooks.json")))
+
+    def test_instalar_em_projeto_idempotente(self):
+        with tempfile.TemporaryDirectory(prefix="proj-idemp-") as projeto:
+            r1 = subprocess.run(
+                [sys.executable, "-I", INSTALAR, "--projeto", projeto, "--plugins", "fluxo,stack-python"],
+                cwd=RAIZ_REPO,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(r1.returncode, 0, r1.stdout + r1.stderr)
+            hooks = os.path.join(projeto, ".cursor", "hooks.json")
+            with open(hooks, "w", encoding="utf-8") as f:
+                f.write('{"version":1,"hooks":{},"custom":true}\n')
+            r2 = subprocess.run(
+                [sys.executable, "-I", INSTALAR, "--projeto", projeto, "--plugins", "fluxo"],
+                cwd=RAIZ_REPO,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(r2.returncode, 0, r2.stdout + r2.stderr)
+            self.assertIn("já existia", r2.stdout)
+            self.assertTrue(_json(hooks).get("custom"))
+            self.assertTrue(os.path.isfile(os.path.join(projeto, ".agents", "skills", "iniciar", "SKILL.md")))
 
 
 if __name__ == "__main__":

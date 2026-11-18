@@ -8,6 +8,7 @@ Idempotente: seguro reexecutar.
 Uso:
   python -I scripts/instalar_em_projeto.py --projeto /caminho/do/produto
   python -I scripts/instalar_em_projeto.py --projeto /caminho/do/produto --plugins fluxo,stack-dotnet
+  python -I scripts/instalar_em_projeto.py --projeto /caminho/do/produto --azure --plugins fluxo,stack-dotnet
 """
 from __future__ import annotations
 
@@ -24,6 +25,7 @@ TEMPLATE_HOOKS = os.path.join(RAIZ, "plugins", "fluxo", "templates", "hooks.curs
 PERFIL_REL = os.path.join(".claude", "projeto.json")
 DESTINO_SKILLS_REL = os.path.join(".agents", "skills")
 HOOKS_REL = os.path.join(".cursor", "hooks.json")
+AZURE_PLUGINS = ("azure-boards", "azure-pipelines")
 
 # Paths relativos à raiz do projeto consumidor (Cursor roda hooks a partir dela).
 RUNTIME_FLUXO = os.path.join(".agents", "skills", "_runtime", "fluxo").replace("\\", "/")
@@ -41,8 +43,17 @@ def _escrever_json(caminho, dados):
         f.write("\n")
 
 
+def _adicionar(nomes, nome, catalogo, avisos, motivo):
+    if nome in nomes:
+        return
+    if nome not in catalogo:
+        avisos.append(f"{motivo}: plugin '{nome}' ausente no marketplace — ignorado")
+        return
+    nomes.append(nome)
+
+
 def _plugins_do_perfil(projeto):
-    """Retorna lista de plugins a partir de .claude/projeto.json, ou None se ausente."""
+    """Retorna (nomes, avisos) a partir de .claude/projeto.json, ou None se ausente."""
     caminho = os.path.join(projeto, PERFIL_REL)
     if not os.path.isfile(caminho):
         return None
@@ -54,39 +65,52 @@ def _plugins_do_perfil(projeto):
         if not isinstance(stack, str) or not stack.strip():
             continue
         nome = f"stack-{stack.strip()}"
-        if nome not in catalogo:
-            avisos.append(f"stack '{stack}' sem plugin {nome} no marketplace — ignorada")
-            continue
-        if nome not in nomes:
-            nomes.append(nome)
+        _adicionar(nomes, nome, catalogo, avisos, f"stack '{stack}'")
+    rastreador = perfil.get("rastreador") or {}
+    tipo = rastreador.get("tipo")
+    if tipo and tipo != "local":
+        _adicionar(nomes, tipo, catalogo, avisos, f"rastreador.tipo '{tipo}'")
+    ci = perfil.get("ci") or {}
+    provedor = ci.get("provedor")
+    if provedor and provedor != "nenhum":
+        _adicionar(nomes, provedor, catalogo, avisos, f"ci.provedor '{provedor}'")
     return nomes, avisos
 
 
-def _resolver_plugins(projeto, plugins_arg):
+def _resolver_plugins(projeto, plugins_arg, azure=False):
     """Devolve (nomes, avisos)."""
     avisos = []
+    catalogo = _plugins_catalogo()
     if plugins_arg is not None:
         nomes = [n.strip() for n in plugins_arg.split(",") if n.strip()]
         if not nomes:
             raise SystemExit("informe ao menos um plugin em --plugins")
-        return nomes, avisos
+    else:
+        resolvido = _plugins_do_perfil(projeto)
+        if resolvido is None:
+            avisos.append(
+                "sem .claude/projeto.json — instalando só 'fluxo'. "
+                "Passe --plugins ou rode /iniciar no projeto depois."
+            )
+            nomes = ["fluxo"]
+        else:
+            nomes, avisos_perfil = resolvido
+            avisos.extend(avisos_perfil)
 
-    resolvido = _plugins_do_perfil(projeto)
-    if resolvido is None:
-        avisos.append(
-            "sem .claude/projeto.json — instalando só 'fluxo'. "
-            "Passe --plugins ou rode /iniciar no projeto depois."
-        )
-        return ["fluxo"], avisos
-    nomes, avisos_perfil = resolvido
-    avisos.extend(avisos_perfil)
+    if azure:
+        for nome in AZURE_PLUGINS:
+            _adicionar(nomes, nome, catalogo, avisos, "--azure")
+
+    desconhecidos = [n for n in nomes if n not in catalogo]
+    if desconhecidos:
+        raise SystemExit(f"plugins inexistentes: {', '.join(desconhecidos)}")
     return nomes, avisos
 
 
 def _hooks_vendor():
     """hooks.cursor.json do template, com paths relativos ao runtime exportado."""
     dados = _ler_json(TEMPLATE_HOOKS)
-    # Reescreve ${DEV_FLOW_FLUXO}/… → .agents/skills/_runtime/fluxo/…
+
     def _cmd(script):
         return f'python -I "{RUNTIME_FLUXO}/hooks/{script}"'
 
@@ -105,12 +129,12 @@ def _hooks_vendor():
     return dados
 
 
-def instalar(projeto, plugins_arg=None):
+def instalar(projeto, plugins_arg=None, azure=False):
     projeto = os.path.abspath(projeto)
     if not os.path.isdir(projeto):
         raise SystemExit(f"projeto não é um diretório: {projeto}")
 
-    nomes, avisos = _resolver_plugins(projeto, plugins_arg)
+    nomes, avisos = _resolver_plugins(projeto, plugins_arg, azure=azure)
     for a in avisos:
         print(f"aviso: {a}", file=sys.stderr)
 
@@ -147,10 +171,15 @@ def main(argv=None):
     p.add_argument(
         "--plugins",
         default=None,
-        help="lista separada por vírgula; padrão = fluxo + stacks do perfil",
+        help="lista separada por vírgula; padrão = fluxo + stacks/CI/rastreador do perfil",
+    )
+    p.add_argument(
+        "--azure",
+        action="store_true",
+        help="inclui azure-boards e azure-pipelines (ADO / doublecheck)",
     )
     args = p.parse_args(argv)
-    return instalar(args.projeto, args.plugins)
+    return instalar(args.projeto, args.plugins, azure=args.azure)
 
 
 if __name__ == "__main__":
