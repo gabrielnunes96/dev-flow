@@ -15,7 +15,7 @@ Argumento: `$ARGUMENTS` — vazio = próxima pronta da demanda ativa; um id (`T3
 2. `git status --short`: limpo. Alteração pendente que não é sua → parar e perguntar.
 3. Se `validacao.token.script` existir, rodar (`fluxo:x.py` = `S/x.py`; sem prefixo = relativo à raiz do projeto). Código 2 (sem VPN) → avisar e seguir implementando; a validação espera. Código 3 → parar.
 4. Carregar a skill de cada stack do perfil e da `stack` da tarefa: stack `X` → skill `stack-X:X` (ex.: `stack-dotnet:dotnet`, `stack-postgres:postgres`, `stack-docker:docker`). Sem o plugin da stack → seguir só com as convenções do projeto e avisar no fechamento.
-5. Método de raciocínio: `../../referencias/raciocinio.md` (relativo a esta skill). Vale para os passos 2 a 4.
+5. Método de raciocínio: `../../referencias/raciocinio.md` (relativo a esta skill). Vale para os passos 2 a 4. Como disparar especialistas em cada host: `../../referencias/hosts.md`.
 
 ## 1. Escolher e abrir a tarefa
 - Fila = `{docs}/{demanda}/tarefas.json`. `python -I S/plano.py proxima <arq>` (ou a do argumento). Código 1 → a mensagem diz por quê (fila concluída, dependência, protegida); reportar e parar.
@@ -35,17 +35,17 @@ Argumento: `$ARGUMENTS` — vazio = próxima pronta da demanda ativa; um id (`T3
 
 ## 3. Testes
 - Cada critério da tarefa tem pelo menos um teste. Siga o padrão de testes que o projeto já tem.
-- Critério com regra combinada, cálculo, estados ou muitas bordas → delegar o desenho (e, se útil, a escrita) dos testes ao subagente `fluxo:testador` com os critérios, os arquivos alterados e o caminho `S`.
+- Critério com regra combinada, cálculo, estados ou muitas bordas → disparar o especialista `../../agents/testador.md` com os critérios, os arquivos alterados e o caminho `S`.
 - Teste que nunca falhou não prova nada: confira que ele falharia sem a mudança (inverta a condição mentalmente ou rode antes de implementar).
 - Derrubar a aplicação antes de compilar (`python -I S/servico.py derrubar`, se houver `servico`), então `comandos.teste`. Tudo verde antes de seguir.
 
 ## 4. Revisão
-- Delegar ao subagente `fluxo:revisor` com: id e critérios da tarefa, stacks, e o que mudou. Corrigir os achados procedentes e rodar os testes de novo. Achado que você descarta → dizer por quê no fechamento.
-- Diff que toca autenticação, autorização, dado pessoal, pagamento, upload, segredo ou infraestrutura (IaC, Dockerfile, manifesto, pipeline) → também o subagente `fluxo:seguranca` em modo revisão, em paralelo com o revisor. Achado crítico/alto bloqueia o commit até ser corrigido ou o usuário aceitar o risco por escrito.
-- Teste falhando sem causa clara depois de duas tentativas → subagente `fluxo:depurador`, em vez de tentar variações às cegas.
+- Disparar o especialista `../../agents/revisor.md` com: id e critérios da tarefa, stacks, e o que mudou. Corrigir os achados procedentes e rodar os testes de novo. Achado que você descarta → dizer por quê no fechamento.
+- Diff que toca autenticação, autorização, dado pessoal, pagamento, upload, segredo ou infraestrutura (IaC, Dockerfile, manifesto, pipeline) → também `../../agents/seguranca.md` em modo revisão, em paralelo com o revisor. Achado crítico/alto bloqueia o commit até ser corrigido ou o usuário aceitar o risco por escrito.
+- Teste falhando sem causa clara depois de duas tentativas → especialista `../../agents/depurador.md`, em vez de tentar variações às cegas.
 
 ## 5. Validação no ambiente
-- Conforme `validacao.tipo`, delegar ao subagente `fluxo:validador` com o lote: os `casos_obrigatorios` do perfil + o que os critérios pedem. Dados de teste em `validacao.dados`.
+- Conforme `validacao.tipo`, disparar o especialista `../../agents/validador.md` com o lote: os `casos_obrigatorios` do perfil + o que os critérios pedem. Dados de teste em `validacao.dados`.
 - Instabilidade conhecida do ambiente → repetir uma vez e registrar. Falha do código → voltar ao passo 2. Sem acesso (VPN) → registrar "não validado: motivo" e seguir; não marcar a demanda como entregue sem validar depois.
 
 ## 6. Commit (só com permissão)
@@ -59,4 +59,4 @@ Argumento: `$ARGUMENTS` — vazio = próxima pronta da demanda ativa; um id (`T3
 ## 8. Fechamento
 - Resumo curto: tarefa, commit, testes (total), validação por variante, estado, próxima pronta (`plano.py proxima`).
 - `todas` → voltar ao passo 0. Parar ao esgotar a fila ou em: sem acesso ao ambiente para validar, falha sem causa clara, regra ambígua, algo fora do escopo da demanda, ou qualquer item de `pare_e_pergunte` do perfil.
-- **Paralelo** (opcional, quando o usuário pedir pressa): `plano.py prontas` lista as que não dependem entre si; cada uma pode ir para um subagente com `isolation: worktree`, e você integra os commits na ordem do plano.
+- **Paralelo** (opcional, quando o usuário pedir pressa): `plano.py prontas` lista as que não dependem entre si; cada uma pode ir para um agente isolado (worktree / Task do host), e você integra os commits na ordem do plano.

@@ -12,7 +12,7 @@ Onde gravar: `docs/adr/` na raiz do projeto, se existir ou se o projeto versiona
 
 ## adr `<decisão>`
 1. Contexto: requisito que força a decisão (com número quando houver), restrições, o que existe hoje (ler código e ADRs anteriores).
-2. Delegar ao subagente `fluxo:arquiteto` com a decisão e o contexto. Ele devolve alternativas, trade-offs e recomendação.
+2. Disparar o especialista `../../agents/arquiteto.md` com a decisão e o contexto. Ele devolve alternativas, trade-offs e recomendação. Como disparar: `../../referencias/hosts.md`.
 3. Escrever a ADR com situação **proposta**. Mostrar ao usuário: opções, recomendação, consequências. A escolha é dele quando envolve custo, prazo ou produto.
 4. Aprovada → situação **aceita em dd/mm/aaaa**. Se nasceu de uma demanda, citar a ADR na seção 9 da `02-tecnica.md`.
 
@@ -23,9 +23,9 @@ Descrever a arquitetura atual em `docs/arquitetura.md` (ou atualizar a existente
 - **Componentes** dos containers principais: camadas/módulos e responsabilidades, com caminho no repositório.
 - **Fluxos críticos**: 2–3 caminhos do dado mais importantes, ponta a ponta.
 - **Operação**: onde roda (`infra` do perfil), como é implantado (`ci` do perfil), como é observado.
-Diagramas em texto (bloco `text` com setas), sem mermaid. Tudo verificado no código: o subagente `fluxo:analista` levanta, você escreve.
+Diagramas em texto (bloco `text` com setas), sem mermaid. Tudo verificado no código: o especialista `../../agents/analista.md` levanta, você escreve.
 
 ## revisar
 1. Requisitos de qualidade: perguntar ao usuário os que não estão escritos (volume, latência, disponibilidade, RPO/RTO).
-2. Subagente `fluxo:arquiteto` (estrutura, resiliência, escalabilidade, custo) e `fluxo:seguranca` em modo ameaças, em paralelo.
-3. Relatório `docs/revisao-arquitetura-<data>.md`: achados por severidade com evidência, riscos, e recomendações ordenadas por valor/esforço. Cada recomendação estrutural vira uma ADR proposta ou uma demanda (`/fluxo:demanda`).
+2. Especialistas `../../agents/arquiteto.md` (estrutura, resiliência, escalabilidade, custo) e `../../agents/seguranca.md` em modo ameaças, em paralelo.
+3. Relatório `docs/revisao-arquitetura-<data>.md`: achados por severidade com evidência, riscos, e recomendações ordenadas por valor/esforço. Cada recomendação estrutural vira uma ADR proposta ou uma demanda (skill `demanda`).

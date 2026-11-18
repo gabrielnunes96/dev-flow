@@ -18,8 +18,9 @@ O `SKILL.md` tem três blocos, nessa ordem (o `fluxo:revisor` procura o último 
 Depois:
 1. Adicionar o nome a `stacks` no schema (`plugins/fluxo/schema/projeto.schema.json`) e a `STACKS` em `plugins/fluxo/scripts/perfil.py`, e o sinal de detecção na tabela da skill `fluxo:iniciar`.
 1. Registrar em `.claude-plugin/marketplace.json` (mesma versão do `plugin.json`).
-2. Se a stack tiver validação própria, documentar no `fluxo:validador` (novo `validacao.tipo` exige também `perfil.py` e o schema).
-3. Modelo de pipeline em `plugins/azure-pipelines/templates/<nome>.yml` (e no `github-actions`/`gitlab-ci`), se fizer sentido.
-4. `claude plugin validate plugins/stack-<nome>` e `python -m unittest discover -s tests`.
+2. Rodar `python -I scripts/sincronizar_hosts.py` para gerar o espelho Cursor (`.cursor-plugin`).
+3. Se a stack tiver validação própria, documentar no `fluxo:validador` (novo `validacao.tipo` exige também `perfil.py` e o schema).
+4. Modelo de pipeline em `plugins/azure-pipelines/templates/<nome>.yml` (e no `github-actions`/`gitlab-ci`), se fizer sentido.
+5. `claude plugin validate plugins/stack-<nome>` e `python -m unittest discover -s tests`.
 
 Critério para o que entra na skill de stack: vale para **qualquer** projeto daquela stack. O que é de um projeto só vai no `CLAUDE.md` dele.

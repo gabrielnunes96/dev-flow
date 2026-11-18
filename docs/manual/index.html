@@ -328,17 +328,18 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
       <section class="doc" id="instalar" data-titulo="Instalação">
         <span class="eyebrow">Começar</span>
         <h2>Instalação</h2>
-        <p class="lead">Uma vez por máquina você adiciona o marketplace. Depois instala o núcleo e um plugin por stack que o projeto usa.</p>
+        <p class="lead">Claude Code, Cursor (Team Marketplace / Third-Party Imports) ou vendor com Agent Skills. Depois instala o núcleo e um plugin por stack.</p>
         <ol class="steps">
-          <li><b>Adicione o marketplace</b><p>Use o caminho local do repositório ou a URL git dele.</p>
+          <li><b>Claude Code — marketplace</b><p>Caminho local ou URL git.</p>
             <div class="code"><pre>claude plugin marketplace add &lt;caminho-ou-url-do-dev-flow&gt;</pre></div></li>
           <li><b>Instale o núcleo</b><p>Sempre. Traz as skills do processo, os agentes, os hooks e os scripts.</p>
             <div class="code"><pre>claude plugin install fluxo@dev-flow</pre></div></li>
           <li><b>Instale as stacks e o CI do projeto</b><p>Stack <code>X</code> no perfil → plugin <code>stack-X</code>. Use o <a href="#montador">montador</a> abaixo para gerar os comandos.</p></li>
-          <li><b>Mantenha atualizado</b><p>Depois de qualquer mudança publicada no marketplace:</p>
-            <div class="code"><pre>claude plugin marketplace update dev-flow</pre></div></li>
+          <li><b>Cursor</b><p>Team Marketplace: importar o repo (<code>.cursor-plugin/marketplace.json</code>). Ou Third-Party Imports + plugins Claude. Ou vendor:</p>
+            <div class="code"><pre>python -I scripts/exportar_skills.py --destino &lt;projeto&gt;/.agents/dev-flow --plugins fluxo,stack-python</pre></div></li>
+          <li><b>Mantenha atualizado</b><p>Claude: <code>claude plugin marketplace update dev-flow</code>. Depois de mudar manifests Claude no repo: <code>python -I scripts/sincronizar_hosts.py</code>.</p></li>
         </ol>
-        <div class="callout info"><span class="ico">i</span><div><p><b>Para o time inteiro de uma vez:</b> declare o marketplace e os plugins no <code>.claude/settings.json</code> versionado do projeto. Quem abrir o projeto recebe tudo. O montador abaixo também gera esse trecho.</p></div></div>
+        <div class="callout info"><span class="ico">i</span><div><p><b>Para o time inteiro de uma vez:</b> declare o marketplace e os plugins no <code>.claude/settings.json</code> versionado do projeto (Claude) ou use o Team Marketplace do Cursor. O montador abaixo também gera o trecho Claude.</p></div></div>
       </section>
 
       <section class="doc" id="montador" data-titulo="Monte sua instalação">
@@ -618,7 +619,7 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
         <details class="faq"><summary>O guard bloqueou uma ação que eu queria</summary><div><p>Ele está aplicando o perfil. Se a regra estiver errada, ajuste <code>protecao</code> no <code>.claude/projeto.json</code>; se o bloqueio for <code>git push</code>, faça o push você mesmo no terminal.</p></div></details>
         <details class="faq"><summary>A skill da stack não carregou</summary><div><p>Confira se o plugin <code>stack-X</code> está instalado (<code>claude plugin install stack-X@dev-flow</code>) e se <code>X</code> está em <code>stacks</code> do perfil. Sem o plugin, o ciclo segue com as convenções do projeto e avisa no fechamento.</p></div></details>
         <details class="faq"><summary>A validação diz “SEM ACESSO: token não gerado (VPN?)”</summary><div><p>O script de token saiu com código 2. Conecte a VPN e peça “valida a T3 de novo”. A tarefa fica registrada como não validada até lá.</p></div></details>
-        <details class="faq"><summary>Fiz uma mudança no marketplace e o projeto não viu</summary><div><p>Rode <code>claude plugin marketplace update dev-flow</code> e abra uma sessão nova. Skills e hooks são carregados no início da sessão.</p></div></details>
+        <details class="faq"><summary>Fiz uma mudança no marketplace e o projeto não viu</summary><div><p>Claude: <code>claude plugin marketplace update dev-flow</code> e sessão nova. Cursor Team Marketplace: Refresh. Vendor: rode de novo <code>exportar_skills.py</code>. Skills e hooks carregam no início da sessão.</p></div></details>
         <details class="faq"><summary>Quero uma stack que não existe</summary><div><p>Use <code>"outra"</code> em <code>stacks</code> por enquanto e veja <code>docs/novo-plugin-de-stack.md</code>: um plugin pequeno com uma skill de três partes, registrado no schema e no marketplace. O teste <code>test_marketplace.py</code> confere a estrutura.</p></div></details>
       </section>
 

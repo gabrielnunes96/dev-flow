@@ -40,7 +40,7 @@ def main():
         return
     if not raiz:
         if os.path.isdir(os.path.join(inicio, ".git")):
-            print("[fluxo] Projeto sem .claude/projeto.json; /fluxo:iniciar cria o perfil.")
+            print("[fluxo] Projeto sem .claude/projeto.json; skill iniciar (/fluxo:iniciar) cria o perfil.")
         return
     linhas = [
         f"[fluxo] Projeto {perfil.get('nome')} ({', '.join(perfil.get('stacks') or [])}); perfil em {os.path.join(raiz, perfil_mod.ARQUIVO)}.",

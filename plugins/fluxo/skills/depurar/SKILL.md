@@ -15,7 +15,7 @@ Método: `../../referencias/raciocinio.md` (seção 6), relativo a esta skill. S
 
 ## 2. Investigar
 - Causa óbvia e local (erro de digitação, import faltando, com stack trace apontando a linha) → seguir direto ao passo 3.
-- Senão, delegar ao subagente `fluxo:depurador` com: sintoma, reprodução, stacks, versão boa conhecida (se houver) e o caminho dos scripts `S`. Ele devolve causa raiz com evidência e a correção mínima proposta.
+- Senão, disparar o especialista `../../agents/depurador.md` com: sintoma, reprodução, stacks, versão boa conhecida (se houver) e o caminho dos scripts `S`. Ele devolve causa raiz com evidência e a correção mínima proposta. Como disparar: `../../referencias/hosts.md`.
 - Registrar em `bug.md`: hipóteses testadas, causa raiz (`arquivo:linha`) e gatilho.
 
 ## 3. Teste de regressão primeiro
@@ -28,10 +28,10 @@ Método: `../../referencias/raciocinio.md` (seção 6), relativo a esta skill. S
 - `comandos.teste` (e `build`/`lint`) verdes. Teste novo passando.
 
 ## 5. Revisar, validar, commitar
-- Subagente `fluxo:revisor` com o bug, a causa e o diff (critério de aceite = "o sintoma não ocorre e o teste de regressão passa").
-- Validação no ambiente pelo `fluxo:validador` quando `validacao.tipo` ≠ `nenhuma`, reproduzindo o cenário original.
-- Commit como no ciclo da tarefa (`fluxo:task`, passo 6): stage só dos arquivos da correção, pedir permissão, mensagem `Corrige <sintoma>` no `git.formato_commit`. Nunca push.
+- Especialista `../../agents/revisor.md` com o bug, a causa e o diff (critério de aceite = "o sintoma não ocorre e o teste de regressão passa").
+- Validação no ambiente pelo especialista `../../agents/validador.md` quando `validacao.tipo` ≠ `nenhuma`, reproduzindo o cenário original.
+- Commit como no ciclo da tarefa (skill `task`, passo 6): stage só dos arquivos da correção, pedir permissão, mensagem `Corrige <sintoma>` no `git.formato_commit`. Nunca push.
 
 ## 6. Fechar
 - `bug.md` completo: causa, correção (hash), teste, validação, como evitar (regra nova?).
-- Aprendizado que vale além deste bug (armadilha da stack, do ambiente, do projeto) → sugerir `/fluxo:aprender`.
+- Aprendizado que vale além deste bug (armadilha da stack, do ambiente, do projeto) → sugerir a skill `aprender`.
