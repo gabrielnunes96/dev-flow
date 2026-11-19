@@ -1,6 +1,6 @@
 {
   "name": "stack-mysql",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Convenções de MySQL/MariaDB para o fluxo: migrations, DDL online, utf8mb4, InnoDB e deadlocks, índices por EXPLAIN e lotes.",
   "author": {
     "name": "Gabriel Nunes Campos"

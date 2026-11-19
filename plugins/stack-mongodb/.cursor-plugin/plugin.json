@@ -1,7 +1,7 @@
 {
   "name": "stack-mongodb",
   "description": "Convenções de MongoDB para o fluxo: modelagem por acesso, $jsonSchema, índices ESR, operadores atômicos, transações e injeção de operador.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": {
     "name": "Gabriel Nunes Campos"
   },

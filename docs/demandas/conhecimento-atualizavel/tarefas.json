@@ -15,9 +15,9 @@
         "CA-12"
       ],
       "validacao": "perfil.py validar com sugerir/aplicar/inválido",
-      "estado": "a_fazer",
+      "estado": "feito",
       "wi": null,
-      "commit": null
+      "commit": "f423e8f"
     },
     {
       "id": "T2",
@@ -33,9 +33,9 @@
         "CA-10"
       ],
       "validacao": "testes de texto",
-      "estado": "a_fazer",
+      "estado": "feito",
       "wi": null,
-      "commit": null
+      "commit": "31ef895"
     },
     {
       "id": "T3",
@@ -51,9 +51,9 @@
         "CA-7"
       ],
       "validacao": "unittest com JSON fixo",
-      "estado": "a_fazer",
+      "estado": "feito",
       "wi": null,
-      "commit": null
+      "commit": "6254705"
     },
     {
       "id": "T4",
@@ -69,9 +69,9 @@
         "CA-1"
       ],
       "validacao": "--verificar retorna 0; tabela com dados reais",
-      "estado": "a_fazer",
+      "estado": "feito",
       "wi": null,
-      "commit": null
+      "commit": "35cf596"
     },
     {
       "id": "T5",
@@ -87,9 +87,9 @@
         "CA-11"
       ],
       "validacao": "unittest; execução real opcional",
-      "estado": "a_fazer",
+      "estado": "feito",
       "wi": null,
-      "commit": null
+      "commit": "f85a386"
     },
     {
       "id": "T6",
@@ -105,9 +105,9 @@
         "CA-8"
       ],
       "validacao": "teste de existência/conteúdo; YAML válido",
-      "estado": "a_fazer",
+      "estado": "feito",
       "wi": null,
-      "commit": null
+      "commit": "56cde69"
     },
     {
       "id": "T7",
@@ -124,7 +124,7 @@
         "CA-12"
       ],
       "validacao": "testes + claude plugin validate + sincronizar_hosts --check",
-      "estado": "a_fazer",
+      "estado": "andamento",
       "wi": null,
       "commit": null
     }

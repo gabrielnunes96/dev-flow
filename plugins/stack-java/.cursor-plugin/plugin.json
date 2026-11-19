@@ -1,7 +1,7 @@
 {
   "name": "stack-java",
   "description": "Convenções de Java/Kotlin para o fluxo: Spring Boot, JPA sem N+1, Bean Validation, JUnit 5, MockMvc, Testcontainers e Flyway.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": {
     "name": "Gabriel Nunes Campos"
   },

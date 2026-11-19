@@ -1,7 +1,7 @@
 {
   "name": "stack-dotnet",
   "description": "Convenções de .NET para o fluxo: build/teste, testes de contrato com a API em memória, pacotes vulneráveis e SDKs gerados.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": {
     "name": "Gabriel Nunes Campos"
   },

@@ -1,7 +1,7 @@
 {
   "name": "design",
   "description": "Designer de UX/UI para o fluxo: direção visual, temas claro/escuro com tokens, tipografia, layout, animações limpas, acessibilidade e revisão visual no navegador.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": {
     "name": "Gabriel Nunes Campos"
   },
