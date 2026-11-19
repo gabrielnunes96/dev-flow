@@ -1,0 +1,41 @@
+# Revisão mensal do conhecimento das stacks (plugins/stack-*/referencias/atual.md).
+# Roda o levantamento de versões e publica o relatório; a curadoria é da skill atualizar-conhecimento,
+# com aprovação humana. Para criar: Pipelines → New pipeline → este arquivo.
+trigger: none
+pr: none
+
+schedules:
+  - cron: "0 11 1 * *"   # dia 1 de cada mês, 08:00 em Brasília
+    displayName: Revisão mensal do conhecimento
+    branches:
+      include: [main]
+    always: true
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: "3.12"
+
+  - script: |
+      set +e
+      python -I scripts/atualizar_conhecimento.py --sem-gravar --relatorio "$(Build.ArtifactStagingDirectory)/conhecimento.md"
+      codigo=$?
+      set -e
+      if [ $codigo -eq 2 ]; then
+        echo "##vso[task.logissue type=warning]Há mudanças nas stacks: rode a skill atualizar-conhecimento (relatório nos artefatos)."
+        echo "##vso[task.complete result=SucceededWithIssues;]"
+      elif [ $codigo -ne 0 ]; then
+        exit $codigo
+      fi
+    displayName: Levantar versões das stacks
+
+  - script: python -I scripts/atualizar_conhecimento.py --verificar
+    displayName: Conferir revisão humana (120 dias)
+    continueOnError: true
+
+  - publish: $(Build.ArtifactStagingDirectory)/conhecimento.md
+    artifact: conhecimento
+    condition: always()

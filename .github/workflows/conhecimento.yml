@@ -1,0 +1,51 @@
+# Revisão mensal do conhecimento das stacks (plugins/stack-*/referencias/atual.md).
+# Roda o levantamento de versões; com achados, abre (ou atualiza) uma issue com o relatório.
+# A curadoria é da skill atualizar-conhecimento, com aprovação humana — nada é commitado aqui.
+name: Conhecimento das stacks
+
+on:
+  schedule:
+    - cron: "0 11 1 * *"   # dia 1 de cada mês, 08:00 em Brasília
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  levantar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Levantar versões das stacks
+        id: levantar
+        run: |
+          set +e
+          python -I scripts/atualizar_conhecimento.py --sem-gravar --relatorio conhecimento.md
+          codigo=$?
+          python -I scripts/atualizar_conhecimento.py --verificar >> conhecimento.md || { [ "$codigo" -eq 0 ] && codigo=2; }
+          echo "codigo=$codigo" >> "$GITHUB_OUTPUT"
+          [ $codigo -eq 1 ] && exit 1 || exit 0
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: conhecimento
+          path: conhecimento.md
+
+      - name: Abrir ou atualizar a issue
+        if: steps.levantar.outputs.codigo == '2'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          titulo="Revisão de conhecimento das stacks"
+          numero=$(gh issue list --state open --search "$titulo in:title" --json number --jq '.[0].number')
+          if [ -n "$numero" ]; then
+            gh issue comment "$numero" --body-file conhecimento.md
+          else
+            gh issue create --title "$titulo" --body-file conhecimento.md
+          fi

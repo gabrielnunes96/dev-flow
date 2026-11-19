@@ -18,6 +18,11 @@ steps:
   - script: python -m unittest discover -s tests -v
     displayName: Testes dos scripts
 
+  - script: |
+      python -I scripts/atualizar_conhecimento.py --verificar --max-dias 0
+      python -I scripts/sincronizar_hosts.py --check
+    displayName: Conhecimento das stacks e manifestos dos hosts
+
   - task: NodeTool@0
     inputs:
       versionSpec: 22.x

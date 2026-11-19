@@ -134,6 +134,17 @@ class ConhecimentoScriptTests(unittest.TestCase):
         with open(os.path.join(self.fonte, f"{produto}.json"), "w", encoding="utf-8") as f:
             f.write(dados if isinstance(dados, str) else json.dumps(dados))
 
+    def test_suporte_ativo_encerrado_sem_fim_de_vida(self):
+        self.assertEqual(ac.situacao({"cycle": "17", "eol": False, "support": "2024-04-25"}, HOJE), "suporte ativo encerrado")
+        self.assertEqual(ac.situacao({"cycle": "19", "eol": False, "support": True}, HOJE), "suportado")
+        self.assertEqual(ac.situacao({"cycle": "22", "lts": "2024-10-29", "eol": "2027-04-30", "support": "2025-10-21"}, HOJE), "LTS")
+        NODEJS_NOVO = [dict(c) for c in NODEJS]
+        NODEJS_NOVO[0]["support"] = "2026-11-01"
+        self._fonte("nodejs", NODEJS_NOVO)
+        ac.levantar(HOJE - dt.timedelta(days=30), stacks=["node"], fonte_dir=self.fonte)
+        achados = ac.levantar(HOJE, stacks=["node"], fonte_dir=self.fonte)
+        self.assertTrue(any(t == "fim_de_suporte" and "nodejs 27 encerrou o suporte ativo" in m for t, m in achados))
+
     def test_ciclo_sem_ponto_zero_e_ano_do_sql_server(self):  # CA-5 (.NET e SQL Server)
         self._fonte("dotnet", [{"cycle": "10", "lts": True, "eol": "2028-11-14"}, {"cycle": "8", "lts": True, "eol": "2026-11-10"}])
         self._fonte("mssqlserver", [{"cycle": "16.0", "releaseLabel": "2022", "eol": "2033-01-11"},
@@ -229,6 +240,7 @@ class ConhecimentoNoRepositorioTests(unittest.TestCase):
     def test_especialistas_citam_projeto_primeiro(self):  # CA-2
         agentes = [os.path.join("plugins", "fluxo", "agents", a) for a in os.listdir(os.path.join(PLUGINS, "fluxo", "agents"))]
         agentes.append(os.path.join("plugins", "design", "agents", "designer.md"))
+        agentes.append(os.path.join("plugins", "logs", "agents", "analista-de-logs.md"))
         for arq in agentes:
             texto = _ler_repo(arq)
             self.assertIn("## Conhecimento atual (projeto primeiro)", texto, arq)
@@ -248,6 +260,24 @@ class ConhecimentoNoRepositorioTests(unittest.TestCase):
         linha = next(l for l in texto.splitlines() if "qualquer projeto daquela stack" in l)
         self.assertIn("referencias/atual.md", linha)
         self.assertIn("PR", linha)
+
+
+class RevisaoPeriodicaTests(unittest.TestCase):  # CA-8
+    def test_pipelines_agendadas_rodam_o_levantamento(self):
+        for arq in ("azure-pipelines-conhecimento.yml", os.path.join(".github", "workflows", "conhecimento.yml")):
+            texto = _ler_repo(arq)
+            self.assertIn("cron:", texto, arq)
+            self.assertIn("scripts/atualizar_conhecimento.py --sem-gravar --relatorio", texto, arq)
+            self.assertNotIn("git push", texto, arq)
+        self.assertIn("atualizar_conhecimento.py --verificar --max-dias 0", _ler_repo("azure-pipelines.yml"))
+
+    def test_skill_de_manutencao_termina_em_branch_sem_merge(self):
+        texto = _ler_repo(".claude", "skills", "atualizar-conhecimento", "SKILL.md")
+        self.assertIn("name: atualizar-conhecimento", texto)
+        self.assertIn("**nunca** faça merge, push", texto)
+        self.assertIn("pr.md", texto)
+        self.assertIn("avaliar_agentes.py", texto)
+        self.assertIn("qualquer host", texto)
 
 
 if __name__ == "__main__":
