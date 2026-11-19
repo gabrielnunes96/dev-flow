@@ -18,6 +18,7 @@ STACKS = {"dotnet", "sql", "front", "node", "python", "java", "go", "postgres", 
 RASTREADORES = {"local", "azure-boards"}
 VALIDACOES = {"http", "sql", "navegador", "comando", "nenhuma"}
 PUSH = {"humano", "permitido"}
+NOVIDADES = {"sugerir", "aplicar"}
 PLATAFORMAS = {"web", "ios", "android", "desktop"}
 PROVEDORES_CI = {"azure-pipelines", "github-actions", "gitlab-ci", "nenhum"}
 NUVENS = {"azure", "aws", "gcp", "on-premise", "outra"}
@@ -129,6 +130,17 @@ def validar(perfil):
             for p in design.get("plataformas") or []:
                 if p not in PLATAFORMAS:
                     erro(f"design.plataformas: '{p}' inválida ({', '.join(sorted(PLATAFORMAS))}).")
+
+    conhecimento = perfil.get("conhecimento")
+    if conhecimento is not None:
+        if not isinstance(conhecimento, dict):
+            erro("conhecimento: deve ser objeto.")
+        else:
+            novidades = conhecimento.get("novidades", "sugerir")
+            if not isinstance(novidades, str) or novidades not in NOVIDADES:
+                erro(f"conhecimento.novidades: '{novidades}' inválido ({', '.join(sorted(NOVIDADES))}).")
+            for chave in sorted(set(conhecimento) - {"novidades"}):
+                aviso(f"conhecimento.{chave}: campo desconhecido (só 'novidades'); será ignorado.")
 
     ci = perfil.get("ci")
     if ci is not None:

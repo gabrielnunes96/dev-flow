@@ -71,6 +71,7 @@ class MarketplaceTests(unittest.TestCase):
         props = schema["properties"]
         self.assertEqual(set(props["stacks"]["items"]["enum"]), perfil.STACKS)
         self.assertEqual(set(props["ci"]["properties"]["provedor"]["enum"]), perfil.PROVEDORES_CI)
+        self.assertEqual(set(props["conhecimento"]["properties"]["novidades"]["enum"]), perfil.NOVIDADES)
         self.assertEqual(set(props["infra"]["properties"]["nuvem"]["enum"]), perfil.NUVENS)
         self.assertEqual(set(props["infra"]["properties"]["execucao"]["items"]["enum"]), perfil.EXECUCOES)
 

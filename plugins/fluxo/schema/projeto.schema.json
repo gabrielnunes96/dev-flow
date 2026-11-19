@@ -138,6 +138,14 @@
         "referencias": { "type": "array", "items": { "type": "string" }, "description": "Guias de marca, telas de referência ou arquivos de design (caminho ou URL)." }
       }
     },
+    "conhecimento": {
+      "type": "object",
+      "description": "Como os especialistas tratam novidades de tecnologia (referencias/conhecimento.md do plugin fluxo).",
+      "additionalProperties": false,
+      "properties": {
+        "novidades": { "type": "string", "enum": ["sugerir", "aplicar"], "default": "sugerir", "description": "sugerir: novidade que o projeto não usa vira sugestão; aplicar: projeto novo ou que acompanha novidades pode usar a versão suportada mais recente (LTS quando houver)." }
+      }
+    },
     "ci": {
       "type": "object",
       "description": "Onde roda a integração e entrega contínuas; define a skill de pipeline usada pelo fluxo.",

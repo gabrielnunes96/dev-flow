@@ -36,6 +36,7 @@ Use a ferramenta de pergunta do host se existir; senão, pergunte no chat — op
 - Onde ficam as especificações: versionadas em `docs/demandas` (recomendado) ou locais em `.claude/local/demandas`.
 - Ambiente de validação: URL, se exige token/VPN, onde ficam os dados de teste.
 - O que não pode ser tocado (diretórios, sistemas).
+- Novidades de tecnologia (`conhecimento.novidades`): projeto novo → recomendar `aplicar`; projeto existente → `sugerir` (padrão; pode omitir). Ver `../../referencias/conhecimento.md`.
 
 ## 3. Gravar
 - `.claude/projeto.json` a partir de `../../templates/projeto.json`, com `$schema` apontando para `../../schema/projeto.schema.json` (caminho absoluto). `python -I ../../scripts/perfil.py validar` até "perfil ok".

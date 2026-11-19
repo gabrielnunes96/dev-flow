@@ -48,6 +48,18 @@ class PerfilTests(unittest.TestCase):
         self.assertTrue(any("cobol" in a for a in avisos))
         self.assertTrue(any("comandos.teste" in a for a in avisos))
 
+    def test_validar_conhecimento_novidades(self):
+        base = {"nome": "x", "stacks": ["python"]}
+        erros = lambda p: [m for n, m in perfil.validar(p) if n == "erro"]  # noqa: E731
+        self.assertEqual(erros(base), [])
+        self.assertEqual(erros({**base, "conhecimento": {"novidades": "aplicar"}}), [])
+        self.assertEqual(erros({**base, "conhecimento": {"novidades": "sugerir"}}), [])
+        self.assertTrue(any("conhecimento.novidades" in e for e in erros({**base, "conhecimento": {"novidades": "sempre"}})))
+        self.assertTrue(any("conhecimento:" in e for e in erros({**base, "conhecimento": "aplicar"})))
+        self.assertTrue(any("conhecimento.novidades" in e for e in erros({**base, "conhecimento": {"novidades": ["aplicar"]}})))
+        avisos = [m for n, m in perfil.validar({**base, "conhecimento": {"novidade": "aplicar"}}) if n == "aviso"]
+        self.assertTrue(any("conhecimento.novidade" in a for a in avisos))
+
     def test_validar_secao_design(self):
         ok = perfil.validar({"nome": "x", "stacks": ["front"], "comandos": {"teste": "t"},
                              "design": {"tokens": "src/tokens.css", "plataformas": ["web", "ios"]}})
