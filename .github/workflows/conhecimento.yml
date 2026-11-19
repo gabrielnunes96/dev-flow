@@ -28,12 +28,17 @@ jobs:
           set +e
           python -I scripts/atualizar_conhecimento.py --sem-gravar --relatorio conhecimento.md
           codigo=$?
-          python -I scripts/atualizar_conhecimento.py --verificar >> conhecimento.md || { [ "$codigo" -eq 0 ] && codigo=2; }
+          if ! python -I scripts/atualizar_conhecimento.py --verificar --max-dias 0 > verificacao.txt; then
+            { echo; echo "## Arquivos fora do formato"; echo; sed 's/^/- /' verificacao.txt; } >> conhecimento.md
+            [ "$codigo" -eq 0 ] && codigo=2
+          fi
           echo "codigo=$codigo" >> "$GITHUB_OUTPUT"
           [ $codigo -eq 1 ] && exit 1 || exit 0
 
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
+          if-no-files-found: ignore
           name: conhecimento
           path: conhecimento.md
 
@@ -42,10 +47,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          titulo="Revisão de conhecimento das stacks"
-          numero=$(gh issue list --state open --search "$titulo in:title" --json number --jq '.[0].number')
+          rotulo="dev-flow-conhecimento"
+          gh label create "$rotulo" --description "Revisão mensal do conhecimento das stacks" --force
+          numero=$(gh issue list --state open --label "$rotulo" --json number --jq '.[0].number')
           if [ -n "$numero" ]; then
             gh issue comment "$numero" --body-file conhecimento.md
           else
-            gh issue create --title "$titulo" --body-file conhecimento.md
+            gh issue create --title "Revisão de conhecimento das stacks" --label "$rotulo" --body-file conhecimento.md
           fi

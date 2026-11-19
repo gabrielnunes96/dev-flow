@@ -596,6 +596,22 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
         <p>Além do hook, são regras do processo: commit só com o seu “pode commitar”, <code>terraform apply</code> e deploy em produção nunca pela sessão, validação de banco só em base de desenvolvimento.</p>
       </section>
 
+      <section class="doc" id="raciocinio" data-titulo="Método de raciocínio">
+        <span class="eyebrow">Referência</span>
+        <h2>Método de raciocínio</h2>
+        <p class="lead">Implementar, revisar, testar e depurar seguem o mesmo método, escrito em <code>plugins/fluxo/referencias/raciocinio.md</code>. A qualidade não depende de o modelo lembrar de pensar nisso.</p>
+        <div class="grid-2">
+          <div class="card"><h4>Modelar antes de mexer</h4><p>Entrada, transformação e saída numa frase. Onde há estado e quem mais escreve nele. Onde estão as fronteiras de confiança.</p></div>
+          <div class="card"><h4>Contrato de cada unidade</h4><p>Pré-condição, pós-condição, invariante e o que acontece no erro. O que não se consegue escrever vira critério faltando.</p></div>
+          <div class="card"><h4>Casos de borda</h4><p>Cardinalidade (0, 1, muitos, máximo+1), ausência, números, texto, tempo e fuso, ordem, concorrência, falha parcial, dependência fora, permissão, volume.</p></div>
+          <div class="card"><h4>Custo</h4><p>O() do caminho principal; I/O vence CPU; N+1, laço aninhado e tudo em memória são os suspeitos. Otimizar só com número na mão.</p></div>
+          <div class="card"><h4>Execução simulada</h4><p>Caminho feliz, uma borda e um erro percorridos na cabeça com os valores. Diferença do esperado é bug antes de existir.</p></div>
+          <div class="card"><h4>Sem overengineering</h4><p>O menor código que atende os critérios, no padrão do projeto. Abstração, camada, cache, fila ou dependência só com requisito escrito. Teste: se eu apagar isto, qual critério falha?</p></div>
+          <div class="card"><h4>Depurar por hipóteses</h4><p>Reproduzir, observar o literal, listar hipóteses, derrubar a mais barata primeiro, causa raiz, teste que prova.</p></div>
+        </div>
+        <div class="callout gate-c"><span class="ico">◆</span><div><p><b>Antes de dizer “pronto”:</b> cada critério tem um teste que falharia se o critério quebrasse; build, lint e testes verdes nesta execução; validação feita ou registrada como pendente; e dito o que não foi verificado.</p></div></div>
+      </section>
+
       <section class="doc" id="conhecimento" data-titulo="Conhecimento atual">
         <span class="eyebrow">Referência</span>
         <h2>Conhecimento atual</h2>
@@ -615,22 +631,6 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
             <tr><td>Testes de comportamento</td><td><code>plugins/fluxo/evals/</code></td><td><code>claude plugin eval plugins/fluxo</code> ou <code>python -I scripts/avaliar_agentes.py --comando "&lt;cli do agente&gt;"</code> em qualquer host</td></tr>
           </tbody>
         </table></div>
-      </section>
-
-      <section class="doc" id="raciocinio" data-titulo="Método de raciocínio">
-        <span class="eyebrow">Referência</span>
-        <h2>Método de raciocínio</h2>
-        <p class="lead">Implementar, revisar, testar e depurar seguem o mesmo método, escrito em <code>plugins/fluxo/referencias/raciocinio.md</code>. A qualidade não depende de o modelo lembrar de pensar nisso.</p>
-        <div class="grid-2">
-          <div class="card"><h4>Modelar antes de mexer</h4><p>Entrada, transformação e saída numa frase. Onde há estado e quem mais escreve nele. Onde estão as fronteiras de confiança.</p></div>
-          <div class="card"><h4>Contrato de cada unidade</h4><p>Pré-condição, pós-condição, invariante e o que acontece no erro. O que não se consegue escrever vira critério faltando.</p></div>
-          <div class="card"><h4>Casos de borda</h4><p>Cardinalidade (0, 1, muitos, máximo+1), ausência, números, texto, tempo e fuso, ordem, concorrência, falha parcial, dependência fora, permissão, volume.</p></div>
-          <div class="card"><h4>Custo</h4><p>O() do caminho principal; I/O vence CPU; N+1, laço aninhado e tudo em memória são os suspeitos. Otimizar só com número na mão.</p></div>
-          <div class="card"><h4>Execução simulada</h4><p>Caminho feliz, uma borda e um erro percorridos na cabeça com os valores. Diferença do esperado é bug antes de existir.</p></div>
-          <div class="card"><h4>Sem overengineering</h4><p>O menor código que atende os critérios, no padrão do projeto. Abstração, camada, cache, fila ou dependência só com requisito escrito. Teste: se eu apagar isto, qual critério falha?</p></div>
-          <div class="card"><h4>Depurar por hipóteses</h4><p>Reproduzir, observar o literal, listar hipóteses, derrubar a mais barata primeiro, causa raiz, teste que prova.</p></div>
-        </div>
-        <div class="callout gate-c"><span class="ico">◆</span><div><p><b>Antes de dizer “pronto”:</b> cada critério tem um teste que falharia se o critério quebrasse; build, lint e testes verdes nesta execução; validação feita ou registrada como pendente; e dito o que não foi verificado.</p></div></div>
       </section>
 
       <section class="doc" id="problemas" data-titulo="Problemas comuns">

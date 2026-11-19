@@ -28,13 +28,10 @@ steps:
         echo "##vso[task.logissue type=warning]Há mudanças nas stacks: rode a skill atualizar-conhecimento (relatório nos artefatos)."
         echo "##vso[task.complete result=SucceededWithIssues;]"
       elif [ $codigo -ne 0 ]; then
+        echo "erro no levantamento (código $codigo); veja o log do passo." > "$(Build.ArtifactStagingDirectory)/conhecimento.md"
         exit $codigo
       fi
     displayName: Levantar versões das stacks
-
-  - script: python -I scripts/atualizar_conhecimento.py --verificar
-    displayName: Conferir revisão humana (120 dias)
-    continueOnError: true
 
   - publish: $(Build.ArtifactStagingDirectory)/conhecimento.md
     artifact: conhecimento
