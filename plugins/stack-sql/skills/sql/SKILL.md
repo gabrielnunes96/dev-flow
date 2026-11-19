@@ -7,6 +7,8 @@ description: Convenções para escrever, testar e revisar scripts SQL Server no 
 
 As convenções do **projeto** (CLAUDE.md: pastas, numeração, schema) vencem estas quando conflitarem.
 
+Versões com suporte, LTS e mudanças recentes: `../../referencias/atual.md` (veja a data de revisão). Antes de usar API ou recurso, siga o procedimento *projeto primeiro* do fluxo (`referencias/conhecimento.md` do plugin `fluxo`): padrão do projeto → versão em uso → documentação daquela versão → novidade como sugestão.
+
 ## Escrever
 - **Um script por mudança**, com nome ordenável: `scripts/AAAAMMDD_NN_descricao.sql` e o par `rollback/AAAAMMDD_NN_descricao.rollback.sql` (modelos em `../../templates/`, relativo a esta skill).
 - **Idempotente**: rodar duas vezes não falha nem duplica. `IF NOT EXISTS` / `OBJECT_ID(...) IS NULL` / `COL_LENGTH(...) IS NULL` para DDL; `CREATE OR ALTER` para procedure/view/function; `MERGE` ou `WHERE NOT EXISTS` para carga de domínio.

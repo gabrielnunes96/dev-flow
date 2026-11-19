@@ -7,6 +7,8 @@ description: Convenções e armadilhas de back-end Node.js/TypeScript para imple
 
 As convenções do **projeto** (CLAUDE.md, `tsconfig.json`, ESLint) vencem estas quando conflitarem. Front-end (React/Angular/Vue) é da skill `stack-front:front`.
 
+Versões com suporte, LTS e mudanças recentes: `../../referencias/atual.md` (veja a data de revisão). Antes de usar API ou recurso, siga o procedimento *projeto primeiro* do fluxo (`referencias/conhecimento.md` do plugin `fluxo`): padrão do projeto → versão em uso → documentação daquela versão → novidade como sugestão.
+
 ## Implementar
 - Gerenciador pelo lock: `pnpm-lock.yaml` → pnpm; `yarn.lock` → yarn; `package-lock.json` → npm; `bun.lockb` → bun. Instale com o comando de lock congelado (`npm ci`, `pnpm i --frozen-lockfile`). Versão do Node em `.nvmrc`/`engines`.
 - Siga a operação existente mais parecida (rota → validação → controller/handler → serviço → repositório). NestJS: módulo, provider registrado, DTO com `class-validator`; Fastify: schema JSON na rota; Express: middleware de validação (zod) e um handler de erro central.

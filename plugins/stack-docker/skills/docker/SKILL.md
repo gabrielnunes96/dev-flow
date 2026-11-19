@@ -7,9 +7,11 @@ description: Convenções para escrever, testar e revisar Dockerfile e Docker Co
 
 As convenções do **projeto** (registro, nomes de imagem, base corporativa) vencem estas quando conflitarem. Modelos: `../../templates/` (relativo a esta skill).
 
+Versões com suporte, LTS e mudanças recentes: `../../referencias/atual.md` (veja a data de revisão). Antes de usar API ou recurso, siga o procedimento *projeto primeiro* do fluxo (`referencias/conhecimento.md` do plugin `fluxo`): padrão do projeto → versão em uso → documentação daquela versão → novidade como sugestão.
+
 ## Dockerfile
 - **Múltiplos estágios**: `build` (SDK, dependências de compilação) → `runtime` (só o necessário para rodar). Modelos por stack em `../../templates/Dockerfile.<stack>`.
-- **Base fixada e mínima**: tag de versão explícita (`node:22.11-alpine`, `python:3.12-slim`, `mcr.microsoft.com/dotnet/aspnet:8.0`), idealmente com digest (`@sha256:`). Nunca `latest`. Distroless/chiseled quando a stack permite.
+- **Base fixada e mínima**: tag de versão explícita **da versão que o projeto usa** (`node:<versão>-alpine`, `python:<versão>-slim`, `mcr.microsoft.com/dotnet/aspnet:<versão>`; versões com suporte no `atual.md` da stack da linguagem), idealmente com digest (`@sha256:`). Nunca `latest`. Distroless/chiseled quando a stack permite.
 - **Cache de camadas**: copiar primeiro o manifesto de dependências (`package*.json`, `pyproject.toml`+lock, `*.csproj`, `go.mod`/`go.sum`, `pom.xml`), instalar, e só depois copiar o código. `RUN --mount=type=cache` para cache do gerenciador (BuildKit).
 - **`.dockerignore`** obrigatório (modelo `../../templates/dockerignore`): `.git`, `node_modules`, `bin/obj`, `.venv`, `.env*`, `.claude/local`, artefatos de teste. O que não está no ignore vai para o contexto (e pode ir para a imagem).
 - **Usuário não root**: `USER` numérico (ex.: `10001`) ou o usuário da base (`node`, `app`); arquivos com dono certo (`COPY --chown`).

@@ -7,6 +7,8 @@ description: Convenções para modelar, implementar, testar e revisar com MongoD
 
 As convenções do **projeto** (ODM — Mongoose, Spring Data, Motor/Beanie, driver oficial —, pastas de migração) vencem estas quando conflitarem.
 
+Versões com suporte, LTS e mudanças recentes: `../../referencias/atual.md` (veja a data de revisão). Antes de usar API ou recurso, siga o procedimento *projeto primeiro* do fluxo (`referencias/conhecimento.md` do plugin `fluxo`): padrão do projeto → versão em uso → documentação daquela versão → novidade como sugestão.
+
 ## Modelar
 - **Modele pelo padrão de acesso**, não pela normalização: liste as consultas da funcional e desenhe o documento para que a principal leia **um** documento.
 - Embutir quando o filho só existe com o pai, é lido junto e é limitado (endereços de um cliente). Referenciar quando cresce sem limite (pedidos de um cliente), é compartilhado ou atualizado sozinho. Array que cresce sem limite é bug futuro (documento máximo de 16 MB, reescrita cara).

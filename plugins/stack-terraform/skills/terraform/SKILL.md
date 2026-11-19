@@ -7,6 +7,8 @@ description: Convenções para escrever, testar e revisar infraestrutura como c�
 
 As convenções do **projeto** (estrutura de pastas, backend, módulos corporativos, `infra.iac` do perfil) vencem estas quando conflitarem.
 
+Versões com suporte, LTS e mudanças recentes: `../../referencias/atual.md` (veja a data de revisão). Antes de usar API ou recurso, siga o procedimento *projeto primeiro* do fluxo (`referencias/conhecimento.md` do plugin `fluxo`): padrão do projeto → versão em uso → documentação daquela versão → novidade como sugestão.
+
 ## Regra de ouro
 **A sessão nunca roda `terraform apply`/`destroy`** em ambiente compartilhado. Ela escreve o código, roda `fmt`, `validate`, `plan` (quando há credencial de leitura de dev) e entrega o plano para o usuário ou para o pipeline com aprovação aplicar.
 

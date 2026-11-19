@@ -201,5 +201,54 @@ class ConhecimentoScriptTests(unittest.TestCase):
         self.assertEqual(self._main("--hoje", "19/11/2026"), 1)
 
 
+PLUGINS = os.path.join(RAIZ_REPO, "plugins")
+
+
+def _ler_repo(*partes):
+    with open(os.path.join(RAIZ_REPO, *partes), encoding="utf-8") as f:
+        return f.read()
+
+
+class ConhecimentoNoRepositorioTests(unittest.TestCase):
+    def test_toda_stack_tem_atual_md_valido_e_citado(self):  # CA-1
+        self.assertEqual(ac.verificar(dt.date.today(), max_dias=0), [])
+        for pasta in sorted(os.listdir(PLUGINS)):
+            if not pasta.startswith("stack-"):
+                continue
+            stack = pasta[len("stack-"):]
+            skill = _ler_repo("plugins", pasta, "skills", stack, "SKILL.md")
+            self.assertIn("`../../referencias/atual.md`", skill, pasta)
+            self.assertIn("conhecimento.md", skill, pasta)
+            d = ac.ler(os.path.join(PLUGINS, pasta, "referencias", "atual.md"))
+            for produto in d["produtos"]:
+                self.assertIn(produto, ac.PADROES, f"{pasta}: {produto} sem padrão de varredura")
+
+    def test_max_dias_zero_ignora_idade(self):
+        self.assertEqual(ac.verificar(dt.date(2099, 1, 1), max_dias=0), [])
+
+    def test_especialistas_citam_projeto_primeiro(self):  # CA-2
+        agentes = [os.path.join("plugins", "fluxo", "agents", a) for a in os.listdir(os.path.join(PLUGINS, "fluxo", "agents"))]
+        agentes.append(os.path.join("plugins", "design", "agents", "designer.md"))
+        for arq in agentes:
+            texto = _ler_repo(arq)
+            self.assertIn("## Conhecimento atual (projeto primeiro)", texto, arq)
+            self.assertIn("fluxo/referencias/conhecimento.md", texto, arq)
+            self.assertIn("conhecimento.novidades", texto, arq)
+
+    def test_procedimento_cobre_os_quatro_passos_sem_depender_de_host(self):  # RF-2, CA-12
+        texto = _ler_repo("plugins", "fluxo", "referencias", "conhecimento.md")
+        for titulo in ("## 1. O projeto manda", "## 2. Versão em uso", "## 3. Documentação daquela versão", "## 4. Novidade"):
+            self.assertIn(titulo, texto)
+        self.assertIn("busca na web", texto)
+        self.assertIn("pacote instalado", texto)
+        self.assertIn("não confirmei", texto)
+
+    def test_aprender_leva_aprendizado_de_stack_ao_atual_md(self):  # CA-10
+        texto = _ler_repo("plugins", "fluxo", "skills", "aprender", "SKILL.md")
+        linha = next(l for l in texto.splitlines() if "qualquer projeto daquela stack" in l)
+        self.assertIn("referencias/atual.md", linha)
+        self.assertIn("PR", linha)
+
+
 if __name__ == "__main__":
     unittest.main()

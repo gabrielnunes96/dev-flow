@@ -15,7 +15,7 @@ Para cada aprendizado (do argumento ou levantado na conversa: correções do usu
    | Comportamento de ambiente / dados de teste | arquivo de `validacao.dados` |
    | Comando, caminho, proteção, situação de parar | `.claude/projeto.json` |
    | Algo que nunca pode acontecer | `protecao` no perfil (o guard aplica) — não só texto |
-   | Jeito de trabalhar que vale para qualquer projeto daquela stack | skill do plugin `stack-*` |
+   | Jeito de trabalhar que vale para qualquer projeto daquela stack | skill do plugin `stack-*` (método) ou `referencias/atual.md` dele (versão, suporte, mudança recente — com data e fonte), por proposta (branch + PR) no repositório do dev-flow |
    | Jeito de trabalhar que vale para qualquer projeto | skill do plugin `fluxo` |
    | Preferência pessoal do usuário | memória do Claude |
 2. **Conferir** se já existe algo que cobre: atualizar em vez de duplicar; remover o que ficou errado (ex.: um "impedimento" que não era).

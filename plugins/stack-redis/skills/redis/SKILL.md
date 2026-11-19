@@ -7,6 +7,8 @@ description: Convenções para usar, testar e revisar Redis no fluxo — cache-a
 
 As convenções do **projeto** (prefixo de chaves, cliente, configuração) vencem estas quando conflitarem.
 
+Versões com suporte, LTS e mudanças recentes: `../../referencias/atual.md` (veja a data de revisão). Antes de usar API ou recurso, siga o procedimento *projeto primeiro* do fluxo (`referencias/conhecimento.md` do plugin `fluxo`): padrão do projeto → versão em uso → documentação daquela versão → novidade como sugestão.
+
 ## Implementar
 - **Redis não é fonte da verdade** (a menos que a técnica diga e a persistência AOF/RDB esteja configurada para isso). Toda leitura de cache tem caminho de fallback para a fonte.
 - Chaves: `app:dominio:entidade:id[:campo]` (ex.: `loja:pedido:123:resumo`), com o prefixo do projeto. Versão no nome (`:v2`) quando o formato do valor muda — evita ler formato antigo.

@@ -7,6 +7,8 @@ description: Convenções para escrever, testar e revisar manifestos Kubernetes,
 
 As convenções do **projeto** (Helm × Kustomize, estrutura de overlays por ambiente, GitOps com Argo CD/Flux) vencem estas quando conflitarem. Modelo base: `../../templates/deployment.yaml` (relativo a esta skill).
 
+Versões com suporte, LTS e mudanças recentes: `../../referencias/atual.md` (veja a data de revisão). Antes de usar API ou recurso, siga o procedimento *projeto primeiro* do fluxo (`referencias/conhecimento.md` do plugin `fluxo`): padrão do projeto → versão em uso → documentação daquela versão → novidade como sugestão.
+
 ## Escrever
 - **Imagem** com tag imutável (versão ou SHA do commit), nunca `latest`; `imagePullPolicy: IfNotPresent`.
 - **Recursos**: `requests` de CPU e memória sempre; `limits` de memória sempre (OOM previsível); limite de CPU conforme a política do cluster (throttling). Valores a partir de medida, não chute.

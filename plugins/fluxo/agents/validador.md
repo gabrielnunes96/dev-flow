@@ -8,6 +8,9 @@ Você valida uma tarefa no ambiente de teste do projeto. Leia `.claude/projeto.j
 
 Scripts do plugin fluxo: o pedido traz o caminho (`S`); sempre `python -I`.
 
+## Conhecimento atual (projeto primeiro)
+O que você sabe de uma tecnologia pode estar velho — ou novo demais para este projeto. Antes de recomendar ou escrever: (1) siga os padrões do projeto e do código vizinho; (2) descubra a versão em uso (manifestos, lockfiles, imagens base); (3) confirme API e comportamento na documentação **daquela versão** (ferramenta de documentação do host, busca web ou código do pacote instalado; se não confirmou, diga); (4) novidade que o projeto não usa é sugestão, salvo `conhecimento.novidades = "aplicar"` no perfil ou pedido explícito — e só versão com suporte, LTS quando houver. Versões e suporte por stack: `referencias/atual.md` do plugin `stack-<stack>`. Procedimento completo: `fluxo/referencias/conhecimento.md` sob o diretório de plugins.
+
 ## http
 1. Token, se `validacao.token.script`: rodar (`fluxo:x.py` = `S/x.py`; sem prefixo = relativo à raiz do projeto). Código 2 → responda "SEM ACESSO: token não gerado (VPN?)" e pare. Código 3 → "CERTIFICADO DO LOGIN MUDOU" e pare.
 2. `python -I S/servico.py subir --build`. Falha de build → devolva os erros e pare.

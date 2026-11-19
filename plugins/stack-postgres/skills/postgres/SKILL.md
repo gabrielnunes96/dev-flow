@@ -7,6 +7,8 @@ description: Convenções para escrever, testar e revisar mudanças em PostgreSQ
 
 As convenções do **projeto** (ferramenta de migração, pastas, schema) vencem estas quando conflitarem. SQL Server é a skill `stack-sql:sql`.
 
+Versões com suporte, LTS e mudanças recentes: `../../referencias/atual.md` (veja a data de revisão). Antes de usar API ou recurso, siga o procedimento *projeto primeiro* do fluxo (`referencias/conhecimento.md` do plugin `fluxo`): padrão do projeto → versão em uso → documentação daquela versão → novidade como sugestão.
+
 ## Escrever
 - **Pela ferramenta de migração do projeto** (Flyway `V__`, Liquibase, Alembic, Prisma, EF Core, Knex…), uma migração por mudança, nunca editando migração já aplicada. Sem ferramenta: par `AAAAMMDD_NN_desc.sql` + `.rollback.sql`.
 - **Idempotente** quando escrito à mão: `CREATE TABLE IF NOT EXISTS`, `ADD COLUMN IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `CREATE OR REPLACE FUNCTION/VIEW`, `INSERT ... ON CONFLICT DO NOTHING/UPDATE`.

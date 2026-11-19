@@ -7,6 +7,8 @@ description: Convenções e armadilhas de Go para implementar, testar e revisar 
 
 As convenções do **projeto** (CLAUDE.md, `.golangci.yml`, layout de pacotes) vencem estas quando conflitarem.
 
+Versões com suporte, LTS e mudanças recentes: `../../referencias/atual.md` (veja a data de revisão). Antes de usar API ou recurso, siga o procedimento *projeto primeiro* do fluxo (`referencias/conhecimento.md` do plugin `fluxo`): padrão do projeto → versão em uso → documentação daquela versão → novidade como sugestão.
+
 ## Implementar
 - Siga o layout existente (`cmd/`, `internal/`, pacotes por domínio). Pacote novo só quando há responsabilidade nova; nada de `utils`/`common` genérico.
 - Erros: devolva, não entre em pânico. Envolva com contexto: `fmt.Errorf("buscar pedido %d: %w", id, err)`; compare com `errors.Is`/`errors.As`, nunca pela string. Erro tratado uma vez: ou loga ou devolve.
