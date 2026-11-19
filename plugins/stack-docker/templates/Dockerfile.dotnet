@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # ASP.NET Core em múltiplos estágios. Ajuste PROJETO e as versões ao projeto.
-ARG DOTNET=8.0
+ARG DOTNET=10.0
 FROM mcr.microsoft.com/dotnet/sdk:${DOTNET} AS build
 WORKDIR /src
 COPY *.sln ./

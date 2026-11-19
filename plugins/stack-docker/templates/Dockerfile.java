@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# Spring Boot 3.3+ com Maven wrapper e camadas do jar. Para Gradle: ./gradlew bootJar.
+# Spring Boot (jar executável) com Maven wrapper e camadas do jar. Para Gradle: ./gradlew bootJar.
 FROM eclipse-temurin:21-jdk AS build
 WORKDIR /src
 COPY mvnw pom.xml ./
