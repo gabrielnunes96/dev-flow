@@ -15,14 +15,14 @@ Gerado em 2026-11-19 por `scripts/atualizar_conhecimento.py` a partir de endofli
 | Produto | Ciclo | Situação | Lançado | Suporte ativo até | Fim de suporte | Última |
 | --- | --- | --- | --- | --- | --- | --- |
 | redis | 8.10 | suportado | 2026-07-29 | sim | — | 8.10.3 |
-| redis | 8.8 | suportado | 2026-05-25 | 2026-07-29 | — | 8.8.4 |
-| redis | 8.6 | suportado | 2026-02-11 | 2026-05-25 | — | 8.6.8 |
-| redis | 8.4 | suportado | 2025-11-18 | 2026-02-11 | — | 8.4.8 |
-| redis | 8.2 | suportado | 2025-08-04 | 2025-11-18 | 2030-09-01 | 8.2.11 |
-| redis | 8.0 | suportado | 2025-05-02 | 2025-08-04 | 2026-12-01 | 8.0.6 |
-| redis | 7.4 | suportado | 2024-07-29 | 2025-05-02 | 2029-12-01 | 7.4.12 |
-| redis | 7.2 | suportado | 2023-08-15 | 2024-07-29 | 2029-12-01 | 7.2.17 |
-| redis | 6.2 | suportado | 2021-02-22 | 2022-04-27 | 2027-04-01 | 6.2.24 |
+| redis | 8.8 | suporte ativo encerrado | 2026-05-25 | 2026-07-29 | — | 8.8.4 |
+| redis | 8.6 | suporte ativo encerrado | 2026-02-11 | 2026-05-25 | — | 8.6.8 |
+| redis | 8.4 | suporte ativo encerrado | 2025-11-18 | 2026-02-11 | — | 8.4.8 |
+| redis | 8.2 | suporte ativo encerrado | 2025-08-04 | 2025-11-18 | 2030-09-01 | 8.2.11 |
+| redis | 8.0 | suporte ativo encerrado | 2025-05-02 | 2025-08-04 | 2026-12-01 | 8.0.6 |
+| redis | 7.4 | suporte ativo encerrado | 2024-07-29 | 2025-05-02 | 2029-12-01 | 7.4.12 |
+| redis | 7.2 | suporte ativo encerrado | 2023-08-15 | 2024-07-29 | 2029-12-01 | 7.2.17 |
+| redis | 6.2 | suporte ativo encerrado | 2021-02-22 | 2022-04-27 | 2027-04-01 | 6.2.24 |
 | redis | 7.0 | sem suporte | 2022-04-27 | 2023-08-15 | 2024-07-29 | 7.0.15 |
 | redis | 6.0 | sem suporte | 2020-04-30 | 2021-02-22 | 2022-05-31 | 6.0.20 |
 <!-- versoes:fim -->

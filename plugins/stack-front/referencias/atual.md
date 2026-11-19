@@ -25,13 +25,13 @@ Gerado em 2026-11-19 por `scripts/atualizar_conhecimento.py` a partir de endofli
 | nodejs | 25 | sem suporte | 2025-10-15 | 2026-04-01 | 2026-06-01 | 25.9.0 |
 | nodejs | 23 | sem suporte | 2024-10-16 | 2025-04-01 | 2025-06-01 | 23.11.1 |
 | react | 19 | suportado | 2024-12-05 | sim | — | 19.3.1 |
-| react | 18 | suportado | 2022-03-29 | 2024-12-05 | — | 18.3.1 |
-| react | 17 | suportado | 2020-10-20 | 2022-03-29 | — | 17.0.2 |
-| react | 16 | suportado | 2017-09-26 | 2020-10-20 | — | 16.14.0 |
-| react | 15 | suportado | 2016-04-07 | 2020-10-14 | — | 15.7.0 |
+| react | 18 | suporte ativo encerrado | 2022-03-29 | 2024-12-05 | — | 18.3.1 |
+| react | 17 | suporte ativo encerrado | 2020-10-20 | 2022-03-29 | — | 17.0.2 |
+| react | 16 | suporte ativo encerrado | 2017-09-26 | 2020-10-20 | — | 16.14.0 |
+| react | 15 | suporte ativo encerrado | 2016-04-07 | 2020-10-14 | — | 15.7.0 |
 | angular | 22 | suportado | 2026-06-03 | 2027-06-30 | 2028-06-30 | 22.2.6 |
-| angular | 21 | suportado | 2025-11-19 | 2026-06-03 | 2027-06-30 | 21.2.26 |
-| angular | 20 | suportado | 2025-05-28 | 2025-11-19 | 2026-11-28 | 20.3.35 |
+| angular | 21 | suporte ativo encerrado | 2025-11-19 | 2026-06-03 | 2027-06-30 | 21.2.26 |
+| angular | 20 | suporte ativo encerrado | 2025-05-28 | 2025-11-19 | 2026-11-28 | 20.3.35 |
 | angular | 19 | sem suporte | 2024-11-19 | 2025-05-28 | 2026-05-19 | 19.2.25 |
 | angular | 18 | sem suporte | 2024-05-22 | 2024-11-19 | 2025-11-21 | 18.2.14 |
 | vue | 3.5 | suportado | 2024-09-03 | sim | — | 3.5.45 |

@@ -22,5 +22,6 @@ Vale para todo especialista e toda skill de stack. O que você sabe de uma tecno
 - Conforme `conhecimento.novidades` no perfil:
   - `sugerir` (padrão): novidade que o projeto não usa vira **sugestão** no fechamento (ou ADR proposta), com ganho, custo e risco. Não muda o código por conta própria.
   - `aplicar`: projeto novo ou que pediu para acompanhar novidades — pode usar a versão suportada mais recente (LTS quando houver), registrando a escolha.
+- Situações na tabela do `atual.md`: `LTS` e `suportado` servem para trabalho novo; `suporte ativo encerrado` ainda pode receber correções de segurança até o fim de suporte (ou nenhuma, se não houver fim declarado) — use se o projeto já está nela, mas registre como risco a planejar; `sem suporte` é risco a apontar.
 - Em qualquer caso: só versão estável e com suporte. Versão sem suporte (fim de vida) no projeto → apontar como risco, não "atualizar de carona" numa tarefa que não pediu.
 - A demanda pediu explicitamente a novidade → aplicar, seguindo os passos 1 a 3.

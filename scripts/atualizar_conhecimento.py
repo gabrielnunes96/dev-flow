@@ -173,6 +173,9 @@ def situacao(ciclo, hoje):
     lts = ciclo.get("lts")
     if lts is True or (_data(lts) and _data(lts) <= hoje):
         return "LTS"
+    suporte = _data(ciclo.get("support"))
+    if suporte and suporte <= hoje:
+        return "suporte ativo encerrado"  # só correções de segurança até o fim, ou nenhuma se não há fim declarado
     return "suportado"
 
 
@@ -266,6 +269,8 @@ def comparar(anteriores, dados_por_produto, hoje):
                 achados.append(("novo_ciclo", f"{produto} {ciclo} ({agora})"))
             elif antes is not None and antes != "sem suporte" and agora == "sem suporte":
                 achados.append(("fim_de_suporte", f"{produto} {ciclo} saiu de suporte (fim: {_texto(c.get('eol'))})"))
+            elif antes in ("LTS", "suportado") and agora == "suporte ativo encerrado":
+                achados.append(("fim_de_suporte", f"{produto} {ciclo} encerrou o suporte ativo (fim: {_texto(c.get('eol'))})"))
             elif antes is not None and antes != "LTS" and agora == "LTS":
                 achados.append(("novo_lts", f"{produto} {ciclo} virou LTS"))
     return achados
