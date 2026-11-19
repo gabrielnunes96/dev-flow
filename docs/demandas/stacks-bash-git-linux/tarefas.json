@@ -33,9 +33,9 @@
         "CA-1"
       ],
       "validacao": "claude plugin validate . && python -m unittest discover -s tests",
-      "estado": "a_fazer",
+      "estado": "feito",
       "wi": null,
-      "commit": null
+      "commit": "a25c54a"
     },
     {
       "id": "T3",

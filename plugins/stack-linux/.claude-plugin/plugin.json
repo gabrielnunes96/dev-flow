@@ -1,0 +1,16 @@
+{
+  "name": "stack-linux",
+  "version": "0.1.0",
+  "description": "Convenções de Linux para o fluxo: serviços systemd endurecidos, usuários e permissões mínimas, pacotes fixados, SSH sem senha, firewall, logs no journald, timers, diagnóstico e mudança em servidor sempre pelo humano.",
+  "author": {
+    "name": "Gabriel Nunes Campos"
+  },
+  "keywords": [
+    "linux",
+    "systemd",
+    "servidor",
+    "ubuntu",
+    "debian",
+    "rhel"
+  ]
+}

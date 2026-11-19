@@ -110,6 +110,16 @@
       "description": "Convenções de scripts de shell (Bash e sh POSIX) para o fluxo: modo estrito, aspas, trap e limpeza, entrada validada, portabilidade, ShellCheck, shfmt e testes com bats."
     },
     {
+      "name": "stack-git",
+      "source": "stack-git",
+      "description": "Convenções de Git para o fluxo: commits atômicos, branch a partir da base, conflitos resolvidos com teste, histórico publicado intocável, .gitattributes de fim de linha, segredos e arquivos grandes fora do histórico, diagnóstico com bisect e reflog."
+    },
+    {
+      "name": "stack-linux",
+      "source": "stack-linux",
+      "description": "Convenções de Linux para o fluxo: serviços systemd endurecidos, usuários e permissões mínimas, pacotes fixados, SSH sem senha, firewall, logs no journald, timers, diagnóstico e mudança em servidor sempre pelo humano."
+    },
+    {
       "name": "design",
       "source": "design",
       "description": "Designer de UX/UI: direção visual, temas claro/escuro com tokens, telas e fluxos, animações limpas, acessibilidade e revisão visual."

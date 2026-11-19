@@ -14,7 +14,7 @@ import sys
 
 ARQUIVO = os.path.join(".claude", "projeto.json")
 STACKS = {"dotnet", "sql", "front", "node", "python", "java", "go", "postgres", "mysql", "mongodb", "redis",
-          "docker", "kubernetes", "terraform", "bash", "outra"}
+          "docker", "kubernetes", "terraform", "bash", "git", "linux", "outra"}
 RASTREADORES = {"local", "azure-boards"}
 VALIDACOES = {"http", "sql", "navegador", "comando", "nenhuma"}
 PUSH = {"humano", "permitido"}
