@@ -24,6 +24,7 @@ argument-hint: "[caminho do projeto]"
   | `Dockerfile`, `compose.yaml`/`docker-compose.yml` | docker |
   | manifestos com `apiVersion:`/`kind:`, `Chart.yaml`, `kustomization.yaml` | kubernetes |
   | `*.tf`, `.terraform.lock.hcl` | terraform |
+  | `*.sh`, `*.bash`, arquivo com shebang `#!/bin/bash`, `#!/usr/bin/env bash` ou `#!/bin/sh` | bash |
 - Comandos: scripts do `package.json`, solução e projetos de teste .NET, `Makefile`/`justfile`/`Taskfile.yml`, `pyproject.toml` (pytest, ruff, mypy), `pom.xml`/`gradlew`, `go.mod` (`go test ./...`, `go vet`), pipelines existentes, `launchSettings.json` (perfis, portas, healthcheck), `compose.yaml` (serviços e portas). A skill da stack lista os comandos típicos.
 - CI → `ci.provedor`: `azure-pipelines.yml`/`.azure-pipelines/` → azure-pipelines; `.github/workflows/` → github-actions; `.gitlab-ci.yml` → gitlab-ci. Nenhum → perguntar junto com o rastreador.
 - Infra → `infra`: nuvem pelos provedores do Terraform/SDKs (`azurerm`, `aws`, `google`), orquestrador (`kubernetes`, `compose`, app service, serverless), ambientes que aparecem em pipelines/manifestos (`dev`, `hml`, `prd`).

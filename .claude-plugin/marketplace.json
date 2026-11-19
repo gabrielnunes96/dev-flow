@@ -142,6 +142,13 @@
       "category": "development"
     },
     {
+      "name": "stack-bash",
+      "source": "./plugins/stack-bash",
+      "description": "Convenções de scripts de shell (Bash e sh POSIX) para o fluxo: modo estrito, aspas, trap e limpeza, entrada validada, portabilidade, ShellCheck, shfmt e testes com bats.",
+      "version": "0.1.0",
+      "category": "development"
+    },
+    {
       "name": "design",
       "source": "./plugins/design",
       "description": "Designer de UX/UI: direção visual, temas claro/escuro com tokens, telas e fluxos, animações limpas, acessibilidade e revisão visual.",
