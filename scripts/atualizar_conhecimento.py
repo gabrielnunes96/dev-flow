@@ -21,6 +21,9 @@ Formato de atual.md (ver docs/novo-plugin-de-stack.md):
   ## Fontes oficiais  (ao menos um link)
   ## Versões         <!-- versoes:inicio --> ... <!-- versoes:fim -->
   ## Mudanças a observar
+
+  produtos=- : a stack não tem ciclos de suporte publicados (ex.: Bash). "## Versões" fica em texto livre,
+  sem bloco gerado; o modo online não consulta a fonte, mas a revisão vencida continua valendo.
 """
 import argparse
 import datetime as dt
@@ -40,7 +43,12 @@ META = re.compile(r"<!--\s*dev-flow:conhecimento\s+(.*?)-->")
 BLOCO = re.compile(r"(<!-- versoes:inicio -->)(.*?)(<!-- versoes:fim -->)", re.S)
 SECOES = ("## Fontes oficiais", "## Versões", "## Mudanças a observar")
 SEM_SUPORTE_MOSTRADOS = 2
+SEM_PRODUTO = "-"
 EXTENSOES = (".md", ".yml", ".yaml", ".json", ".tf", ".txt", ".toml", ".cs", ".py", ".js", ".ts", ".css", ".html")
+
+# Tag de imagem com codinome Debian (debian:bookworm-slim, node:20-bullseye, aspnet:8.0-bookworm-slim):
+# só em "debian:<codinome>" ou em tag que começa por versão, para não pegar CSS ("align-items:stretch").
+IMAGEM_COM_CODINOME = r"\b(?:debian:|[\w./-]+:\d[\w.]*-(?:slim-)?)([a-z]{5,})\b"
 
 # Como cada produto aparece citado em texto, YAML ou imagem de container. O grupo 1 é o ciclo.
 PADROES = {
@@ -63,6 +71,12 @@ PADROES = {
     "mssqlserver": [r"\bSQL Server\s+(20\d\d)\b"],
     "django": [r"\bDjango\s+(\d\.\d)\b"],
     "docker-engine": [r"\bDocker (?:Engine\s+)?(\d{2}\.\d+)\b", r"\bdocker:(\d{2}\.\d+)"],
+    "git": [r"\b[Gg]it\s+v?(2\.\d+)\b"],
+    # Distribuições: versão, tag de imagem, runner de CI e codinome na tag (debian:bookworm-slim, python:3.12-slim-bookworm).
+    "ubuntu": [r"\bUbuntu\s+(\d{2}\.\d{2})\b", r"\bubuntu[:-](\d{2}\.\d{2})\b", r"\bubuntu:([a-z]{5,})\b"],
+    "debian": [r"\bDebian\s+(\d{1,2})\b", r"\bdebian:(\d{1,2})\b", IMAGEM_COM_CODINOME],
+    "rhel": [r"\b(?:RHEL|Red Hat Enterprise Linux)\s+(\d{1,2})\b", r"\bubi(\d{1,2})\b"],
+    "alpine-linux": [r"\bAlpine(?: Linux)?\s+(3\.\d+)\b", r"\balpine:?(3\.\d+)\b"],
 }
 
 
@@ -91,6 +105,9 @@ def ler(arq):
     m = META.search(texto)
     meta = dict(re.findall(r"(\w+)=(\S+)", m.group(1))) if m else {}
     produtos = [p for p in meta.get("produtos", "").split(",") if p]
+    sem_produto = produtos == [SEM_PRODUTO]
+    if sem_produto:
+        produtos = []
     revisado = None
     try:
         revisado = dt.date.fromisoformat(meta.get("revisado_em", ""))
@@ -104,6 +121,7 @@ def ler(arq):
         "texto": texto,
         "tem_meta": bool(m),
         "produtos": produtos,
+        "sem_produto": sem_produto,
         "revisado_em": revisado,
         "n_fontes": len(re.findall(r"https?://", fontes)),
         "bloco": bloco.group(2) if bloco else None,
@@ -132,8 +150,8 @@ def verificar(hoje, max_dias=120, stacks=None):
     for stack, arq in atuais.items():
         d = ler(arq)
         rel = os.path.relpath(arq, RAIZ)
-        if not d["tem_meta"] or not d["produtos"]:
-            problemas.append(f"{rel}: falta o comentário dev-flow:conhecimento com produtos=")
+        if not d["tem_meta"] or not (d["produtos"] or d["sem_produto"]):
+            problemas.append(f"{rel}: falta o comentário dev-flow:conhecimento com produtos= (ou produtos=-)")
         if d["revisado_em"] is None:
             problemas.append(f"{rel}: revisado_em ausente ou inválido (AAAA-MM-DD)")
         elif max_dias > 0 and (hoje - d["revisado_em"]).days > max_dias:
@@ -143,7 +161,7 @@ def verificar(hoje, max_dias=120, stacks=None):
                 problemas.append(f"{rel}: falta a seção '{s}'")
         if d["n_fontes"] < 1:
             problemas.append(f"{rel}: '## Fontes oficiais' sem link")
-        if d["bloco"] is None:
+        if d["bloco"] is None and not d["sem_produto"]:
             problemas.append(f"{rel}: falta o bloco <!-- versoes:inicio --> ... <!-- versoes:fim -->")
     return problemas
 
@@ -185,8 +203,12 @@ def normalizar(versao):
 
 
 def nomes_do_ciclo(ciclo):
-    """Como um ciclo pode aparecer citado: o próprio ciclo e, se houver, o ano do releaseLabel (SQL Server 2022)."""
+    """Como um ciclo pode aparecer citado: o próprio ciclo, o ano do releaseLabel (SQL Server 2022) e o
+    codinome em minúsculas (Debian "Bookworm" → bookworm, Ubuntu "Jammy Jellyfish" → jammy)."""
     nomes = {normalizar(ciclo["cycle"])}
+    codinome = str(ciclo.get("codename") or "").split()
+    if codinome:
+        nomes.add(codinome[0].lower())
     ano = re.match(r"(20\d\d)\b", str(ciclo.get("releaseLabel") or ""))
     if ano:
         nomes.add(ano.group(1))
@@ -326,6 +348,8 @@ def levantar(hoje, stacks=None, fonte_dir=None, gravar=True, max_dias=120):
         rel = os.path.relpath(arq, RAIZ)
         if d["revisado_em"] and max_dias > 0 and (hoje - d["revisado_em"]).days > max_dias:
             achados.append(("revisao_vencida", f"{rel}: revisado em {d['revisado_em']}"))
+        if d["sem_produto"]:
+            continue
         if not d["produtos"] or d["bloco"] is None:
             achados.append(("estrutura", f"{rel}: sem produtos= ou sem bloco de versões (rode --verificar)"))
             continue

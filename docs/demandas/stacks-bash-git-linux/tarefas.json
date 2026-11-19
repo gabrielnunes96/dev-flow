@@ -1,0 +1,96 @@
+{
+  "demanda": "stacks-bash-git-linux",
+  "titulo": "Stacks de Bash, Git e Linux",
+  "item_raiz": null,
+  "tarefas": [
+    {
+      "id": "T1",
+      "titulo": "Levantamento: stack sem produto e codinomes de distribuição",
+      "descricao": "produtos=- em verificar/levantar; codinome em nomes_do_ciclo; PADROES de git e distribuições; testes.",
+      "repo": ".",
+      "stack": "python",
+      "depende_de": [],
+      "criterios": [
+        "CA-2",
+        "CA-3",
+        "CA-4"
+      ],
+      "validacao": "claude plugin validate . && python -m unittest discover -s tests",
+      "estado": "a_fazer",
+      "wi": null,
+      "commit": null
+    },
+    {
+      "id": "T2",
+      "titulo": "Plugin stack-bash",
+      "descricao": "Skill bash, atual.md (produtos=-), modelo de script.",
+      "repo": ".",
+      "stack": "python",
+      "depende_de": [
+        "T1"
+      ],
+      "criterios": [
+        "CA-1"
+      ],
+      "validacao": "claude plugin validate . && python -m unittest discover -s tests",
+      "estado": "a_fazer",
+      "wi": null,
+      "commit": null
+    },
+    {
+      "id": "T3",
+      "titulo": "Plugin stack-git",
+      "descricao": "Skill git e atual.md (git).",
+      "repo": ".",
+      "stack": "python",
+      "depende_de": [
+        "T1"
+      ],
+      "criterios": [
+        "CA-1"
+      ],
+      "validacao": "claude plugin validate . && python -m unittest discover -s tests",
+      "estado": "a_fazer",
+      "wi": null,
+      "commit": null
+    },
+    {
+      "id": "T4",
+      "titulo": "Plugin stack-linux",
+      "descricao": "Skill linux e atual.md (ubuntu, debian, rhel, alpine-linux).",
+      "repo": ".",
+      "stack": "python",
+      "depende_de": [
+        "T1"
+      ],
+      "criterios": [
+        "CA-1"
+      ],
+      "validacao": "claude plugin validate . && python -m unittest discover -s tests",
+      "estado": "a_fazer",
+      "wi": null,
+      "commit": null
+    },
+    {
+      "id": "T5",
+      "titulo": "Perfil, detecção, catálogo, documentação e versões",
+      "descricao": "STACKS/schema, iniciar, marketplace + sincronizar_hosts, README, manual, guia de stack, versões.",
+      "repo": ".",
+      "stack": "python",
+      "depende_de": [
+        "T2",
+        "T3",
+        "T4"
+      ],
+      "criterios": [
+        "CA-1",
+        "CA-5",
+        "CA-6"
+      ],
+      "validacao": "claude plugin validate . && python -m unittest discover -s tests",
+      "estado": "a_fazer",
+      "wi": null,
+      "commit": null
+    }
+  ]
+}

@@ -201,6 +201,42 @@ class ConhecimentoScriptTests(unittest.TestCase):
         achados = ac.levantar(HOJE, fonte_dir=self.fonte)
         self.assertTrue(any(t == "estrutura" and "stack-python" in m for t, m in achados))
 
+    def test_stack_sem_produto_dispensa_tabela_mas_nao_a_revisao(self):  # demanda stacks-bash-git-linux, CA-2 e CA-3
+        sem = "# Conhecimento atual: bash\n<!-- dev-flow:conhecimento revisado_em={r} produtos=- -->\n\n## Fontes oficiais\n- https://www.gnu.org/software/bash/\n\n## Versões\nSem ciclos publicados.\n\n## Mudanças a observar\n- nada\n"
+        arq = os.path.join(self.plugins, "stack-bash", "referencias", "atual.md")
+        self._escrever(arq, sem.format(r="2026-11-01"))
+        self.assertEqual(ac.verificar(HOJE), [])
+        with mock.patch.object(ac, "buscar", side_effect=AssertionError("não deveria consultar")):
+            self.assertEqual(ac.levantar(HOJE, stacks=["bash"], gravar=False), [])
+        self._escrever(arq, sem.format(r="2026-01-01"))
+        with mock.patch.object(ac, "buscar", side_effect=AssertionError("não deveria consultar")):
+            self.assertEqual([t for t, _ in ac.levantar(HOJE, stacks=["bash"], gravar=False)], ["revisao_vencida"])
+        self.assertEqual(self._ler(arq), sem.format(r="2026-01-01"))
+        self._atual("python", "", "")
+        self.assertTrue(any("stack-python" in p and "produtos=" in p for p in ac.verificar(HOJE)))
+        self._escrever(self.py, ATUAL.format(nome="python", revisado="2026-11-01", produtos="python", bloco="").replace(
+            "<!-- versoes:inicio -->\n\n<!-- versoes:fim -->", ""))
+        self.assertTrue(any("stack-python" in p and "versoes:inicio" in p for p in ac.verificar(HOJE)))
+
+    def test_distribuicao_citada_por_codinome_tag_ou_runner(self):  # CA-4
+        self._fonte("debian", [{"cycle": "13", "codename": "Trixie", "eol": "2030-06-30"},
+                               {"cycle": "12", "codename": "Bookworm", "eol": "2028-06-30"},
+                               {"cycle": "10", "codename": "Buster", "eol": "2024-06-30"}])
+        self._fonte("ubuntu", [{"cycle": "24.04", "codename": "Noble Numbat", "lts": True, "eol": "2029-05-31"},
+                               {"cycle": "20.04", "codename": "Focal Fossa", "lts": True, "eol": "2025-05-31"}])
+        self._fonte("alpine-linux", [{"cycle": "3.22", "eol": "2027-05-01"}, {"cycle": "3.18", "eol": "2025-05-09"}])
+        self._atual("linux", "ubuntu,debian,alpine-linux", "")
+        self._escrever(os.path.join(self.plugins, "stack-linux", "templates", "x.yml"),
+                       "a: debian:buster-slim\nb: node:20-buster\nc: python:3.12-slim-bookworm\n"
+                       "runs-on: ubuntu-20.04\nd: ubuntu:focal\ne: node:20-alpine3.18\n"
+                       "f: align-items:stretch\ng: Debian 12 e Ubuntu 24.04\nh: antes do Ubuntu 20.04\n")
+        citadas = sorted(m.split(" cita ")[1] for t, m in ac.levantar(HOJE, stacks=["linux"], fonte_dir=self.fonte, gravar=False)
+                         if t == "versao_sem_suporte")
+        self.assertEqual(citadas, sorted(["debian buster, sem suporte", "debian buster, sem suporte",
+                                          "ubuntu 20.04, sem suporte", "ubuntu focal, sem suporte",
+                                          "alpine-linux 3.18, sem suporte"]))
+        self.assertEqual(ac.nomes_do_ciclo({"cycle": "22.04", "codename": "Jammy Jellyfish"}), {"22.04", "jammy"})
+
     def test_codigos_de_saida_e_relatorio(self):
         rel = os.path.join(self.dir, "rel.md")
         self.assertEqual(self._main(*["--fonte-dir", self.fonte, "--stack", "node", "--hoje", "2026-11-19", "--relatorio", rel]), 2)
