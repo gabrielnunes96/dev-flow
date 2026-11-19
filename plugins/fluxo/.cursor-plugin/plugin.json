@@ -1,7 +1,7 @@
 {
   "name": "fluxo",
   "description": "Núcleo do fluxo de desenvolvimento: demanda → funcional → técnica → plano → tasks → PR, com agentes especialistas (analista, arquiteto, revisor, segurança, testador, depurador, validador), método de raciocínio, guard de segurança e validação local.",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "author": {
     "name": "Gabriel Nunes Campos"
   },

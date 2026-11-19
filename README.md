@@ -114,6 +114,7 @@ python -I scripts/sincronizar_hosts.py --check
 | **stack-java** | Spring Boot, JPA sem N+1, Bean Validation, JUnit 5, MockMvc, Testcontainers, Flyway. Kotlin incluso. |
 | **stack-go** | Erros com wrap, `context`, goroutines sem vazamento, testes de tabela, `-race`, govulncheck. |
 | **stack-front** | React, Angular, Vue: estados de tela, contrato com o back, verificação visual desktop e mobile. |
+| **stack-bash** | Scripts de shell (Bash e sh POSIX): modo estrito, aspas, `trap` e `mktemp`, `getopts`, portabilidade, ShellCheck e bats; modelo de script. |
 
 ### Bancos de dados
 | Plugin | Cobre |
@@ -124,12 +125,14 @@ python -I scripts/sincronizar_hosts.py --check
 | **stack-mongodb** | Modelagem por acesso, `$jsonSchema`, índices ESR, operadores atômicos, injeção de operador. |
 | **stack-redis** | Cache-aside com TTL, invalidação, locks com token, rate limit, streams, comandos proibidos. |
 
-### Infraestrutura
+### Infraestrutura e sistema
 | Plugin | Cobre |
 | --- | --- |
 | **stack-docker** | Multi-stage, base fixada, não root, `.dockerignore`, compose de dev; modelos de Dockerfile para dotnet, node, python, java e go. |
 | **stack-kubernetes** | Requests/limits, probes, `securityContext`, rollout sem indisponibilidade, PDB/HPA, segredos externos; manifesto base. |
 | **stack-terraform** | Estado remoto, versões fixadas, plan revisado (nunca apply pela sessão), `prevent_destroy`, `moved`/`import`. |
+| **stack-git** | Commits atômicos, conflitos com teste, histórico publicado intocável, `.gitattributes` de fim de linha, segredos e binários fora do histórico, `bisect`/`reflog`. |
+| **stack-linux** | systemd endurecido, permissões mínimas, SSH só por chave, firewall, journald, timers; mudança em servidor pelo humano. Ubuntu, Debian, RHEL e Alpine. |
 
 ### Extras
 | Plugin | O que traz |
