@@ -105,9 +105,9 @@
         "CA-7"
       ],
       "validacao": "claude plugin validate . && python -m unittest discover -s tests",
-      "estado": "andamento",
+      "estado": "feito",
       "wi": null,
-      "commit": null
+      "commit": "e6fb8e0"
     }
   ]
 }
