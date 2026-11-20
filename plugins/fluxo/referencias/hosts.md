@@ -19,5 +19,8 @@ Arquivos em `../../agents/<especialista>.md` (relativo à skill). Dispare um sub
 - Cursor (projeto vendor): rode `python -I scripts/instalar_em_projeto.py --projeto <produto>` (cria `.agents/skills` + `.cursor/hooks.json` com paths relativos ao `_runtime/fluxo`). Alternativa manual: copie `templates/hooks.cursor.json` e defina `DEV_FLOW_FLUXO` para a pasta do plugin `fluxo` exportada.
 - Hosts sem hooks: o `guard` não roda sozinho — as skills ainda pedem as mesmas restrições; a garantia automática some.
 
+## Conhecimento atual
+Todo especialista e skill de stack segue `conhecimento.md` (projeto primeiro → versão em uso → documentação daquela versão → novidade conforme o perfil). A consulta à documentação usa o que o host tiver (MCP de documentação, busca web) e, na falta, o código dos pacotes instalados.
+
 ## Perfil
 Sempre `.claude/projeto.json` na raiz do projeto consumidor (Cursor com Third-Party Imports também lê `.claude/`).

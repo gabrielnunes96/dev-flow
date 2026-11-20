@@ -5,14 +5,14 @@
   },
   "metadata": {
     "description": "Fluxo de desenvolvimento automatizado do time: da demanda à especificação funcional e técnica, plano, implementação task a task com agentes especialistas, revisão, segurança, validação, PR e CI/CD — com stacks de linguagem, banco e infraestrutura.",
-    "version": "0.3.0"
+    "version": "0.4.2"
   },
   "plugins": [
     {
       "name": "fluxo",
       "source": "./plugins/fluxo",
       "description": "Núcleo do processo: demanda → funcional → técnica → plano → tasks → PR, com agentes especialistas (arquiteto, segurança, testador, depurador), método de raciocínio, pontos de aprovação humana, guard e validação local.",
-      "version": "0.3.0",
+      "version": "0.4.2",
       "category": "development"
     },
     {
@@ -47,97 +47,125 @@
       "name": "stack-dotnet",
       "source": "./plugins/stack-dotnet",
       "description": "Convenções de .NET para o fluxo: build/teste, testes de contrato com a API em memória, pacotes vulneráveis e SDKs gerados.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "development"
     },
     {
       "name": "stack-node",
       "source": "./plugins/stack-node",
       "description": "Convenções de back-end Node.js/TypeScript para o fluxo: Express/Fastify/NestJS, validação por schema, ORMs, async, supertest e npm audit.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "development"
     },
     {
       "name": "stack-python",
       "source": "./plugins/stack-python",
       "description": "Convenções de Python para o fluxo: FastAPI/Django/Flask, tipagem, pytest, ruff, async, SQLAlchemy/Alembic e pip-audit.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "development"
     },
     {
       "name": "stack-java",
       "source": "./plugins/stack-java",
       "description": "Convenções de Java/Kotlin para o fluxo: Spring Boot, JPA sem N+1, Bean Validation, JUnit 5, MockMvc, Testcontainers e Flyway.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "development"
     },
     {
       "name": "stack-go",
       "source": "./plugins/stack-go",
       "description": "Convenções de Go para o fluxo: erros com wrap, context, goroutines sem vazamento, testes de tabela, race detector e govulncheck.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "development"
     },
     {
       "name": "stack-front",
       "source": "./plugins/stack-front",
       "description": "Convenções de front-end para o fluxo: lint, testes, build e verificação visual no navegador (desktop e mobile).",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "development"
     },
     {
       "name": "stack-sql",
       "source": "./plugins/stack-sql",
       "description": "Convenções de scripts SQL Server para o fluxo: idempotência, rollback pareado, transação, lote e validação em base de desenvolvimento.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "development"
     },
     {
       "name": "stack-postgres",
       "source": "./plugins/stack-postgres",
       "description": "Convenções de PostgreSQL para o fluxo: migrations com rollback, DDL sem travar (CONCURRENTLY, NOT VALID), tipos, índices por EXPLAIN e lotes.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "development"
     },
     {
       "name": "stack-mysql",
       "source": "./plugins/stack-mysql",
       "description": "Convenções de MySQL/MariaDB para o fluxo: migrations, DDL online, utf8mb4, InnoDB e deadlocks, índices por EXPLAIN e lotes.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "development"
     },
     {
       "name": "stack-mongodb",
       "source": "./plugins/stack-mongodb",
       "description": "Convenções de MongoDB para o fluxo: modelagem por acesso, $jsonSchema, índices ESR, operadores atômicos, transações e injeção de operador.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "development"
     },
     {
       "name": "stack-redis",
       "source": "./plugins/stack-redis",
       "description": "Convenções de Redis para o fluxo: cache-aside com TTL, invalidação, atomicidade, locks, rate limit, streams e comandos proibidos.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "development"
     },
     {
       "name": "stack-docker",
       "source": "./plugins/stack-docker",
       "description": "Convenções de Docker para o fluxo: multi-stage, base fixada, não root, .dockerignore, healthcheck, compose de desenvolvimento e Trivy; modelos por stack.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "development"
     },
     {
       "name": "stack-kubernetes",
       "source": "./plugins/stack-kubernetes",
       "description": "Convenções de Kubernetes/Helm/Kustomize para o fluxo: recursos, probes, securityContext, rollout sem indisponibilidade, PDB/HPA, segredos e kubeconform.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "development"
     },
     {
       "name": "stack-terraform",
       "source": "./plugins/stack-terraform",
       "description": "Convenções de Terraform/OpenTofu para o fluxo: estado remoto, versões fixadas, plan revisado, prevent_destroy, moved/import, menor privilégio e checkov.",
+      "version": "0.2.0",
+      "category": "development"
+    },
+    {
+      "name": "stack-bash",
+      "source": "./plugins/stack-bash",
+      "description": "Convenções de scripts de shell (Bash e sh POSIX) para o fluxo: modo estrito, aspas, trap e limpeza, entrada validada, portabilidade, ShellCheck, shfmt e testes com bats.",
+      "version": "0.1.0",
+      "category": "development"
+    },
+    {
+      "name": "stack-git",
+      "source": "./plugins/stack-git",
+      "description": "Convenções de Git para o fluxo: commits atômicos, branch a partir da base, conflitos resolvidos com teste, histórico publicado intocável, .gitattributes de fim de linha, segredos e arquivos grandes fora do histórico, diagnóstico com bisect e reflog.",
+      "version": "0.1.0",
+      "category": "development"
+    },
+    {
+      "name": "stack-linux",
+      "source": "./plugins/stack-linux",
+      "description": "Convenções de Linux para o fluxo: serviços systemd endurecidos, usuários e permissões mínimas, pacotes fixados, SSH sem senha, firewall, logs no journald, timers, diagnóstico e mudança em servidor sempre pelo humano.",
+      "version": "0.1.0",
+      "category": "development"
+    },
+    {
+      "name": "stack-powershell",
+      "source": "./plugins/stack-powershell",
+      "description": "Convenções de PowerShell (7 e Windows PowerShell 5.1) para o fluxo: modo estrito e erros terminantes, funções avançadas com parâmetros validados, -WhatIf em quem altera, saída em objetos, codificação, segredos, PSScriptAnalyzer e Pester.",
       "version": "0.1.0",
       "category": "development"
     },
@@ -145,7 +173,7 @@
       "name": "design",
       "source": "./plugins/design",
       "description": "Designer de UX/UI: direção visual, temas claro/escuro com tokens, telas e fluxos, animações limpas, acessibilidade e revisão visual.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "category": "design"
     },
     {
@@ -159,7 +187,7 @@
       "name": "logs",
       "source": "./plugins/logs",
       "description": "Analisa um conjunto de logs (arquivo, pasta, zip ou tar) numa interface local ou pelo script: erro, aviso, códigos de retorno e um painel HTML.",
-      "version": "0.1.8",
+      "version": "0.1.9",
       "category": "development"
     }
   ]

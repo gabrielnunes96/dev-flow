@@ -1,0 +1,132 @@
+{
+  "demanda": "conhecimento-atualizavel",
+  "titulo": "Conhecimento atualizável dos agentes",
+  "item_raiz": null,
+  "tarefas": [
+    {
+      "id": "T1",
+      "titulo": "Procedimento projeto primeiro e política de novidades no perfil",
+      "descricao": "Criar fluxo/referencias/conhecimento.md; campo conhecimento.novidades no schema e em perfil.py validar; citar no hosts.md e na skill iniciar; testes do perfil.",
+      "repo": ".",
+      "stack": "python",
+      "depende_de": [],
+      "criterios": [
+        "CA-3",
+        "CA-12"
+      ],
+      "validacao": "perfil.py validar com sugerir/aplicar/inválido",
+      "estado": "feito",
+      "wi": null,
+      "commit": "f423e8f"
+    },
+    {
+      "id": "T2",
+      "titulo": "Bloco de conhecimento atual nos especialistas e nas skills de stack",
+      "descricao": "Bloco 'Conhecimento atual' nos agentes do fluxo, designer e analista-de-logs; linha nas skills stack-* apontando para ../../referencias/atual.md; aprender encaminha aprendizado de stack.",
+      "repo": ".",
+      "stack": "python",
+      "depende_de": [
+        "T1"
+      ],
+      "criterios": [
+        "CA-2",
+        "CA-10"
+      ],
+      "validacao": "testes de texto",
+      "estado": "feito",
+      "wi": null,
+      "commit": "31ef895"
+    },
+    {
+      "id": "T3",
+      "titulo": "Script atualizar_conhecimento.py com testes",
+      "descricao": "Levantamento online via endoflife.date, verificação offline, relatório, varredura de versões citadas; testes com --fonte-dir.",
+      "repo": ".",
+      "stack": "python",
+      "depende_de": [],
+      "criterios": [
+        "CA-4",
+        "CA-5",
+        "CA-6",
+        "CA-7"
+      ],
+      "validacao": "unittest com JSON fixo",
+      "estado": "feito",
+      "wi": null,
+      "commit": "6254705"
+    },
+    {
+      "id": "T4",
+      "titulo": "Arquivos atual.md das 13 stacks",
+      "descricao": "Criar referencias/atual.md por stack com fontes e produtos e gerar o bloco de versões rodando o script online.",
+      "repo": ".",
+      "stack": "python",
+      "depende_de": [
+        "T2",
+        "T3"
+      ],
+      "criterios": [
+        "CA-1"
+      ],
+      "validacao": "--verificar retorna 0; tabela com dados reais",
+      "estado": "feito",
+      "wi": null,
+      "commit": "35cf596"
+    },
+    {
+      "id": "T5",
+      "titulo": "Suíte de comportamento e executor host-agnóstico",
+      "descricao": "Casos em plugins/fluxo/evals/<agente>/<caso>/ no formato do claude plugin eval; scripts/avaliar_agentes.py; testes com comando falso.",
+      "repo": ".",
+      "stack": "python",
+      "depende_de": [
+        "T2"
+      ],
+      "criterios": [
+        "CA-9",
+        "CA-11"
+      ],
+      "validacao": "unittest; execução real opcional",
+      "estado": "feito",
+      "wi": null,
+      "commit": "f85a386"
+    },
+    {
+      "id": "T6",
+      "titulo": "Revisão periódica: skill de manutenção e pipelines agendadas",
+      "descricao": "Skill .claude/skills/atualizar-conhecimento; azure-pipelines-conhecimento.yml; workflow GitHub mensal com issue; --verificar no CI de PR.",
+      "repo": ".",
+      "stack": "python",
+      "depende_de": [
+        "T3",
+        "T5"
+      ],
+      "criterios": [
+        "CA-8"
+      ],
+      "validacao": "teste de existência/conteúdo; YAML válido",
+      "estado": "feito",
+      "wi": null,
+      "commit": "56cde69"
+    },
+    {
+      "id": "T7",
+      "titulo": "Documentação, versões e sincronização dos hosts",
+      "descricao": "README, manual, CLAUDE.md, novo-plugin-de-stack, .gitignore; subir versões dos plugins alterados; sincronizar_hosts.py.",
+      "repo": ".",
+      "stack": "python",
+      "depende_de": [
+        "T4",
+        "T6"
+      ],
+      "criterios": [
+        "CA-1",
+        "CA-12"
+      ],
+      "validacao": "testes + claude plugin validate + sincronizar_hosts --check",
+      "estado": "feito",
+      "wi": null,
+      "commit": "7c11a64"
+    }
+  ]
+}

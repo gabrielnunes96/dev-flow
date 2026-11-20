@@ -114,6 +114,8 @@ python -I scripts/sincronizar_hosts.py --check
 | **stack-java** | Spring Boot, JPA sem N+1, Bean Validation, JUnit 5, MockMvc, Testcontainers, Flyway. Kotlin incluso. |
 | **stack-go** | Erros com wrap, `context`, goroutines sem vazamento, testes de tabela, `-race`, govulncheck. |
 | **stack-front** | React, Angular, Vue: estados de tela, contrato com o back, verificação visual desktop e mobile. |
+| **stack-powershell** | PowerShell 7 e Windows PowerShell 5.1: modo estrito, `$LASTEXITCODE`, funções avançadas com `-WhatIf`, saída em objetos, codificação, segredos, PSScriptAnalyzer e Pester; modelo de script. |
+| **stack-bash** | Scripts de shell (Bash e sh POSIX): modo estrito, aspas, `trap` e `mktemp`, `getopts`, portabilidade, ShellCheck e bats; modelo de script. |
 
 ### Bancos de dados
 | Plugin | Cobre |
@@ -124,12 +126,14 @@ python -I scripts/sincronizar_hosts.py --check
 | **stack-mongodb** | Modelagem por acesso, `$jsonSchema`, índices ESR, operadores atômicos, injeção de operador. |
 | **stack-redis** | Cache-aside com TTL, invalidação, locks com token, rate limit, streams, comandos proibidos. |
 
-### Infraestrutura
+### Infraestrutura e sistema
 | Plugin | Cobre |
 | --- | --- |
 | **stack-docker** | Multi-stage, base fixada, não root, `.dockerignore`, compose de dev; modelos de Dockerfile para dotnet, node, python, java e go. |
 | **stack-kubernetes** | Requests/limits, probes, `securityContext`, rollout sem indisponibilidade, PDB/HPA, segredos externos; manifesto base. |
 | **stack-terraform** | Estado remoto, versões fixadas, plan revisado (nunca apply pela sessão), `prevent_destroy`, `moved`/`import`. |
+| **stack-git** | Commits atômicos, conflitos com teste, histórico publicado intocável, `.gitattributes` de fim de linha, segredos e binários fora do histórico, `bisect`/`reflog`. |
+| **stack-linux** | systemd endurecido, permissões mínimas, SSH só por chave, firewall, journald, timers; mudança em servidor pelo humano. Ubuntu, Debian, RHEL e Alpine. |
 
 ### Extras
 | Plugin | O que traz |
@@ -156,6 +160,19 @@ Cada agente roda em contexto isolado, com ferramentas restritas, e devolve só o
 | `design:designer` | Trabalho de UI à parte | Tema, telas, animações, revisão visual |
 
 Todos seguem o **método de raciocínio** do plugin ([`plugins/fluxo/referencias/raciocinio.md`](plugins/fluxo/referencias/raciocinio.md)): modelar entrada/estado/fronteiras, contrato (pré/pós-condição e invariante), lista de casos de borda, custo (O() e I/O), execução simulada, **simplicidade sem overengineering** (nada de abstração, camada ou infraestrutura sem requisito), depuração por hipóteses e verificação antes de dizer "pronto".
+
+## Conhecimento sempre atual (sem sair aplicando novidade)
+
+Linguagens, frameworks e modelos mudam; o dev-flow separa o que envelhece do que dura e tem uma rotina para não ficar para trás. Funciona em qualquer host.
+
+| Camada | Onde | O que faz |
+| --- | --- | --- |
+| Método × conhecimento volátil | skill `stack-*` (método) e `plugins/stack-*/referencias/atual.md` (fontes oficiais, versões com suporte/LTS/fim de suporte, mudanças a observar, data de revisão) | O que envelhece fica num arquivo datado, não no texto da skill. Os agentes não fixam modelo: herdam o da sessão. |
+| Projeto primeiro | [`plugins/fluxo/referencias/conhecimento.md`](plugins/fluxo/referencias/conhecimento.md), citado por todo especialista e skill de stack | Padrão do projeto → versão em uso → documentação **daquela versão** (MCP de documentação do host, busca web ou código do pacote instalado) → novidade só como sugestão, salvo `conhecimento.novidades = "aplicar"`. |
+| Revisão periódica | `scripts/atualizar_conhecimento.py` + pipelines mensais (`azure-pipelines-conhecimento.yml`, `.github/workflows/conhecimento.yml`) + skill de manutenção `.claude/skills/atualizar-conhecimento` | Consulta endoflife.date, regenera as tabelas, aponta ciclo novo, LTS novo, fim de suporte e versão sem suporte citada nos plugins (arquivo:linha). A skill faz a curadoria pelas fontes oficiais e termina numa branch com `pr.md`: **quem aprova é humano**. |
+| Testes de comportamento | `plugins/fluxo/evals/<agente>/<caso>/` | Casos com entrada e verificações (regex e critério para juiz). Rodam com `claude plugin eval plugins/fluxo` no Claude Code ou com `python -I scripts/avaliar_agentes.py --comando "<cli do agente>" [--juiz "<cli>"]` em qualquer host (Cursor, Codex…). Atualização que piora um caso não entra. |
+
+A skill `aprender` fecha o ciclo: aprendizado de um projeto que vale para toda a stack vira proposta (PR) no `atual.md` ou na skill da stack.
 
 ## Comandos do dia a dia
 
@@ -193,6 +210,7 @@ Tudo o que é específico de um projeto fica em `.claude/projeto.json` ([schema]
 | `protecao` | Textos/diretórios proibidos, arquivos gerados, segredos | guard (bloqueio real) |
 | `pare_e_pergunte` | Situações do projeto em que o ciclo para | task |
 | `design` | Tokens, design system, plataformas, referências | design |
+| `conhecimento` | `novidades`: `sugerir` (padrão; novidade vira sugestão) ou `aplicar` (projeto novo usa a versão suportada mais recente) | todos os especialistas e skills de stack |
 
 Valide sempre que mudar: `python -I <scripts>/perfil.py validar` (o hook de início de sessão mostra o caminho dos scripts).
 
@@ -272,4 +290,5 @@ claude plugin validate .
 - Mudança de comportamento de script ou hook → teste em `tests/`. Dado novo que uma skill precisa → schema + `perfil.py validar` + teste.
 - Nova stack: [`docs/novo-plugin-de-stack.md`](docs/novo-plugin-de-stack.md) (o `test_marketplace.py` confere que toda stack do schema tem plugin com checklist).
 - Publicar: subir `version` no `plugin.json` alterado e no `marketplace.json`.
+- Conhecimento das stacks: `python -I scripts/atualizar_conhecimento.py` (levanta e regrava as tabelas; `--verificar` confere sem rede). Suíte de comportamento: `python -I scripts/avaliar_agentes.py --listar` / `--comando "<cli>"`. Revisão periódica: skill `atualizar-conhecimento` (em `.claude/skills/`).
 - Conceitos (rules, skills, agentes, hooks, MCP, plugins e quando usar cada um): [`docs/conceitos.md`](docs/conceitos.md). Migração do projeto piloto: [`docs/migracao-projeto-piloto.md`](docs/migracao-projeto-piloto.md).

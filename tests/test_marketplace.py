@@ -66,11 +66,19 @@ class MarketplaceTests(unittest.TestCase):
             self.assertEqual(titulos[-1], "Checklist de revisão", arq)
             self.assertGreaterEqual(len(re.findall(r"^\d+\. ", texto.split("## Checklist de revisão")[1], re.M)), 5, arq)
 
+    def test_readme_e_manual_listam_toda_stack(self):  # stacks-bash-git-linux CA-6
+        readme = _ler(os.path.join(RAIZ_REPO, "README.md"))
+        manual = _ler(os.path.join(RAIZ_REPO, "docs", "manual", "index.html"))
+        for stack in sorted(perfil.STACKS - {"outra"}):
+            self.assertIn(f"**stack-{stack}**", readme, stack)
+            self.assertIn(f'n: "stack-{stack}"', manual, stack)
+
     def test_schema_e_perfil_concordam(self):
         schema = json.loads(_ler(os.path.join(FLUXO, "schema", "projeto.schema.json")))
         props = schema["properties"]
         self.assertEqual(set(props["stacks"]["items"]["enum"]), perfil.STACKS)
         self.assertEqual(set(props["ci"]["properties"]["provedor"]["enum"]), perfil.PROVEDORES_CI)
+        self.assertEqual(set(props["conhecimento"]["properties"]["novidades"]["enum"]), perfil.NOVIDADES)
         self.assertEqual(set(props["infra"]["properties"]["nuvem"]["enum"]), perfil.NUVENS)
         self.assertEqual(set(props["infra"]["properties"]["execucao"]["items"]["enum"]), perfil.EXECUCOES)
 

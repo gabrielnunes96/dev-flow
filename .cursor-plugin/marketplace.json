@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Fluxo de desenvolvimento automatizado do time: da demanda à especificação funcional e técnica, plano, implementação task a task com agentes especialistas, revisão, segurança, validação, PR e CI/CD — com stacks de linguagem, banco e infraestrutura.",
-    "version": "0.3.0",
+    "version": "0.4.2",
     "pluginRoot": "plugins"
   },
   "plugins": [
@@ -103,6 +103,26 @@
       "name": "stack-terraform",
       "source": "stack-terraform",
       "description": "Convenções de Terraform/OpenTofu para o fluxo: estado remoto, versões fixadas, plan revisado, prevent_destroy, moved/import, menor privilégio e checkov."
+    },
+    {
+      "name": "stack-bash",
+      "source": "stack-bash",
+      "description": "Convenções de scripts de shell (Bash e sh POSIX) para o fluxo: modo estrito, aspas, trap e limpeza, entrada validada, portabilidade, ShellCheck, shfmt e testes com bats."
+    },
+    {
+      "name": "stack-git",
+      "source": "stack-git",
+      "description": "Convenções de Git para o fluxo: commits atômicos, branch a partir da base, conflitos resolvidos com teste, histórico publicado intocável, .gitattributes de fim de linha, segredos e arquivos grandes fora do histórico, diagnóstico com bisect e reflog."
+    },
+    {
+      "name": "stack-linux",
+      "source": "stack-linux",
+      "description": "Convenções de Linux para o fluxo: serviços systemd endurecidos, usuários e permissões mínimas, pacotes fixados, SSH sem senha, firewall, logs no journald, timers, diagnóstico e mudança em servidor sempre pelo humano."
+    },
+    {
+      "name": "stack-powershell",
+      "source": "stack-powershell",
+      "description": "Convenções de PowerShell (7 e Windows PowerShell 5.1) para o fluxo: modo estrito e erros terminantes, funções avançadas com parâmetros validados, -WhatIf em quem altera, saída em objetos, codificação, segredos, PSScriptAnalyzer e Pester."
     },
     {
       "name": "design",

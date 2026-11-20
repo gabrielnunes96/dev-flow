@@ -7,6 +7,8 @@ description: Convenções e armadilhas de Java/Kotlin na JVM para implementar, t
 
 As convenções do **projeto** (CLAUDE.md, checkstyle/spotless, arquitetura de pacotes) vencem estas quando conflitarem.
 
+Versões com suporte, LTS e mudanças recentes: `../../referencias/atual.md` (veja a data de revisão). Antes de usar API ou recurso, siga o procedimento *projeto primeiro* do fluxo (`referencias/conhecimento.md` do plugin `fluxo`): padrão do projeto → versão em uso → documentação daquela versão → novidade como sugestão.
+
 ## Implementar
 - Build pelo wrapper do projeto: `./mvnw` ou `./gradlew` (nunca o Maven/Gradle global). Versão do JDK em `pom.xml`/`toolchain`/`.sdkmanrc`.
 - Siga o fluxo existente mais parecido (controller → DTO/record → service → repository → entidade). Injeção por construtor (campos `final`), sem `@Autowired` em campo.

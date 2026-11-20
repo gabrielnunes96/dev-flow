@@ -10,7 +10,7 @@
     "stacks": {
       "type": "array",
       "minItems": 1,
-      "items": { "enum": ["dotnet", "sql", "front", "node", "python", "java", "go", "postgres", "mysql", "mongodb", "redis", "docker", "kubernetes", "terraform", "outra"] },
+      "items": { "enum": ["dotnet", "sql", "front", "node", "python", "java", "go", "postgres", "mysql", "mongodb", "redis", "docker", "kubernetes", "terraform", "bash", "git", "linux", "powershell", "outra"] },
       "description": "Define quais skills de stack (plugins stack-*) o ciclo da task carrega: stack X → skill stack-X:X. Linguagens, bancos (sql = SQL Server) e infraestrutura."
     },
     "idioma": { "type": "string", "default": "pt-BR" },
@@ -136,6 +136,14 @@
         "sistema": { "type": "string", "description": "Design system ou biblioteca de componentes em uso (ex.: shadcn/ui, MUI, próprio em src/ui)." },
         "plataformas": { "type": "array", "items": { "enum": ["web", "ios", "android", "desktop"] } },
         "referencias": { "type": "array", "items": { "type": "string" }, "description": "Guias de marca, telas de referência ou arquivos de design (caminho ou URL)." }
+      }
+    },
+    "conhecimento": {
+      "type": "object",
+      "description": "Como os especialistas tratam novidades de tecnologia (referencias/conhecimento.md do plugin fluxo).",
+      "additionalProperties": false,
+      "properties": {
+        "novidades": { "type": "string", "enum": ["sugerir", "aplicar"], "default": "sugerir", "description": "sugerir: novidade que o projeto não usa vira sugestão; aplicar: projeto novo ou que acompanha novidades pode usar a versão suportada mais recente (LTS quando houver)." }
       }
     },
     "ci": {

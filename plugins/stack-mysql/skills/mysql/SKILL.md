@@ -7,6 +7,8 @@ description: Convenções para escrever, testar e revisar mudanças em MySQL e M
 
 As convenções do **projeto** (ferramenta de migração, pastas) vencem estas quando conflitarem.
 
+Versões com suporte, LTS e mudanças recentes: `../../referencias/atual.md` (veja a data de revisão). Antes de usar API ou recurso, siga o procedimento *projeto primeiro* do fluxo (`referencias/conhecimento.md` do plugin `fluxo`): padrão do projeto → versão em uso → documentação daquela versão → novidade como sugestão.
+
 ## Escrever
 - **Pela ferramenta de migração do projeto** (Flyway, Liquibase, Alembic, Prisma, Laravel, Rails…), uma migração por mudança, nunca editando migração aplicada. Lembre: **DDL no MySQL faz commit implícito** — uma migração com várias DDLs não é atômica; prefira uma DDL por migração e um rollback por passo.
 - Idempotência à mão: `CREATE TABLE IF NOT EXISTS`, `DROP ... IF EXISTS`; para coluna/índice (sem `IF NOT EXISTS` no MySQL) consulte `information_schema` antes. MariaDB aceita `ADD COLUMN IF NOT EXISTS`.

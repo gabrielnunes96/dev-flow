@@ -1,0 +1,14 @@
+{
+  "name": "stack-bash",
+  "description": "Convenções de scripts de shell (Bash e sh POSIX) para o fluxo: modo estrito, aspas, trap e limpeza, entrada validada, portabilidade, ShellCheck, shfmt e testes com bats.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Gabriel Nunes Campos"
+  },
+  "keywords": [
+    "bash",
+    "shell",
+    "sh",
+    "shellcheck"
+  ]
+}

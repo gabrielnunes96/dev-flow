@@ -7,6 +7,8 @@ description: Convenções e armadilhas de Python para implementar, testar e revi
 
 As convenções do **projeto** (CLAUDE.md, `pyproject.toml`, configuração do ruff/mypy) vencem estas quando conflitarem.
 
+Versões com suporte, LTS e mudanças recentes: `../../referencias/atual.md` (veja a data de revisão). Antes de usar API ou recurso, siga o procedimento *projeto primeiro* do fluxo (`referencias/conhecimento.md` do plugin `fluxo`): padrão do projeto → versão em uso → documentação daquela versão → novidade como sugestão.
+
 ## Implementar
 - Descubra o gerenciador antes de instalar algo: `uv.lock` → `uv`; `poetry.lock` → `poetry`; `Pipfile.lock` → `pipenv`; senão `pip` com `requirements*.txt`. Rode tudo **dentro do ambiente do projeto** (`uv run`, `poetry run`, `.venv`), nunca no Python global.
 - Siga a operação existente mais parecida de ponta a ponta (rota → schema/serializer → serviço → repositório/ORM → teste). FastAPI: dependências por `Depends`, schemas pydantic separados de entrada e saída; Django: lógica fora da view (serviço/manager), migrations geradas por `makemigrations` e revisadas; Flask: blueprints e factory.

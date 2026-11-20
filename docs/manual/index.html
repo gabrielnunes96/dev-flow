@@ -256,7 +256,7 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
           <path d="M8 10h8M8 15h5M8 20h10" stroke="var(--bg)" stroke-width="2.2" stroke-linecap="round"/>
           <rect x="18.5" y="12.5" width="5" height="5" transform="rotate(45 21 15)" fill="var(--gate)"/>
         </svg>
-        <div><strong>dev-flow</strong><span>Manual do fluxo · v0.2</span></div>
+        <div><strong>dev-flow</strong><span>Manual do fluxo · v0.4</span></div>
       </a>
       <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="toc">Menu</button>
     </div>
@@ -286,6 +286,7 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
         <a href="#cicd">CI/CD</a>
         <a href="#protecoes">Proteções</a>
         <a href="#raciocinio">Método de raciocínio</a>
+        <a href="#conhecimento">Conhecimento atual</a>
       </div>
       <div class="toc-group"><span>Ajuda</span>
         <a href="#problemas">Problemas comuns</a>
@@ -318,9 +319,9 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
         </div>
         <div class="legend"><span><i class="gate"></i> ponto de aprovação: só avança com o seu “ok”</span><span><code>/fluxo:entregar</code> percorre tudo e para só nas aprovações</span></div>
         <div class="hero-meta">
-          <div><b>22</b>plugins</div>
+          <div><b>26</b>plugins</div>
           <div><b>8</b>agentes especialistas</div>
-          <div><b>14</b>stacks: linguagens, bancos e infra</div>
+          <div><b>18</b>stacks: linguagens, shell, bancos, infra, Git e Linux</div>
           <div><b>3</b>provedores de CI/CD</div>
         </div>
       </section>
@@ -350,7 +351,7 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
           <form id="montadorForm" onsubmit="return false">
             <fieldset><legend>Linguagens e front</legend><div class="opts" data-grupo="linguagem"></div></fieldset>
             <fieldset><legend>Bancos de dados</legend><div class="opts" data-grupo="banco"></div></fieldset>
-            <fieldset><legend>Infraestrutura</legend><div class="opts" data-grupo="infra"></div></fieldset>
+            <fieldset><legend>Infraestrutura e sistema</legend><div class="opts" data-grupo="infra"></div></fieldset>
             <fieldset><legend>CI/CD</legend>
               <select id="ciSel" aria-label="Provedor de CI/CD">
                 <option value="nenhum">Nenhum por enquanto</option>
@@ -385,7 +386,7 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
         <p class="lead">Abra o Claude Code na pasta do projeto (pode estar vazia) e rode <code>/fluxo:iniciar</code>. Ele lê o que dá para ler e pergunta só o que é seu.</p>
         <div class="grid-2">
           <div class="card"><h4>O que ele detecta sozinho</h4>
-            <ul><li>Stacks pelos arquivos: <code>*.csproj</code>, <code>package.json</code>, <code>pyproject.toml</code>, <code>pom.xml</code>, <code>go.mod</code>, <code>Dockerfile</code>, <code>*.tf</code>, manifestos Kubernetes, drivers de banco.</li>
+            <ul><li>Stacks pelos arquivos: <code>*.csproj</code>, <code>package.json</code>, <code>pyproject.toml</code>, <code>pom.xml</code>, <code>go.mod</code>, <code>Dockerfile</code>, <code>*.tf</code>, manifestos Kubernetes, drivers de banco, scripts <code>*.sh</code> e <code>*.ps1</code>, repositório Git, units systemd e cloud-init.</li>
             <li>Comandos de build, teste, lint e vulnerabilidades.</li>
             <li>Provedor de CI pelos arquivos de pipeline.</li>
             <li>Nuvem e onde a aplicação roda.</li>
@@ -611,6 +612,27 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
         <div class="callout gate-c"><span class="ico">◆</span><div><p><b>Antes de dizer “pronto”:</b> cada critério tem um teste que falharia se o critério quebrasse; build, lint e testes verdes nesta execução; validação feita ou registrada como pendente; e dito o que não foi verificado.</p></div></div>
       </section>
 
+      <section class="doc" id="conhecimento" data-titulo="Conhecimento atual">
+        <span class="eyebrow">Referência</span>
+        <h2>Conhecimento atual</h2>
+        <p class="lead">Tecnologia muda todo mês. Os especialistas aprendem o que é novo, mas seguem o projeto: novidade só entra como sugestão, a não ser que o projeto peça.</p>
+        <ol class="steps">
+          <li><b>O projeto manda</b><p>Convenções e o código vizinho vencem o "jeito mais moderno".</p></li>
+          <li><b>Versão em uso</b><p>Lida dos manifestos, lockfiles e imagens base antes de escolher API.</p></li>
+          <li><b>Documentação daquela versão</b><p>Ferramenta de documentação do host (MCP), busca web ou o código do pacote instalado. Sem confirmação, o agente diz que não confirmou.</p></li>
+          <li><b>Novidade</b><p><code>conhecimento.novidades</code> no perfil: <code>sugerir</code> (padrão) ou <code>aplicar</code> (projeto novo). Sempre versão com suporte, LTS quando houver.</p></li>
+        </ol>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Peça</th><th>Onde</th><th>Para quê</th></tr></thead>
+          <tbody>
+            <tr><td>Conhecimento por stack</td><td><code>plugins/stack-*/referencias/atual.md</code></td><td>Fontes oficiais, versões com suporte/LTS/fim de suporte (tabela gerada), mudanças a observar, data de revisão</td></tr>
+            <tr><td>Levantamento</td><td><code>scripts/atualizar_conhecimento.py</code></td><td>Regenera as tabelas pela endoflife.date e aponta ciclo novo, LTS novo, fim de suporte e versão sem suporte citada nos plugins</td></tr>
+            <tr><td>Revisão mensal</td><td>pipelines agendadas + skill <code>atualizar-conhecimento</code></td><td>Relatório, curadoria pelas fontes oficiais e branch com <code>pr.md</code> — aprovação humana, sem merge automático</td></tr>
+            <tr><td>Testes de comportamento</td><td><code>plugins/fluxo/evals/</code></td><td><code>claude plugin eval plugins/fluxo</code> ou <code>python -I scripts/avaliar_agentes.py --comando "&lt;cli do agente&gt;"</code> em qualquer host</td></tr>
+          </tbody>
+        </table></div>
+      </section>
+
       <section class="doc" id="problemas" data-titulo="Problemas comuns">
         <span class="eyebrow">Ajuda</span>
         <h2>Problemas comuns</h2>
@@ -641,7 +663,7 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
             <tr><td><b>STRIDE</b></td><td>Roteiro de ameaças: falsificação, adulteração, repúdio, vazamento, negação de serviço, elevação de privilégio.</td></tr>
             <tr><td><b>Tarefa pronta</b></td><td>A fazer, não protegida e com todas as dependências feitas.</td></tr>
           </tbody></table></div>
-        <footer class="end">Manual do marketplace dev-flow v0.2. Fonte: <code>docs/manual/index.html</code> no repositório; atualize junto com o README ao mudar skills, agentes ou plugins.</footer>
+        <footer class="end">Manual do marketplace dev-flow v0.4. Fonte: <code>docs/manual/index.html</code> no repositório; atualize junto com o README ao mudar skills, agentes ou plugins.</footer>
       </section>
 
     </div>
@@ -652,30 +674,34 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
 (function () {
   "use strict";
   var PLUGINS = [
-    { n: "fluxo", v: "0.2.0", c: "nucleo", d: "Processo completo: demanda, técnica, plano, tarefas, PR, depuração e arquitetura. Agentes, hooks, scripts e método de raciocínio.", s: "/fluxo:*" },
+    { n: "fluxo", v: "0.4.2", c: "nucleo", d: "Processo completo: demanda, técnica, plano, tarefas, PR, depuração e arquitetura. Agentes, hooks, scripts e método de raciocínio.", s: "/fluxo:*" },
     { n: "azure-boards", v: "0.1.0", c: "ci", d: "Item raiz e tasks no Azure Boards a partir de tarefas.json, estados e descrição do card.", s: "/azure-boards:boards" },
     { n: "azure-pipelines", v: "0.2.0", c: "ci", d: "YAML do Azure DevOps para dotnet, node, python, java, go, sql, Docker e Terraform; diagnóstico.", s: "/azure-pipelines:pipeline" },
     { n: "github-actions", v: "0.1.0", c: "ci", d: "Workflows de CI, imagem no GHCR com varredura e deploy por environment com OIDC.", s: "/github-actions:actions" },
     { n: "gitlab-ci", v: "0.1.0", c: "ci", d: ".gitlab-ci.yml com testes, SAST, imagem e produção manual; diagnóstico com glab.", s: "/gitlab-ci:gitlab" },
-    { n: "stack-dotnet", v: "0.1.0", c: "linguagem", k: "dotnet", r: ".NET", d: "ASP.NET Core, Nullable em DTOs, rotas obsoletas, testes de contrato com a API em memória.", s: "stack-dotnet:dotnet" },
-    { n: "stack-node", v: "0.1.0", c: "linguagem", k: "node", r: "Node.js", d: "Express, Fastify, NestJS, TypeScript estrito, zod, Prisma, supertest.", s: "stack-node:node" },
-    { n: "stack-python", v: "0.1.0", c: "linguagem", k: "python", r: "Python", d: "FastAPI, Django, Flask, pydantic v2, SQLAlchemy, pytest, ruff, uv.", s: "stack-python:python" },
-    { n: "stack-java", v: "0.1.0", c: "linguagem", k: "java", r: "Java / Kotlin", d: "Spring Boot, JPA sem N+1, Bean Validation, JUnit 5, Testcontainers, Flyway.", s: "stack-java:java" },
-    { n: "stack-go", v: "0.1.0", c: "linguagem", k: "go", r: "Go", d: "Erros com wrap, context, goroutines sem vazamento, testes de tabela, -race.", s: "stack-go:go" },
-    { n: "stack-front", v: "0.1.0", c: "linguagem", k: "front", r: "Front-end", d: "React, Angular, Vue: estados de tela, contrato com o back, verificação visual.", s: "stack-front:front" },
-    { n: "stack-sql", v: "0.1.0", c: "banco", k: "sql", r: "SQL Server", d: "Idempotência, rollback pareado, XACT_ABORT, alteração em lotes.", s: "stack-sql:sql" },
-    { n: "stack-postgres", v: "0.1.0", c: "banco", k: "postgres", r: "PostgreSQL", d: "DDL sem travar (CONCURRENTLY, NOT VALID), timestamptz, numeric, EXPLAIN.", s: "stack-postgres:postgres" },
-    { n: "stack-mysql", v: "0.1.0", c: "banco", k: "mysql", r: "MySQL / MariaDB", d: "DDL online, utf8mb4 e collation, deadlocks, índices compostos.", s: "stack-mysql:mysql" },
-    { n: "stack-mongodb", v: "0.1.0", c: "banco", k: "mongodb", r: "MongoDB", d: "Modelagem por acesso, $jsonSchema, índices ESR, injeção de operador.", s: "stack-mongodb:mongodb" },
-    { n: "stack-redis", v: "0.1.0", c: "banco", k: "redis", r: "Redis", d: "Cache-aside com TTL, invalidação, locks com token, rate limit, streams.", s: "stack-redis:redis" },
-    { n: "stack-docker", v: "0.1.0", c: "infra", k: "docker", r: "Docker", d: "Multi-stage, base fixada, não root, compose de dev, Trivy; Dockerfiles por stack.", s: "stack-docker:docker" },
-    { n: "stack-kubernetes", v: "0.1.0", c: "infra", k: "kubernetes", r: "Kubernetes", d: "Probes, securityContext, rollout sem indisponibilidade, PDB, HPA, segredos externos.", s: "stack-kubernetes:kubernetes" },
-    { n: "stack-terraform", v: "0.1.0", c: "infra", k: "terraform", r: "Terraform", d: "Estado remoto, plan revisado, prevent_destroy, moved/import, menor privilégio.", s: "stack-terraform:terraform" },
-    { n: "design", v: "0.1.0", c: "extra", d: "Direção visual, tema claro/escuro com tokens, telas, animações, acessibilidade.", s: "/design:design" },
+    { n: "stack-dotnet", v: "0.2.0", c: "linguagem", k: "dotnet", r: ".NET", d: "ASP.NET Core, Nullable em DTOs, rotas obsoletas, testes de contrato com a API em memória.", s: "stack-dotnet:dotnet" },
+    { n: "stack-node", v: "0.2.0", c: "linguagem", k: "node", r: "Node.js", d: "Express, Fastify, NestJS, TypeScript estrito, zod, Prisma, supertest.", s: "stack-node:node" },
+    { n: "stack-python", v: "0.2.0", c: "linguagem", k: "python", r: "Python", d: "FastAPI, Django, Flask, pydantic v2, SQLAlchemy, pytest, ruff, uv.", s: "stack-python:python" },
+    { n: "stack-java", v: "0.2.0", c: "linguagem", k: "java", r: "Java / Kotlin", d: "Spring Boot, JPA sem N+1, Bean Validation, JUnit 5, Testcontainers, Flyway.", s: "stack-java:java" },
+    { n: "stack-go", v: "0.2.0", c: "linguagem", k: "go", r: "Go", d: "Erros com wrap, context, goroutines sem vazamento, testes de tabela, -race.", s: "stack-go:go" },
+    { n: "stack-front", v: "0.2.0", c: "linguagem", k: "front", r: "Front-end", d: "React, Angular, Vue: estados de tela, contrato com o back, verificação visual.", s: "stack-front:front" },
+    { n: "stack-bash", v: "0.1.0", c: "linguagem", k: "bash", r: "Bash / sh", d: "Modo estrito, aspas, trap e mktemp, getopts, portabilidade, ShellCheck e bats.", s: "stack-bash:bash" },
+    { n: "stack-powershell", v: "0.1.0", c: "linguagem", k: "powershell", r: "PowerShell", d: "Modo estrito, $LASTEXITCODE, funções avançadas com -WhatIf, saída em objetos, PSScriptAnalyzer e Pester.", s: "stack-powershell:powershell" },
+    { n: "stack-sql", v: "0.2.0", c: "banco", k: "sql", r: "SQL Server", d: "Idempotência, rollback pareado, XACT_ABORT, alteração em lotes.", s: "stack-sql:sql" },
+    { n: "stack-postgres", v: "0.2.0", c: "banco", k: "postgres", r: "PostgreSQL", d: "DDL sem travar (CONCURRENTLY, NOT VALID), timestamptz, numeric, EXPLAIN.", s: "stack-postgres:postgres" },
+    { n: "stack-mysql", v: "0.2.0", c: "banco", k: "mysql", r: "MySQL / MariaDB", d: "DDL online, utf8mb4 e collation, deadlocks, índices compostos.", s: "stack-mysql:mysql" },
+    { n: "stack-mongodb", v: "0.2.0", c: "banco", k: "mongodb", r: "MongoDB", d: "Modelagem por acesso, $jsonSchema, índices ESR, injeção de operador.", s: "stack-mongodb:mongodb" },
+    { n: "stack-redis", v: "0.2.0", c: "banco", k: "redis", r: "Redis", d: "Cache-aside com TTL, invalidação, locks com token, rate limit, streams.", s: "stack-redis:redis" },
+    { n: "stack-docker", v: "0.2.0", c: "infra", k: "docker", r: "Docker", d: "Multi-stage, base fixada, não root, compose de dev, Trivy; Dockerfiles por stack.", s: "stack-docker:docker" },
+    { n: "stack-kubernetes", v: "0.2.0", c: "infra", k: "kubernetes", r: "Kubernetes", d: "Probes, securityContext, rollout sem indisponibilidade, PDB, HPA, segredos externos.", s: "stack-kubernetes:kubernetes" },
+    { n: "stack-terraform", v: "0.2.0", c: "infra", k: "terraform", r: "Terraform", d: "Estado remoto, plan revisado, prevent_destroy, moved/import, menor privilégio.", s: "stack-terraform:terraform" },
+    { n: "stack-git", v: "0.1.0", c: "infra", k: "git", r: "Git", d: "Commits atômicos, conflitos com teste, histórico publicado intocável, .gitattributes, segredos fora do histórico.", s: "stack-git:git" },
+    { n: "stack-linux", v: "0.1.0", c: "infra", k: "linux", r: "Linux", d: "systemd endurecido, permissões mínimas, SSH por chave, firewall, journald e timers.", s: "stack-linux:linux" },
+    { n: "design", v: "0.1.1", c: "extra", d: "Direção visual, tema claro/escuro com tokens, telas, animações, acessibilidade.", s: "/design:design" },
     { n: "video", v: "0.1.0", c: "extra", d: "Vídeo-resumo narrado de uma entrega a partir de um roteiro JSON.", s: "/video:video" },
-    { n: "logs", v: "0.1.8", c: "extra", d: "Analisa arquivos, zips e tars de log numa interface local: erros, avisos, retornos HTTP e painel exportável.", s: "/logs:logs" }
+    { n: "logs", v: "0.1.9", c: "extra", d: "Analisa arquivos, zips e tars de log numa interface local: erros, avisos, retornos HTTP e painel exportável.", s: "/logs:logs" }
   ];
-  var CATS = [["todos", "Todos"], ["nucleo", "Núcleo"], ["ci", "Rastreador e CI/CD"], ["linguagem", "Linguagens"], ["banco", "Bancos"], ["infra", "Infraestrutura"], ["extra", "Extras"]];
+  var CATS = [["todos", "Todos"], ["nucleo", "Núcleo"], ["ci", "Rastreador e CI/CD"], ["linguagem", "Linguagens"], ["banco", "Bancos"], ["infra", "Infraestrutura e sistema"], ["extra", "Extras"]];
   var AGENTES = [
     { n: "analista", m: "ro", d: "Mapeia onde a demanda entra no código: fluxo real do dado, arquivos com linha, padrão a copiar e raio de impacto contado.", w: "Técnica, um por repositório, em paralelo." },
     { n: "arquiteto", m: "ro", d: "Compara alternativas de desenho por consistência, falhas, escala, segurança, custo e reversibilidade; entrega ADRs.", w: "Técnica com decisão estrutural; /fluxo:arquitetura." },

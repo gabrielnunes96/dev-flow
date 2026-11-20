@@ -7,6 +7,8 @@ description: Convenções e armadilhas de .NET/ASP.NET Core para implementar, te
 
 As convenções do **projeto** (CLAUDE.md) vencem estas quando conflitarem.
 
+Versões com suporte, LTS e mudanças recentes: `../../referencias/atual.md` (veja a data de revisão). Antes de usar API ou recurso, siga o procedimento *projeto primeiro* do fluxo (`referencias/conhecimento.md` do plugin `fluxo`): padrão do projeto → versão em uso → documentação daquela versão → novidade como sugestão.
+
 ## Implementar
 - Siga a operação existente mais parecida, de ponta a ponta (DTO → mapper → service → application → controller → registro no IoC). Registro de dependências explícito: se o projeto não usa scan, toda classe nova é registrada.
 - Ler o SDK/cliente gerado antes de escolher método e modelo; não supor membros. Construtores de modelos gerados podem lançar sem argumentos (OpenAPI Generator) — passar os campos.

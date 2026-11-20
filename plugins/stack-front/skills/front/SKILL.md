@@ -7,6 +7,8 @@ description: Convenções para implementar, testar e revisar front-end no fluxo 
 
 As convenções do **projeto** (CLAUDE.md, lint, design system) vencem estas quando conflitarem.
 
+Versões com suporte, LTS e mudanças recentes: `../../referencias/atual.md` (veja a data de revisão). Antes de usar API ou recurso, siga o procedimento *projeto primeiro* do fluxo (`referencias/conhecimento.md` do plugin `fluxo`): padrão do projeto → versão em uso → documentação daquela versão → novidade como sugestão.
+
 ## Implementar
 - Copie o padrão da tela/componente existente mais parecido (estrutura de pastas, estado, chamada à API, tratamento de erro, design system). Não introduza biblioteca nova sem a técnica prever.
 - Contrato da API: tipar a resposta a partir do contrato real do back (DTO/Swagger), não do que "deveria" vir. Tratar loading, vazio, erro (4xx com mensagem do back, 5xx genérico) e 401 (sessão).

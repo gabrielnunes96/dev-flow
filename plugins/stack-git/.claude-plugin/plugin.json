@@ -1,0 +1,13 @@
+{
+  "name": "stack-git",
+  "version": "0.1.0",
+  "description": "Convenções de Git para o fluxo: commits atômicos, branch a partir da base, conflitos resolvidos com teste, histórico publicado intocável, .gitattributes de fim de linha, segredos e arquivos grandes fora do histórico, diagnóstico com bisect e reflog.",
+  "author": {
+    "name": "Gabriel Nunes Campos"
+  },
+  "keywords": [
+    "git",
+    "versionamento",
+    "gitattributes"
+  ]
+}
