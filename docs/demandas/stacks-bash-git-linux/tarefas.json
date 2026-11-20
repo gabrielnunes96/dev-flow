@@ -91,6 +91,23 @@
       "estado": "feito",
       "wi": null,
       "commit": "44858d2"
+    },
+    {
+      "id": "T6",
+      "titulo": "Plugin stack-powershell (complemento)",
+      "descricao": "Skill powershell, atual.md (powershell), PADROES, registro no perfil/schema/iniciar/catálogo, README, manual, versões.",
+      "repo": ".",
+      "stack": "python",
+      "depende_de": [
+        "T5"
+      ],
+      "criterios": [
+        "CA-7"
+      ],
+      "validacao": "claude plugin validate . && python -m unittest discover -s tests",
+      "estado": "andamento",
+      "wi": null,
+      "commit": null
     }
   ]
 }

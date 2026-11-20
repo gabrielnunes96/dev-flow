@@ -233,18 +233,25 @@ class ConhecimentoScriptTests(unittest.TestCase):
         self._fonte("rhel", [{"cycle": "9", "eol": "2032-05-31"}, {"cycle": "7", "eol": "2024-06-30"}])
         self._fonte("git", [{"cycle": "2.56", "eol": False}, {"cycle": "2.46", "eol": "2025-07-08"}])
         self._atual("linux", "ubuntu,debian,alpine-linux,rhel", "")
+        self._fonte("powershell", [{"cycle": "7.6", "lts": True, "eol": "2028-11-14"}, {"cycle": "7.2", "lts": True, "eol": "2024-11-08"}])
         self._atual("git", "git", "")
+        self._atual("powershell", "powershell", "")
         self._escrever(os.path.join(self.plugins, "stack-linux", "templates", "x.yml"),
                        "a: debian:buster-slim\nb: node:20-buster\nc: python:3.12-slim-bookworm\n"
                        "runs-on: ubuntu-20.04\nd: ubuntu:focal\ne: node:20-alpine3.18\n"
                        "f: align-items:stretch\ng: Debian 12 e Ubuntu 24.04\nh: antes do Ubuntu 20.04\n"
                        "i: aspnet:6.0-focal\nj: node:lts-buster\nk: openjdk:11-jre-slim-buster\nl: buildpack-deps:buster\n"
-                       "m: FROM ubi7/ubi-minimal e RHEL 9\nn: Git 2.46 e Git 2.56; a partir do Git 2.46\n")
-        citadas = sorted(m.split(" cita ")[1] for t, m in ac.levantar(HOJE, stacks=["linux", "git"], fonte_dir=self.fonte, gravar=False)
+                       "m: FROM ubi7/ubi-minimal e RHEL 9\nn: Git 2.46 e Git 2.56; a partir do Git 2.46\n"
+                       "o: PowerShell 7.2, pwsh 7.6, Windows PowerShell 5.1 e powershell core 7.2\n"
+                       "p: mcr.microsoft.com/powershell:lts-7.2-ubuntu-22.04\n")
+        self._escrever(os.path.join(self.plugins, "stack-powershell", "templates", "x.ps1"), "\ufeff#requires -version 7.2\n")
+        citadas = sorted(m.split(" cita ")[1] for t, m in ac.levantar(HOJE, stacks=["linux", "git", "powershell"], fonte_dir=self.fonte, gravar=False)
                          if t == "versao_sem_suporte")
         self.assertEqual(citadas, sorted(["debian buster, sem suporte"] * 5 + [
                                           "ubuntu 20.04, sem suporte", "ubuntu focal, sem suporte", "ubuntu focal, sem suporte",
-                                          "alpine-linux 3.18, sem suporte", "rhel 7, sem suporte", "git 2.46, sem suporte"]))
+                                          "alpine-linux 3.18, sem suporte", "rhel 7, sem suporte", "git 2.46, sem suporte",
+                                          "powershell 7.2, sem suporte", "powershell 7.2, sem suporte",
+                                          "powershell 7.2, sem suporte", "powershell 7.2, sem suporte"]))
         self.assertEqual(ac.nomes_do_ciclo({"cycle": "22.04", "codename": "Jammy Jellyfish"}), {"22.04", "jammy"})
 
     def test_codigos_de_saida_e_relatorio(self):

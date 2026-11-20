@@ -17,7 +17,8 @@ Dar aos especialistas e ao ciclo da tarefa as convenções de três assuntos que
 
 ## 4. Escopo
 **Dentro**: plugins `stack-bash`, `stack-git` e `stack-linux` no formato das outras stacks (skill com implementar → testar → checklist; `referencias/atual.md`); stacks `bash`, `git` e `linux` no perfil, na detecção da skill `iniciar`, no README, no manual e no catálogo dos dois hosts.
-**Fora**: PowerShell, zsh/fish, administração de Windows Server, gestão de configuração (Ansible), Git hosting (PR/review ficam nos adaptadores de CI).
+Complemento aprovado pelo usuário: plugin `stack-powershell` no mesmo formato.
+**Fora**: zsh/fish, administração de Windows Server, gestão de configuração (Ansible), Git hosting (PR/review ficam nos adaptadores de CI).
 
 ## 5. Regras de negócio
 - RN-1: o perfil e as convenções do projeto vencem a skill; a política de Git do perfil (`git.*`) vence a skill `git`.
@@ -32,6 +33,7 @@ Dar aos especialistas e ao ciclo da tarefa as convenções de três assuntos que
 - RF-4: cada stack tem `referencias/atual.md`; Git e Linux com tabela gerada (endoflife.date: `git`; `ubuntu`, `debian`, `rhel`, `alpine-linux`); Bash sem ciclo de suporte publicado declara isso e continua sujeito à revisão periódica.
 - RF-5: o levantamento reconhece citações de distribuição por codinome (`bookworm`, `jammy`) e por tag de imagem/runner (`ubuntu-22.04`, `alpine3.18`, `ubi8`).
 - RF-6: `iniciar` detecta as três stacks.
+- RF-7: `stack-powershell`: PowerShell 7 e Windows PowerShell 5.1 — modo estrito e erros, funções avançadas com parâmetros validados, `-WhatIf` em quem altera, saída em objetos, codificação, segredos, PSScriptAnalyzer e Pester; `atual.md` com a tabela do produto `powershell`.
 
 ## 7. Requisitos não funcionais
 - Scripts só com a biblioteca padrão; testes em `tests/`.
@@ -43,9 +45,10 @@ Dar aos especialistas e ao ciclo da tarefa as convenções de três assuntos que
 - CA-4: uma citação `debian:buster-slim`, `ubuntu-20.04` ou `node:20-alpine3.18` de ciclo sem suporte vira achado `versao_sem_suporte`; `align-items: stretch` não.
 - CA-5: catálogo Claude e Cursor sincronizados; `claude plugin validate .` ok.
 - CA-6: README e manual listam as três stacks.
+- CA-7: `powershell` está em `perfil.STACKS`, no schema, no `iniciar`, no catálogo, no README e no manual; citação de PowerShell sem suporte vira achado.
 
 ## 9. Impacto em consumidores
 Nenhuma quebra: stacks novas são opcionais. Quem quiser instala o plugin e acrescenta a stack ao perfil.
 
 ## 10. Dúvidas em aberto
-- PowerShell como stack própria (equipe usa Windows): proposta para depois.
+- Nenhuma.

@@ -8,7 +8,7 @@ Este repositório é o marketplace `dev-flow`: plugins do Claude Code com o flux
 - `scripts/exportar_skills.py`: vendor de plugins/skills para um projeto (Agent Skills / Cloud Agents).
 - `scripts/atualizar_conhecimento.py`: levantamento de versões das stacks (endoflife.date) → tabelas de `plugins/stack-*/referencias/atual.md` e relatório; `--verificar` sem rede. `scripts/avaliar_agentes.py`: suíte de comportamento (`plugins/*/evals/`) com qualquer CLI de agente. Revisão periódica: skill `.claude/skills/atualizar-conhecimento` + `azure-pipelines-conhecimento.yml` / `.github/workflows/conhecimento.yml`.
 - `scripts/instalar_em_projeto.py`: instala no produto (`.agents/skills` + hooks Cursor); `--azure` inclui Boards e Pipelines.
-- `plugins/fluxo`: núcleo (skills, agentes, hooks, scripts, modelos, schema do perfil). Os demais são adaptadores de rastreador e CI (`azure-*`, `github-actions`, `gitlab-ci`), stacks (`stack-*`: linguagens, shell, bancos, infraestrutura, Git e Linux) e extras (`design`, `video`, `logs`).
+- `plugins/fluxo`: núcleo (skills, agentes, hooks, scripts, modelos, schema do perfil). Os demais são adaptadores de rastreador e CI (`azure-*`, `github-actions`, `gitlab-ci`), stacks (`stack-*`: linguagens, shell (Bash e PowerShell), bancos, infraestrutura, Git e Linux) e extras (`design`, `video`, `logs`).
 - `tests/`: unittest dos scripts, hooks e da consistência do marketplace (`test_marketplace.py`, `test_portabilidade.py`).
 - `docs/manual/index.html`: manual navegável (abre direto no navegador); atualizar junto com o README ao mudar skills, agentes ou plugins.
 - `exemplos/`: perfis reais; o teste valida todos.

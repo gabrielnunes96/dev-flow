@@ -44,7 +44,7 @@ BLOCO = re.compile(r"(<!-- versoes:inicio -->)(.*?)(<!-- versoes:fim -->)", re.S
 SECOES = ("## Fontes oficiais", "## Versões", "## Mudanças a observar")
 SEM_SUPORTE_MOSTRADOS = 2
 SEM_PRODUTO = "-"
-EXTENSOES = (".md", ".yml", ".yaml", ".json", ".tf", ".txt", ".toml", ".cs", ".py", ".js", ".ts", ".css", ".html")
+EXTENSOES = (".md", ".yml", ".yaml", ".json", ".tf", ".txt", ".toml", ".cs", ".py", ".js", ".ts", ".css", ".html", ".sh", ".ps1", ".psm1", ".psd1")
 
 # Codinome de distribuição em tag de imagem (debian:bookworm-slim, node:lts-bullseye, aspnet:8.0-focal,
 # openjdk:11-jre-slim-buster): tag sozinha só nas imagens da própria distribuição; nas outras, o codinome vem
@@ -73,6 +73,8 @@ PADROES = {
     "django": [r"\bDjango\s+(\d\.\d)\b"],
     "docker-engine": [r"\bDocker (?:Engine\s+)?(\d{2}\.\d+)\b", r"\bdocker:(\d{2}\.\d+)"],
     "git": [r"\b[Gg]it\s+v?(2\.\d+)\b"],
+    "powershell": [r"(?i)\b(?:PowerShell|pwsh)\s+(?:Core\s+)?(7\.\d+)\b", r"(?i)\bpowershell:(?:lts-)?(7\.\d+)\b",
+                   r"(?i)#Requires\s+-Version\s+(7\.\d+)"],
     # Distribuições: versão, tag de imagem, runner de CI e codinome na tag (debian:bookworm-slim, python:3.12-slim-bookworm).
     "ubuntu": [r"\bUbuntu\s+(\d{2}\.\d{2})\b", r"\bubuntu[:-](\d{2}\.\d{2})\b", IMAGEM_COM_CODINOME],
     "debian": [r"\bDebian\s+(\d{1,2})\b", r"\bdebian:(\d{1,2})\b", IMAGEM_COM_CODINOME],

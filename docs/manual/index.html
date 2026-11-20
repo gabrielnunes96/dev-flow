@@ -319,9 +319,9 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
         </div>
         <div class="legend"><span><i class="gate"></i> ponto de aprovação: só avança com o seu “ok”</span><span><code>/fluxo:entregar</code> percorre tudo e para só nas aprovações</span></div>
         <div class="hero-meta">
-          <div><b>22</b>plugins</div>
+          <div><b>26</b>plugins</div>
           <div><b>8</b>agentes especialistas</div>
-          <div><b>17</b>stacks: linguagens, shell, bancos, infra, Git e Linux</div>
+          <div><b>18</b>stacks: linguagens, shell, bancos, infra, Git e Linux</div>
           <div><b>3</b>provedores de CI/CD</div>
         </div>
       </section>
@@ -386,7 +386,7 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
         <p class="lead">Abra o Claude Code na pasta do projeto (pode estar vazia) e rode <code>/fluxo:iniciar</code>. Ele lê o que dá para ler e pergunta só o que é seu.</p>
         <div class="grid-2">
           <div class="card"><h4>O que ele detecta sozinho</h4>
-            <ul><li>Stacks pelos arquivos: <code>*.csproj</code>, <code>package.json</code>, <code>pyproject.toml</code>, <code>pom.xml</code>, <code>go.mod</code>, <code>Dockerfile</code>, <code>*.tf</code>, manifestos Kubernetes, drivers de banco, scripts <code>*.sh</code>, repositório Git, units systemd e cloud-init.</li>
+            <ul><li>Stacks pelos arquivos: <code>*.csproj</code>, <code>package.json</code>, <code>pyproject.toml</code>, <code>pom.xml</code>, <code>go.mod</code>, <code>Dockerfile</code>, <code>*.tf</code>, manifestos Kubernetes, drivers de banco, scripts <code>*.sh</code> e <code>*.ps1</code>, repositório Git, units systemd e cloud-init.</li>
             <li>Comandos de build, teste, lint e vulnerabilidades.</li>
             <li>Provedor de CI pelos arquivos de pipeline.</li>
             <li>Nuvem e onde a aplicação roda.</li>
@@ -674,7 +674,7 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
 (function () {
   "use strict";
   var PLUGINS = [
-    { n: "fluxo", v: "0.4.1", c: "nucleo", d: "Processo completo: demanda, técnica, plano, tarefas, PR, depuração e arquitetura. Agentes, hooks, scripts e método de raciocínio.", s: "/fluxo:*" },
+    { n: "fluxo", v: "0.4.2", c: "nucleo", d: "Processo completo: demanda, técnica, plano, tarefas, PR, depuração e arquitetura. Agentes, hooks, scripts e método de raciocínio.", s: "/fluxo:*" },
     { n: "azure-boards", v: "0.1.0", c: "ci", d: "Item raiz e tasks no Azure Boards a partir de tarefas.json, estados e descrição do card.", s: "/azure-boards:boards" },
     { n: "azure-pipelines", v: "0.2.0", c: "ci", d: "YAML do Azure DevOps para dotnet, node, python, java, go, sql, Docker e Terraform; diagnóstico.", s: "/azure-pipelines:pipeline" },
     { n: "github-actions", v: "0.1.0", c: "ci", d: "Workflows de CI, imagem no GHCR com varredura e deploy por environment com OIDC.", s: "/github-actions:actions" },
@@ -686,6 +686,7 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
     { n: "stack-go", v: "0.2.0", c: "linguagem", k: "go", r: "Go", d: "Erros com wrap, context, goroutines sem vazamento, testes de tabela, -race.", s: "stack-go:go" },
     { n: "stack-front", v: "0.2.0", c: "linguagem", k: "front", r: "Front-end", d: "React, Angular, Vue: estados de tela, contrato com o back, verificação visual.", s: "stack-front:front" },
     { n: "stack-bash", v: "0.1.0", c: "linguagem", k: "bash", r: "Bash / sh", d: "Modo estrito, aspas, trap e mktemp, getopts, portabilidade, ShellCheck e bats.", s: "stack-bash:bash" },
+    { n: "stack-powershell", v: "0.1.0", c: "linguagem", k: "powershell", r: "PowerShell", d: "Modo estrito, $LASTEXITCODE, funções avançadas com -WhatIf, saída em objetos, PSScriptAnalyzer e Pester.", s: "stack-powershell:powershell" },
     { n: "stack-sql", v: "0.2.0", c: "banco", k: "sql", r: "SQL Server", d: "Idempotência, rollback pareado, XACT_ABORT, alteração em lotes.", s: "stack-sql:sql" },
     { n: "stack-postgres", v: "0.2.0", c: "banco", k: "postgres", r: "PostgreSQL", d: "DDL sem travar (CONCURRENTLY, NOT VALID), timestamptz, numeric, EXPLAIN.", s: "stack-postgres:postgres" },
     { n: "stack-mysql", v: "0.2.0", c: "banco", k: "mysql", r: "MySQL / MariaDB", d: "DDL online, utf8mb4 e collation, deadlocks, índices compostos.", s: "stack-mysql:mysql" },

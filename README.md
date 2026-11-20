@@ -114,6 +114,7 @@ python -I scripts/sincronizar_hosts.py --check
 | **stack-java** | Spring Boot, JPA sem N+1, Bean Validation, JUnit 5, MockMvc, Testcontainers, Flyway. Kotlin incluso. |
 | **stack-go** | Erros com wrap, `context`, goroutines sem vazamento, testes de tabela, `-race`, govulncheck. |
 | **stack-front** | React, Angular, Vue: estados de tela, contrato com o back, verificação visual desktop e mobile. |
+| **stack-powershell** | PowerShell 7 e Windows PowerShell 5.1: modo estrito, `$LASTEXITCODE`, funções avançadas com `-WhatIf`, saída em objetos, codificação, segredos, PSScriptAnalyzer e Pester; modelo de script. |
 | **stack-bash** | Scripts de shell (Bash e sh POSIX): modo estrito, aspas, `trap` e `mktemp`, `getopts`, portabilidade, ShellCheck e bats; modelo de script. |
 
 ### Bancos de dados

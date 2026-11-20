@@ -1,0 +1,14 @@
+{
+  "name": "stack-powershell",
+  "description": "Convenções de PowerShell (7 e Windows PowerShell 5.1) para o fluxo: modo estrito e erros terminantes, funções avançadas com parâmetros validados, -WhatIf em quem altera, saída em objetos, codificação, segredos, PSScriptAnalyzer e Pester.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Gabriel Nunes Campos"
+  },
+  "keywords": [
+    "powershell",
+    "pwsh",
+    "windows",
+    "pester"
+  ]
+}
