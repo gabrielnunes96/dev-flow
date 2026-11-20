@@ -5,7 +5,7 @@ description: Convenções para usar, revisar e diagnosticar Git no fluxo — com
 
 # Git no fluxo
 
-A política de Git do **perfil** (`git.branch_base`, `git.commit_por_task`, `git.formato_commit`, `git.coautor`, `git.push`) e as convenções do projeto vencem estas quando conflitarem. Esta skill cobre o método; quem decide push, merge e publicação é o humano.
+A política de Git do **perfil** (`git.branch_base`, `git.commit_por_task`, `git.formato_commit`, `git.coautor`, `git.escopo_add`, `git.push`) e as convenções do projeto vencem estas quando conflitarem. Esta skill cobre o método: o commit acontece só com a permissão do usuário, como manda o ciclo da tarefa (`fluxo:task`), e push, merge e publicação são do humano.
 
 Versões com suporte, LTS e mudanças recentes: `../../referencias/atual.md` (veja a data de revisão). Antes de usar API ou recurso, siga o procedimento *projeto primeiro* do fluxo (`referencias/conhecimento.md` do plugin `fluxo`): padrão do projeto → versão em uso → documentação daquela versão → novidade como sugestão.
 
@@ -19,13 +19,13 @@ Versões com suporte, LTS e mudanças recentes: `../../referencias/atual.md` (ve
 ## Histórico
 - **Histórico publicado não se reescreve** (`rebase`, `commit --amend`, `reset` em commits que já estão no remoto compartilhado). Corrigir com commit novo ou `git revert`.
 - `rebase` (inclusive `--autosquash` com `fixup!`) só em branch própria ainda não compartilhada. Atualizar branch com a base: o que o projeto usa (merge ou rebase); na dúvida, merge.
-- Operações que **a sessão prepara e o humano executa**: `push` (conforme `git.push`), `push --force`/`--force-with-lease`, `reset --hard` ou `clean -fdx` com trabalho que não é seu, `branch -D`, apagar tag, `filter-repo`, merge na base.
+- Operações que **a sessão prepara e o humano executa**: `push` (conforme `git.push`), `push --force`/`--force-with-lease`, `reset --hard`, `clean -fdx`/`-fdX` (apaga também ignorados: `.env`, `.claude/local/`, dependências), `checkout -- .`/`restore .` com mudança não commitada, `branch -D`, apagar tag, `filter-repo`, merge na base. Para guardar ou ver o que sairia, a sessão usa `git stash` e `git clean -n` (simulação).
 - Perdeu algo? `git reflog` antes de qualquer conclusão: commit "sumido" quase sempre está lá.
 
 ## Conflitos
-- Entender os dois lados antes de escolher: `git log --merge -p <arquivo>`, `git diff` com `merge.conflictStyle=zdiff3` (mostra a base). Nunca "aceitar tudo de um lado" sem ler.
+- Entender os dois lados antes de escolher: `git log --merge -p <arquivo>`; marcadores com a base (`merge.conflictStyle=zdiff3` configurado antes do merge, ou recriados com `git checkout --conflict=zdiff3 -- <arquivo>`; versão mínima no `atual.md`). Nunca "aceitar tudo de um lado" sem ler.
 - Lockfile (`package-lock.json`, `poetry.lock`, `*.lock`) em conflito: aceitar o da base e **regenerar** com o gerenciador; não editar à mão.
-- Depois de resolver: build e testes de novo; `git diff --check` sem marcador `<<<<<<<` sobrando.
+- Depois de resolver: build e testes de novo; `git diff --check` e `git diff --cached --check` sem marcador `<<<<<<<` sobrando.
 
 ## Arquivos e configuração do repositório
 - **Fim de linha**: `.gitattributes` versionado decide, não o `core.autocrlf` de cada máquina. Base: `* text=auto`; `*.sh text eol=lf` (script com CRLF quebra no Linux); `*.bat`/`*.cmd`/`*.ps1` `eol=crlf` quando o projeto exige; imagens, zips e binários `binary`. Mudança de fim de linha em massa = commit próprio (`git add --renormalize .`).
@@ -45,7 +45,7 @@ Versões com suporte, LTS e mudanças recentes: `../../referencias/atual.md` (ve
 - `.git-blame-ignore-revs` para commits de formatação em massa, se o projeto usa.
 
 ## Validar
-- `git status` só com os arquivos da tarefa; `git diff --check` limpo (espaço sobrando, marcador de conflito).
+- `git status` só com os arquivos da tarefa; `git diff --check` e `git diff --cached --check` limpos (espaço sobrando, marcador de conflito).
 - `git diff --cached --stat` coerente com a tarefa; nenhum arquivo acima do tamanho combinado; `git ls-files --eol <arquivos>` sem fim de linha trocado.
 - `git log -1` no formato do perfil, com coautor quando configurado.
 

@@ -88,9 +88,9 @@
         "CA-6"
       ],
       "validacao": "claude plugin validate . && python -m unittest discover -s tests",
-      "estado": "a_fazer",
+      "estado": "feito",
       "wi": null,
-      "commit": null
+      "commit": "44858d2"
     }
   ]
 }

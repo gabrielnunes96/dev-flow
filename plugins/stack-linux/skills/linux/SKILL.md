@@ -15,7 +15,7 @@ Versões com suporte, LTS e mudanças recentes: `../../referencias/atual.md` (ve
 ## Configurar
 - **Distribuição e versão** do projeto (`/etc/os-release`); comando de pacote dela (`apt`, `dnf`, `apk`). Sem misturar repositórios de outra distribuição.
 - **Pacotes**: instalar só o necessário, versão fixada quando o projeto fixa; repositório de terceiro com chave assinada em `/etc/apt/keyrings` (não `apt-key`); atualizações de segurança automáticas conforme a política do projeto (`unattended-upgrades`, `dnf-automatic`).
-- **Serviço da aplicação em systemd**: unit em `/etc/systemd/system/<app>.service` versionada; `User=`/`Group=` próprios (nunca root), `WorkingDirectory`, `ExecStart` com caminho absoluto, `Restart=on-failure`, `EnvironmentFile=` com permissão `0600` para segredos (nunca no unit), limites (`LimitNOFILE`, `MemoryMax`). Endurecimento: `NoNewPrivileges=yes`, `ProtectSystem=strict`, `ProtectHome=yes`, `PrivateTmp=yes`, `ReadWritePaths=` só onde escreve; conferir com `systemd-analyze security <app>`.
+- **Serviço da aplicação em systemd**: unit em `/etc/systemd/system/<app>.service` versionada; `User=`/`Group=` próprios (nunca root), `WorkingDirectory`, `ExecStart` com caminho absoluto, `Restart=on-failure`, segredos fora do unit — `LoadCredential=` (systemd 247+, não vira variável de ambiente herdada) ou, se o projeto já usa, `EnvironmentFile=` com permissão `0600`, limites (`LimitNOFILE`, `MemoryMax`). Endurecimento: `NoNewPrivileges=yes`, `ProtectSystem=strict`, `ProtectHome=yes`, `PrivateTmp=yes`, `ReadWritePaths=` só onde escreve; conferir com `systemd-analyze security <app>`.
 - **Agendamento**: timer do systemd (`.timer` + `.service`) em vez de cron quando possível (log no journald, `Persistent=true`, sem execução sobreposta). Cron que ficar: caminho absoluto, `PATH` definido, saída para log, lock (`flock`) contra sobreposição.
 - **Usuários e permissões**: conta de serviço sem shell de login (`/usr/sbin/nologin`); arquivos da aplicação com dono certo e modo mínimo (`0640`/`0750`); nunca `chmod 777`; `sudo` por regra específica em `/etc/sudoers.d/` (validar com `visudo -c`), sem `NOPASSWD: ALL`.
 - **SSH**: só chave (`PasswordAuthentication no`), `PermitRootLogin no`, usuários permitidos explícitos; mudança de `sshd_config` validada com `sshd -t` e testada **numa segunda sessão aberta** antes de fechar a primeira.
@@ -35,7 +35,7 @@ Versões com suporte, LTS e mudanças recentes: `../../referencias/atual.md` (ve
 
 ## Checklist de revisão
 1. Distribuição e versão condizem com o projeto e estão com suporte (ver `atual.md`).
-2. Serviço com usuário próprio, sem root, segredos em `EnvironmentFile` `0600` e endurecimento do systemd.
+2. Serviço com usuário próprio, sem root, segredos fora do unit (`LoadCredential` ou `EnvironmentFile` `0600`) e endurecimento do systemd.
 3. Permissões mínimas: nenhum `777`, `sudo` restrito, conta de serviço sem login.
 4. SSH só por chave, sem root; firewall com só as portas necessárias; serviço interno sem escutar em `0.0.0.0` à toa.
 5. Pacotes de fonte assinada e versão controlada; atualizações de segurança previstas.

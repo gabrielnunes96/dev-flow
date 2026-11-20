@@ -11,7 +11,7 @@ Versões com suporte, LTS e mudanças recentes: `../../referencias/atual.md` (ve
 
 ## Escrever
 - **Shell certo**: `#!/usr/bin/env bash` quando usa recurso de Bash (arrays, `[[ ]]`, `local`, `pipefail`); `#!/bin/sh` só com POSIX puro (imagem Alpine/distroless sem Bash, `ENTRYPOINT` mínimo). Não misturar: `sh script.sh` num script Bash quebra em silêncio.
-- **Modo estrito** no topo: `set -Eeuo pipefail` (Bash) ou `set -eu` (sh). Conhecer os buracos do `-e`: não vale dentro de `if`, `&&`/`||`, `$(...)` em atribuição com `local x=$(...)` (separe `local x; x=$(...)`). Comando que pode falhar de propósito: `cmd || true` explícito ou `if ! cmd; then`.
+- **Modo estrito** no topo: `set -Eeuo pipefail` (Bash) ou `set -eu` (sh). Conhecer os buracos do `-e`: não vale dentro de `if`, `&&`/`||`, `$(...)` em atribuição com `local x=$(...)` (separe `local x; x=$(...)`). Comando que pode falhar de propósito: `cmd || true` explícito ou `if ! cmd; then`. Outras armadilhas: função chamada em `if`/`&&`/`||` roda inteira sem `-e`; `((i++))` com `i=0` retorna 1 e encerra o script (use `i=$((i + 1))`); com `pipefail`, `cmd | head` ou `| grep -q` pode sair com 141 (SIGPIPE); `$(...)` só herda o `-e` com `shopt -s inherit_errexit` (Bash 4.4+).
 - **Aspas em toda expansão**: `"$var"`, `"$@"`, `"${arr[@]}"`, `"$(cmd)"`. Sem aspas = divisão por espaço e glob. Exceção consciente comentada.
 - **Listas em array**, nunca em string: `args=(--flag "$valor"); cmd "${args[@]}"`. Nada de `eval` para montar comando.
 - **Entrada validada**: `usage()` + `getopts` (ou `case` em laço), obrigatórios checados (`: "${VAR:?defina VAR}"`), `--` antes de argumento que pode começar com `-` (`rm -- "$arq"`, `grep -- "$padrao"`).

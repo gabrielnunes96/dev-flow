@@ -3,10 +3,8 @@
 # Uso: script.sh [-n] <entrada>
 set -Eeuo pipefail
 
-usage() {
-  printf 'Uso: %s [-n] <entrada>\n  -n  simula, sem alterar nada\n' "${0##*/}" >&2
-  exit 2
-}
+ajuda() { printf 'Uso: %s [-n] <entrada>\n  -n  simula, sem alterar nada\n' "${0##*/}"; }
+usage() { ajuda >&2; exit 2; }
 
 erro() { printf 'erro: %s\n' "$*" >&2; exit 1; }
 
@@ -16,7 +14,8 @@ simular=0
 while getopts ':nh' opt; do
   case "$opt" in
     n) simular=1 ;;
-    h | *) usage ;;
+    h) ajuda; exit 0 ;;
+    *) usage ;;
   esac
 done
 shift $((OPTIND - 1))

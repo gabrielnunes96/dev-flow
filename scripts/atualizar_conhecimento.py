@@ -46,9 +46,10 @@ SEM_SUPORTE_MOSTRADOS = 2
 SEM_PRODUTO = "-"
 EXTENSOES = (".md", ".yml", ".yaml", ".json", ".tf", ".txt", ".toml", ".cs", ".py", ".js", ".ts", ".css", ".html")
 
-# Tag de imagem com codinome Debian (debian:bookworm-slim, node:20-bullseye, aspnet:8.0-bookworm-slim):
-# só em "debian:<codinome>" ou em tag que começa por versão, para não pegar CSS ("align-items:stretch").
-IMAGEM_COM_CODINOME = r"\b(?:debian:|[\w./-]+:\d[\w.]*-(?:slim-)?)([a-z]{5,})\b"
+# Codinome de distribuição em tag de imagem (debian:bookworm-slim, node:lts-bullseye, aspnet:8.0-focal,
+# openjdk:11-jre-slim-buster): tag sozinha só nas imagens da própria distribuição; nas outras, o codinome vem
+# depois de um "-", para não pegar CSS ("align-items:stretch"). Cada produto só acusa os próprios codinomes.
+IMAGEM_COM_CODINOME = r"\b(?:(?:debian|ubuntu|buildpack-deps):|[\w./-]+:(?:[\w.]+-)+)([a-z]{5,})\b"
 
 # Como cada produto aparece citado em texto, YAML ou imagem de container. O grupo 1 é o ciclo.
 PADROES = {
@@ -73,7 +74,7 @@ PADROES = {
     "docker-engine": [r"\bDocker (?:Engine\s+)?(\d{2}\.\d+)\b", r"\bdocker:(\d{2}\.\d+)"],
     "git": [r"\b[Gg]it\s+v?(2\.\d+)\b"],
     # Distribuições: versão, tag de imagem, runner de CI e codinome na tag (debian:bookworm-slim, python:3.12-slim-bookworm).
-    "ubuntu": [r"\bUbuntu\s+(\d{2}\.\d{2})\b", r"\bubuntu[:-](\d{2}\.\d{2})\b", r"\bubuntu:([a-z]{5,})\b"],
+    "ubuntu": [r"\bUbuntu\s+(\d{2}\.\d{2})\b", r"\bubuntu[:-](\d{2}\.\d{2})\b", IMAGEM_COM_CODINOME],
     "debian": [r"\bDebian\s+(\d{1,2})\b", r"\bdebian:(\d{1,2})\b", IMAGEM_COM_CODINOME],
     "rhel": [r"\b(?:RHEL|Red Hat Enterprise Linux)\s+(\d{1,2})\b", r"\bubi(\d{1,2})\b"],
     "alpine-linux": [r"\bAlpine(?: Linux)?\s+(3\.\d+)\b", r"\balpine:?(3\.\d+)\b"],
@@ -105,7 +106,8 @@ def ler(arq):
     m = META.search(texto)
     meta = dict(re.findall(r"(\w+)=(\S+)", m.group(1))) if m else {}
     produtos = [p for p in meta.get("produtos", "").split(",") if p]
-    sem_produto = produtos == [SEM_PRODUTO]
+    sem_produto = SEM_PRODUTO in produtos
+    misturado = sem_produto and len(produtos) > 1
     if sem_produto:
         produtos = []
     revisado = None
@@ -122,6 +124,7 @@ def ler(arq):
         "tem_meta": bool(m),
         "produtos": produtos,
         "sem_produto": sem_produto,
+        "misturado": misturado,
         "revisado_em": revisado,
         "n_fontes": len(re.findall(r"https?://", fontes)),
         "bloco": bloco.group(2) if bloco else None,
@@ -161,6 +164,10 @@ def verificar(hoje, max_dias=120, stacks=None):
                 problemas.append(f"{rel}: falta a seção '{s}'")
         if d["n_fontes"] < 1:
             problemas.append(f"{rel}: '## Fontes oficiais' sem link")
+        if d["misturado"]:
+            problemas.append(f"{rel}: produtos=- não se mistura com outros produtos")
+        if d["sem_produto"] and d["bloco"] is not None:
+            problemas.append(f"{rel}: produtos=- não tem bloco de versões gerado (remova o bloco ou declare os produtos)")
         if d["bloco"] is None and not d["sem_produto"]:
             problemas.append(f"{rel}: falta o bloco <!-- versoes:inicio --> ... <!-- versoes:fim -->")
     return problemas

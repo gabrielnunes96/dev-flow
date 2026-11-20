@@ -30,6 +30,7 @@ Gerado em 2026-11-19 por `scripts/atualizar_conhecimento.py` a partir de endofli
 
 ## O que acompanhar
 - Versão do Git dos runners de CI e das imagens (recurso novo de `git` em script de CI só se o runner tiver).
+- Estilo de conflito `zdiff3` (citado na skill): existe a partir do Git 2.35; runner ou servidor mais antigo usa `diff3`.
 - Mudanças de padrão anunciadas para o Git 3.0 (nome da branch inicial, formato de objetos): seguir a configuração explícita do projeto.
 
 ## Mudanças a observar

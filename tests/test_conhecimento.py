@@ -212,6 +212,11 @@ class ConhecimentoScriptTests(unittest.TestCase):
         with mock.patch.object(ac, "buscar", side_effect=AssertionError("não deveria consultar")):
             self.assertEqual([t for t, _ in ac.levantar(HOJE, stacks=["bash"], gravar=False)], ["revisao_vencida"])
         self.assertEqual(self._ler(arq), sem.format(r="2026-01-01"))
+        self._escrever(arq, sem.format(r="2026-11-01").replace("produtos=-", "produtos=-,python"))
+        self.assertTrue(any("não se mistura" in p for p in ac.verificar(HOJE)))
+        self._escrever(arq, sem.format(r="2026-11-01").replace("Sem ciclos publicados.", "<!-- versoes:inicio -->\n<!-- versoes:fim -->"))
+        self.assertTrue(any("não tem bloco de versões" in p for p in ac.verificar(HOJE)))
+        os.remove(arq)
         self._atual("python", "", "")
         self.assertTrue(any("stack-python" in p and "produtos=" in p for p in ac.verificar(HOJE)))
         self._escrever(self.py, ATUAL.format(nome="python", revisado="2026-11-01", produtos="python", bloco="").replace(
@@ -225,16 +230,21 @@ class ConhecimentoScriptTests(unittest.TestCase):
         self._fonte("ubuntu", [{"cycle": "24.04", "codename": "Noble Numbat", "lts": True, "eol": "2029-05-31"},
                                {"cycle": "20.04", "codename": "Focal Fossa", "lts": True, "eol": "2025-05-31"}])
         self._fonte("alpine-linux", [{"cycle": "3.22", "eol": "2027-05-01"}, {"cycle": "3.18", "eol": "2025-05-09"}])
-        self._atual("linux", "ubuntu,debian,alpine-linux", "")
+        self._fonte("rhel", [{"cycle": "9", "eol": "2032-05-31"}, {"cycle": "7", "eol": "2024-06-30"}])
+        self._fonte("git", [{"cycle": "2.56", "eol": False}, {"cycle": "2.46", "eol": "2025-07-08"}])
+        self._atual("linux", "ubuntu,debian,alpine-linux,rhel", "")
+        self._atual("git", "git", "")
         self._escrever(os.path.join(self.plugins, "stack-linux", "templates", "x.yml"),
                        "a: debian:buster-slim\nb: node:20-buster\nc: python:3.12-slim-bookworm\n"
                        "runs-on: ubuntu-20.04\nd: ubuntu:focal\ne: node:20-alpine3.18\n"
-                       "f: align-items:stretch\ng: Debian 12 e Ubuntu 24.04\nh: antes do Ubuntu 20.04\n")
-        citadas = sorted(m.split(" cita ")[1] for t, m in ac.levantar(HOJE, stacks=["linux"], fonte_dir=self.fonte, gravar=False)
+                       "f: align-items:stretch\ng: Debian 12 e Ubuntu 24.04\nh: antes do Ubuntu 20.04\n"
+                       "i: aspnet:6.0-focal\nj: node:lts-buster\nk: openjdk:11-jre-slim-buster\nl: buildpack-deps:buster\n"
+                       "m: FROM ubi7/ubi-minimal e RHEL 9\nn: Git 2.46 e Git 2.56; a partir do Git 2.46\n")
+        citadas = sorted(m.split(" cita ")[1] for t, m in ac.levantar(HOJE, stacks=["linux", "git"], fonte_dir=self.fonte, gravar=False)
                          if t == "versao_sem_suporte")
-        self.assertEqual(citadas, sorted(["debian buster, sem suporte", "debian buster, sem suporte",
-                                          "ubuntu 20.04, sem suporte", "ubuntu focal, sem suporte",
-                                          "alpine-linux 3.18, sem suporte"]))
+        self.assertEqual(citadas, sorted(["debian buster, sem suporte"] * 5 + [
+                                          "ubuntu 20.04, sem suporte", "ubuntu focal, sem suporte", "ubuntu focal, sem suporte",
+                                          "alpine-linux 3.18, sem suporte", "rhel 7, sem suporte", "git 2.46, sem suporte"]))
         self.assertEqual(ac.nomes_do_ciclo({"cycle": "22.04", "codename": "Jammy Jellyfish"}), {"22.04", "jammy"})
 
     def test_codigos_de_saida_e_relatorio(self):
