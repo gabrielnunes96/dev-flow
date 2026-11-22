@@ -14,9 +14,9 @@
         "CA-1"
       ],
       "validacao": "claude plugin validate . && python -m unittest discover -s tests",
-      "estado": "andamento",
+      "estado": "feito",
       "wi": null,
-      "commit": null
+      "commit": "4a34df8"
     },
     {
       "id": "T2",
