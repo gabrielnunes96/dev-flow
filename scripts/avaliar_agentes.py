@@ -4,7 +4,8 @@
 Os casos usam o formato do `claude plugin eval` (prompt.md + graders/*.md), então no Claude Code também dá para rodar
 `claude plugin eval plugins/fluxo`. Este executor é o caminho para os outros hosts (Cursor, Codex, qualquer CLI):
 
-  python -I scripts/avaliar_agentes.py --comando "claude -p"
+  python -I scripts/avaliar_agentes.py --comando "claude -p --no-session-persistence --output-format json"
+  python -I scripts/avaliar_agentes.py --comando "claude -p --model haiku --output-format json" --juiz "claude -p --model opus"
   python -I scripts/avaliar_agentes.py --comando "cursor-agent -p --output-format text" --juiz "cursor-agent -p"
   python -I scripts/avaliar_agentes.py --comando "codex exec -" --caso "revisor/*"
   python -I scripts/avaliar_agentes.py --listar
@@ -14,6 +15,9 @@ padrão, ou por arquivo quando o comando tem `{prompt_arquivo}`. Verificações:
   regex  aplicada à resposta (pattern, flags=i, match=contains|not_contains|count:N)
   llm    só com --juiz: o juiz recebe o critério e a resposta e responde PASS ou FAIL na primeira linha
   outras (tool_used, file_exists...) dependem do host: "não avaliado", não reprovam.
+
+Se a saída do comando for JSON com "result" (ex.: `claude -p --output-format json`), a resposta avaliada é o
+"result" e "total_cost_usd" entra na coluna de custo (agente + juiz); texto puro continua valendo, sem custo.
 
 Saída 0 se todo caso passou em todas as --execucoes; 1 se algum reprovou, deu erro ou ficou sem nenhuma
 verificação avaliada (caso só com verificação llm exige --juiz). O comando roda numa pasta temporária vazia,
@@ -140,6 +144,22 @@ def executar(comando, prompt, timeout):
     return r.stdout
 
 
+def extrair(saida):
+    """(resposta, custo em US$ ou None). JSON com "result" (CLIs com saída estruturada) ou texto puro."""
+    try:
+        dado = json.loads(saida)
+    except ValueError:
+        return saida, None
+    if isinstance(dado, dict) and isinstance(dado.get("result"), str):
+        custo = dado.get("total_cost_usd")
+        return dado["result"], (float(custo) if isinstance(custo, (int, float)) and not isinstance(custo, bool) else None)
+    return saida, None
+
+
+def somar(a, b):
+    return b if a is None else a if b is None else a + b
+
+
 def avaliar_regex(campos, resposta):
     flags = re.I if "i" in str(campos.get("flags", "")) else 0
     n = len(re.findall(campos["pattern"], resposta, flags))
@@ -154,28 +174,29 @@ def avaliar_regex(campos, resposta):
 
 
 def avaliar(grader, resposta, juiz, timeout):
-    """True/False, ou None quando não avaliado."""
+    """(True/False ou None quando não avaliado, custo do juiz ou None)."""
     campos = grader["campos"]
     alvo = campos.get("target", "last_message")
     if alvo != "last_message":
-        return None
+        return None, None
     tipo = campos.get("type")
     if tipo == "regex":
-        return avaliar_regex(campos, resposta)
+        return avaliar_regex(campos, resposta), None
     if tipo == "llm" and juiz:
         pergunta = ("Você é um avaliador. Critério:\n\n" + (campos.get("criteria") or grader["criterio"])
                     + "\n\nResposta avaliada:\n\n<<<\n" + resposta + "\n>>>\n\nResponda só PASS ou FAIL na primeira linha.")
-        veredito = re.search(r"\b(PASS|FAIL)\b", executar(juiz, pergunta, timeout).upper())
+        texto, custo = extrair(executar(juiz, pergunta, timeout))
+        veredito = re.search(r"\b(PASS|FAIL)\b", texto.upper())
         if not veredito:
             raise Erro("o juiz não respondeu PASS nem FAIL")
-        return veredito.group(1) == "PASS"
-    return None
+        return veredito.group(1) == "PASS", custo
+    return None, None
 
 
 def rodar(lista, comando, juiz=None, execucoes=1, saida=print):
     resultados, falhou = [], False
     for caso in lista:
-        aprovadas, avaliadas, detalhes, erro = 0, 0, [], None
+        aprovadas, avaliadas, detalhes, erro, custo = 0, 0, [], None, None
         try:
             try:
                 timeout = int(caso["campos"].get("timeout_seconds") or 300)
@@ -183,11 +204,15 @@ def rodar(lista, comando, juiz=None, execucoes=1, saida=print):
                 raise Erro("timeout_seconds não numérico") from e
             prompt = montar_prompt(caso)
             for _ in range(execucoes):
-                resposta = executar(comando, prompt, timeout)
-                try:
-                    notas = {g["nome"]: avaliar(g, resposta, juiz, timeout) for g in caso["graders"]}
-                except (KeyError, re.error, ValueError) as e:
-                    raise Erro(f"verificação mal formada: {e}") from e
+                resposta, gasto = extrair(executar(comando, prompt, timeout))
+                custo = somar(custo, gasto)
+                notas = {}
+                for g in caso["graders"]:
+                    try:
+                        notas[g["nome"]], gasto = avaliar(g, resposta, juiz, timeout)
+                    except (KeyError, re.error, ValueError) as e:
+                        raise Erro(f"verificação mal formada: {e}") from e
+                    custo = somar(custo, gasto)
                 detalhes.append(notas)
                 validas = [v for v in notas.values() if v is not None]
                 if validas:
@@ -203,9 +228,18 @@ def rodar(lista, comando, juiz=None, execucoes=1, saida=print):
             situacao = "OK" if aprovadas == avaliadas == execucoes else "REPROVADO"
         falhou |= situacao != "OK"
         resultados.append({"caso": caso["nome"], "situacao": situacao, "aprovadas": aprovadas, "avaliadas": avaliadas,
-                           "verificacoes": detalhes, "erro": erro})
-        saida(f"{situacao:13} {caso['nome']} ({aprovadas}/{avaliadas})" + (f" — {erro}" if erro else ""))
+                           "verificacoes": detalhes, "erro": erro, "custo_usd": custo})
+        saida(f"{situacao:13} {caso['nome']} ({aprovadas}/{avaliadas}) {formatar(custo)}" + (f" — {erro}" if erro else ""))
+    total = None
+    for r in resultados:
+        total = somar(total, r["custo_usd"])
+    if total is not None:
+        saida(f"custo total: {formatar(total)}")
     return resultados, falhou
+
+
+def formatar(custo):
+    return "US$ —" if custo is None else f"US$ {custo:.4f}"
 
 
 def main(argv=None):

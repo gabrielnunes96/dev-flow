@@ -1,0 +1,90 @@
+{
+  "demanda": "modelo-e-documentacao",
+  "titulo": "Modelo por especialista e MCP de documentação",
+  "item_raiz": null,
+  "tarefas": [
+    {
+      "id": "T1",
+      "titulo": "Custo na suíte de comportamento",
+      "descricao": "extrair JSON (result/total_cost_usd) e somar custo; teste.",
+      "repo": ".",
+      "stack": "python",
+      "depende_de": [],
+      "criterios": [
+        "CA-1"
+      ],
+      "validacao": "claude plugin validate . && python -m unittest discover -s tests",
+      "estado": "andamento",
+      "wi": null,
+      "commit": null
+    },
+    {
+      "id": "T2",
+      "titulo": "Casos de comportamento do analista e do depurador",
+      "descricao": "um caso cada, no formato do claude plugin eval.",
+      "repo": ".",
+      "stack": "python",
+      "depende_de": [],
+      "criterios": [
+        "CA-2"
+      ],
+      "validacao": "claude plugin validate . && python -m unittest discover -s tests",
+      "estado": "a_fazer",
+      "wi": null,
+      "commit": null
+    },
+    {
+      "id": "T3",
+      "titulo": "Medição por modelo e modelo por especialista",
+      "descricao": "rodar a suíte por família, registrar medicao.md, aplicar model no frontmatter, hosts.md, teste.",
+      "repo": ".",
+      "stack": "python",
+      "depende_de": [
+        "T1",
+        "T2"
+      ],
+      "criterios": [
+        "CA-3",
+        "CA-4"
+      ],
+      "validacao": "claude plugin validate . && python -m unittest discover -s tests",
+      "estado": "a_fazer",
+      "wi": null,
+      "commit": null
+    },
+    {
+      "id": "T4",
+      "titulo": "Catálogo e gerador de MCP de documentação",
+      "descricao": "documentacao.md, mcp_documentacao.py, conhecimento.md, iniciar, atualizar-conhecimento; testes.",
+      "repo": ".",
+      "stack": "python",
+      "depende_de": [],
+      "criterios": [
+        "CA-5",
+        "CA-6"
+      ],
+      "validacao": "claude plugin validate . && python -m unittest discover -s tests",
+      "estado": "a_fazer",
+      "wi": null,
+      "commit": null
+    },
+    {
+      "id": "T5",
+      "titulo": "Documentação e versões",
+      "descricao": "README, manual, hosts.md, versões, sincronizar hosts.",
+      "repo": ".",
+      "stack": "python",
+      "depende_de": [
+        "T3",
+        "T4"
+      ],
+      "criterios": [
+        "CA-7"
+      ],
+      "validacao": "claude plugin validate . && python -m unittest discover -s tests",
+      "estado": "a_fazer",
+      "wi": null,
+      "commit": null
+    }
+  ]
+}

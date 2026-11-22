@@ -34,6 +34,8 @@ def _cmd(codigo):
 AGENTE_FALSO = _cmd("import sys; d=sys.stdin.read(); print('achado: forEach async sem await' if 'forEach' in d else 'nada')")
 JUIZ_APROVA = _cmd("import sys; sys.stdin.read(); print('PASS')")
 JUIZ_MARKDOWN = _cmd("import sys; sys.stdin.read(); print('Analisei a resposta.'); print('Veredito: **PASS**')")
+AGENTE_JSON = _cmd("import sys, json; d=sys.stdin.read(); print(json.dumps({'result': 'achado: forEach async sem await' if 'forEach' in d else 'nada', 'total_cost_usd': 0.25}))")
+JUIZ_JSON = _cmd("import sys, json; sys.stdin.read(); print(json.dumps({'result': 'PASS', 'total_cost_usd': 0.5}))")
 JUIZ_REPROVA = _cmd("import sys; sys.stdin.read(); print('FAIL porque sim')")
 
 
@@ -158,6 +160,21 @@ class ExecutorTests(unittest.TestCase):  # CA-11
         (r,), falhou = self._rodar("revisor/await")
         self.assertEqual(r["situacao"], "ERRO")
         self.assertIn("mal formada", r["erro"])
+
+    def test_le_saida_json_e_soma_custo_do_agente_e_do_juiz(self):  # modelo-e-documentacao CA-1
+        linhas = []
+        (r,), falhou = av.rodar(av.casos(filtro="revisor/await"), AGENTE_JSON, JUIZ_JSON, saida=linhas.append)
+        self.assertFalse(falhou)
+        self.assertEqual(r["situacao"], "OK")
+        self.assertEqual(r["verificacoes"][0]["c"], True)
+        self.assertAlmostEqual(r["custo_usd"], 0.75)
+        self.assertIn("US$ 0.7500", linhas[0])
+        self.assertEqual(linhas[-1], "custo total: US$ 0.7500")
+        (r,), _ = self._rodar("revisor/await")
+        self.assertIsNone(r["custo_usd"])
+        self.assertEqual(av.extrair('{"result": 1}'), ('{"result": 1}', None))
+        self.assertEqual(av.extrair('[1]'), ('[1]', None))
+        self.assertEqual(av.extrair('{"result": "x", "total_cost_usd": true}'), ("x", None))
 
     def test_listar(self):
         self.assertEqual(_main(*["--listar"]), 0)
