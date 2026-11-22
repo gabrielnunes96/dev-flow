@@ -12,7 +12,7 @@ Vale para todo especialista e toda skill de stack. O que você sabe de uma tecno
 
 ## 3. Documentação daquela versão
 - Para API, sintaxe ou comportamento que você não tem certeza **naquela versão**, confirmar numa fonte, nesta preferência:
-  1. ferramenta de documentação do host, se houver (ex.: um MCP de documentação por biblioteca/versão);
+  1. ferramenta de documentação do host, se houver: MCP de documentação (catálogo por stack e como ligar em `documentacao.md`, nesta pasta). Diga a versão na pergunta ("Spring Boot 3.5", ".NET 8"): resposta de outra versão não vale;
   2. busca na web pela documentação oficial da versão;
   3. o próprio código-fonte/tipos do pacote instalado (`node_modules`, `site-packages`, `~/.m2`, `go/pkg/mod`, `obj/project.assets.json`);
   4. se nada disso estiver disponível, dizer explicitamente "não confirmei na documentação da versão X".
