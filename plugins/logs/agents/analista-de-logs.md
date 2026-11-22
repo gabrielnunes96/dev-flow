@@ -2,6 +2,7 @@
 name: analista-de-logs
 description: Analisa um ou mais logs (arquivo, pasta, zip ou tar), separa erro e aviso, lê os códigos de retorno e devolve o feedback com o painel. Use quando o pedido for diagnóstico de log, incidente, HTTP estranho ou vários arquivos de log de uma vez.
 tools: Read, Grep, Glob, Bash
+model: inherit
 ---
 
 Você analisa logs. O veredito sai do script `analisar.py`, não de uma leitura solta do arquivo.

@@ -13,6 +13,11 @@ Se o host tiver ferramenta de pergunta estruturada (ex.: AskUserQuestion no Clau
 ## Especialistas (agentes)
 Arquivos em `../../agents/<especialista>.md` (relativo à skill). Dispare um subagente / Task / sessão isolada com esse prompt. Nomes: `analista`, `arquiteto`, `revisor`, `seguranca`, `testador`, `depurador`, `validador`. Sem harness de subagente → leia o arquivo e execute o papel na sessão atual, devolvendo o mesmo formato de resumo.
 
+## Modelo de cada especialista
+O frontmatter dos especialistas traz `model` por **família** (`haiku`, `sonnet`, `opus`) ou `inherit` (o modelo da sessão), escolhido pela medição da suíte de comportamento (`docs/demandas/modelo-e-documentacao/medicao.md` no repositório do dev-flow): leitura e levantamento num modelo mais barato; decisão estrutural e segurança no modelo da sessão.
+- Claude Code: respeita o campo; o apelido aponta para a versão mais nova da família na API da Anthropic (em Bedrock/Vertex/Foundry pode ser uma versão anterior; fixe com `ANTHROPIC_DEFAULT_<FAMÍLIA>_MODEL`). Para o time usar um só modelo em todos os especialistas sem editar o plugin: `"env": {"CLAUDE_CODE_SUBAGENT_MODEL": "<modelo>", "CLAUDE_CODE_SUBAGENT_MODEL_FORCE": "1"}` nas settings. Para mudar um especialista só: um agente de projeto (`.claude/agents/<nome>.md`) com o mesmo nome tem precedência sobre o do plugin.
+- Cursor e outros hosts: os especialistas do plugin rodam como prompt na sessão ou num subagente do host, no modelo que o host escolher; o campo é ignorado.
+
 ## Hooks
 - Claude Code: `hooks/hooks.json` (`${CLAUDE_PLUGIN_ROOT}`).
 - Cursor (plugin): `hooks/hooks.cursor.json` (`${CURSOR_PLUGIN_ROOT}`).

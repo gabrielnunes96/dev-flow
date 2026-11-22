@@ -17,7 +17,7 @@ padrão, ou por arquivo quando o comando tem `{prompt_arquivo}`. Verificações:
   outras (tool_used, file_exists...) dependem do host: "não avaliado", não reprovam.
 
 Se a saída do comando for JSON com "result" (ex.: `claude -p --output-format json`), a resposta avaliada é o
-"result" e "total_cost_usd" entra na coluna de custo (agente + juiz); texto puro continua valendo, sem custo.
+"result" e "total_cost_usd" entra no custo, separado em agente e juiz; texto puro continua valendo, sem custo.
 
 Saída 0 se todo caso passou em todas as --execucoes; 1 se algum reprovou, deu erro ou ficou sem nenhuma
 verificação avaliada (caso só com verificação llm exige --juiz). O comando roda numa pasta temporária vazia,
@@ -196,7 +196,7 @@ def avaliar(grader, resposta, juiz, timeout):
 def rodar(lista, comando, juiz=None, execucoes=1, saida=print):
     resultados, falhou = [], False
     for caso in lista:
-        aprovadas, avaliadas, detalhes, erro, custo = 0, 0, [], None, None
+        aprovadas, avaliadas, detalhes, erro, custo, custo_juiz = 0, 0, [], None, None, None
         try:
             try:
                 timeout = int(caso["campos"].get("timeout_seconds") or 300)
@@ -212,7 +212,7 @@ def rodar(lista, comando, juiz=None, execucoes=1, saida=print):
                         notas[g["nome"]], gasto = avaliar(g, resposta, juiz, timeout)
                     except (KeyError, re.error, ValueError) as e:
                         raise Erro(f"verificação mal formada: {e}") from e
-                    custo = somar(custo, gasto)
+                    custo_juiz = somar(custo_juiz, gasto)
                 detalhes.append(notas)
                 validas = [v for v in notas.values() if v is not None]
                 if validas:
@@ -228,13 +228,14 @@ def rodar(lista, comando, juiz=None, execucoes=1, saida=print):
             situacao = "OK" if aprovadas == avaliadas == execucoes else "REPROVADO"
         falhou |= situacao != "OK"
         resultados.append({"caso": caso["nome"], "situacao": situacao, "aprovadas": aprovadas, "avaliadas": avaliadas,
-                           "verificacoes": detalhes, "erro": erro, "custo_usd": custo})
-        saida(f"{situacao:13} {caso['nome']} ({aprovadas}/{avaliadas}) {formatar(custo)}" + (f" — {erro}" if erro else ""))
-    total = None
+                           "verificacoes": detalhes, "erro": erro, "custo_usd": custo, "custo_juiz_usd": custo_juiz})
+        saida(f"{situacao:13} {caso['nome']} ({aprovadas}/{avaliadas}) agente {formatar(custo)}"
+              + (f", juiz {formatar(custo_juiz)}" if custo_juiz is not None else "") + (f" — {erro}" if erro else ""))
+    total = juiz_total = None
     for r in resultados:
-        total = somar(total, r["custo_usd"])
-    if total is not None:
-        saida(f"custo total: {formatar(total)}")
+        total, juiz_total = somar(total, r["custo_usd"]), somar(juiz_total, r["custo_juiz_usd"])
+    if total is not None or juiz_total is not None:
+        saida(f"custo total: agente {formatar(total)}" + (f", juiz {formatar(juiz_total)}" if juiz_total is not None else ""))
     return resultados, falhou
 
 

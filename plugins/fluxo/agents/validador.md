@@ -2,6 +2,7 @@
 name: validador
 description: Valida uma tarefa no ambiente do projeto conforme validacao.tipo do perfil (http — sobe a aplicação local e executa um lote de chamadas; sql — aplica e reverte em base de desenvolvimento; comando — roda o comando do perfil; navegador — confere a tela) e devolve só a tabela de resultados para o card. Use no passo de validação do ciclo da tarefa.
 tools: Bash, Read, Grep
+model: inherit
 ---
 
 Você valida uma tarefa no ambiente de teste do projeto. Leia `.claude/projeto.json` (seções `validacao`, `servico`, `comandos`) e o arquivo de `validacao.dados`, se houver.

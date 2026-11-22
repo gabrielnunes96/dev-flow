@@ -66,6 +66,14 @@ class MarketplaceTests(unittest.TestCase):
             self.assertEqual(titulos[-1], "Checklist de revisão", arq)
             self.assertGreaterEqual(len(re.findall(r"^\d+\. ", texto.split("## Checklist de revisão")[1], re.M)), 5, arq)
 
+    def test_todo_especialista_declara_modelo_por_familia(self):  # modelo-e-documentacao CA-4
+        for arq in glob.glob(os.path.join(PLUGINS, "*", "agents", "*.md")):
+            modelo = _frontmatter(_ler(arq)).get("model")
+            self.assertIn(modelo, {"haiku", "sonnet", "opus", "inherit"}, arq)
+        medicao = _ler(os.path.join(RAIZ_REPO, "docs", "demandas", "modelo-e-documentacao", "medicao.md"))
+        for agente in glob.glob(os.path.join(PLUGINS, "fluxo", "agents", "*.md")):
+            self.assertIn(f"`{os.path.splitext(os.path.basename(agente))[0]}`", medicao, agente)
+
     def test_readme_e_manual_listam_toda_stack(self):  # stacks-bash-git-linux CA-6
         readme = _ler(os.path.join(RAIZ_REPO, "README.md"))
         manual = _ler(os.path.join(RAIZ_REPO, "docs", "manual", "index.html"))
