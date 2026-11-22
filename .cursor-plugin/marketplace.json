@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Fluxo de desenvolvimento automatizado do time: da demanda à especificação funcional e técnica, plano, implementação task a task com agentes especialistas, revisão, segurança, validação, PR e CI/CD — com stacks de linguagem, banco e infraestrutura.",
-    "version": "0.4.2",
+    "version": "0.5.0",
     "pluginRoot": "plugins"
   },
   "plugins": [

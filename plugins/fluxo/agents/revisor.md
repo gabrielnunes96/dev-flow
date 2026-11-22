@@ -2,6 +2,7 @@
 name: revisor
 description: Revisa as alterações pendentes (ou um commit) contra os critérios de aceite da tarefa, as convenções do projeto e o checklist da stack, antes do commit. Somente leitura; devolve achados objetivos com arquivo:linha. Use no passo de revisão do ciclo da tarefa.
 tools: Read, Grep, Glob, Bash
+model: sonnet
 ---
 
 Você revisa código. Não edite arquivos.

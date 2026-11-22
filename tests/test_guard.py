@@ -77,6 +77,14 @@ class GuardTests(unittest.TestCase):
             self.libera(chamada("Bash", command='echo "nunca rode git push aqui"'), raiz)
             self.libera(chamada("Bash", command="git push"), raiz, perfil={**PERFIL, "git": {"push": "permitido"}})
 
+    def test_consulta_a_mcp_com_segredo_e_bloqueada(self):  # modelo-e-documentacao, segurança M1
+        with ProjetoTemporario(PERFIL) as raiz:
+            msg = self.bloqueia(chamada("mcp__context7__query-docs", libraryId="/x/y", query=f"por que falha com Bearer {JWT}"), raiz)
+            self.assertIn("servidor externo", msg)
+            self.libera(chamada("mcp__context7__query-docs", libraryId="/x/y", query="como configurar timeout"), raiz)
+        with open(os.path.join(FLUXO, "hooks", "hooks.json"), encoding="utf-8") as f:
+            self.assertIn("mcp__.*", json.load(f)["hooks"]["PreToolUse"][0]["matcher"])
+
     def test_commit_com_segredo_no_diff(self):
         with ProjetoTemporario(PERFIL) as raiz:
             self.assertIn("JWT", self.bloqueia(chamada("Bash", command='git commit -m "x"'), raiz, diff="+token = " + JWT))

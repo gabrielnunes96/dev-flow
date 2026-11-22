@@ -26,6 +26,7 @@ Para cada item, abrir a fonte oficial listada em `## Fontes oficiais` do `atual.
 
 - Mudança que altera o **método** (o jeito de implementar/testar/revisar que vale em qualquer versão) → propor a edição na skill `stack-*` ou no especialista, com a fonte. Mudança de versão/recurso → só no `atual.md`.
 - Ao terminar uma stack: `revisado_em` = hoje no comentário `dev-flow:conhecimento`.
+- Catálogo de MCP de documentação (`plugins/fluxo/referencias/documentacao.md`): conferir em cada fonte se URL, chave e custo continuam valendo e se surgiu MCP oficial para alguma stack; atualizar `revisado_em`. Rodar `python -m unittest tests.test_mcp_documentacao` (ou a suíte inteira).
 - Nada de conteúdo específico de projeto (regra do repositório).
 
 ## 3. Conferir

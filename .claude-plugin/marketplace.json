@@ -5,14 +5,14 @@
   },
   "metadata": {
     "description": "Fluxo de desenvolvimento automatizado do time: da demanda à especificação funcional e técnica, plano, implementação task a task com agentes especialistas, revisão, segurança, validação, PR e CI/CD — com stacks de linguagem, banco e infraestrutura.",
-    "version": "0.4.2"
+    "version": "0.5.0"
   },
   "plugins": [
     {
       "name": "fluxo",
       "source": "./plugins/fluxo",
       "description": "Núcleo do processo: demanda → funcional → técnica → plano → tasks → PR, com agentes especialistas (arquiteto, segurança, testador, depurador), método de raciocínio, pontos de aprovação humana, guard e validação local.",
-      "version": "0.4.2",
+      "version": "0.5.0",
       "category": "development"
     },
     {
@@ -173,7 +173,7 @@
       "name": "design",
       "source": "./plugins/design",
       "description": "Designer de UX/UI: direção visual, temas claro/escuro com tokens, telas e fluxos, animações limpas, acessibilidade e revisão visual.",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "category": "design"
     },
     {
@@ -187,7 +187,7 @@
       "name": "logs",
       "source": "./plugins/logs",
       "description": "Analisa um conjunto de logs (arquivo, pasta, zip ou tar) numa interface local ou pelo script: erro, aviso, códigos de retorno e um painel HTML.",
-      "version": "0.1.9",
+      "version": "0.1.10",
       "category": "development"
     }
   ]
