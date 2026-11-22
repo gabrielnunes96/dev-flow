@@ -87,6 +87,12 @@ class GeradorTests(unittest.TestCase):  # CA-6
         finally:
             if antes is not None:
                 os.environ["CLAUDE_PROJECT_DIR"] = antes
+        for invalido in ([], {"stacks": "dotnet"}, {"stacks": [{"a": 1}]}):
+            shutil.rmtree(os.path.join(self.dir, ".claude"), ignore_errors=True)
+            os.makedirs(os.path.join(self.dir, ".claude"))
+            with open(os.path.join(self.dir, ".claude", "projeto.json"), "w", encoding="utf-8") as f:
+                json.dump(invalido, f)
+            self.assertEqual(_rodar("--host", "claude", "--dir", self.dir)[0], 1, invalido)
         ruim = os.path.join(self.dir, "doc.md")
         with open(ruim, "w", encoding="utf-8") as f:
             f.write("## Catálogo\n| `x` | http://inseguro | não | — | * | — |\n")
@@ -96,6 +102,13 @@ class GeradorTests(unittest.TestCase):  # CA-6
             f.write("# nada\n")
         with self.assertRaises(mcp.Erro):
             mcp.ler_catalogo(ruim)
+        linha = "| `x` | https://a.org/mcp | não | — | * | — |\n"
+        for texto in ("## Catálogo\n| MCP | URL |\n| --- | --- |\n" + linha + linha,
+                      "## Catálogo\n| x | https://a.org/mcp | não | — | * | — |\n"):
+            with open(ruim, "w", encoding="utf-8") as f:
+                f.write(texto)
+            with self.assertRaises(mcp.Erro):
+                mcp.ler_catalogo(ruim)
 
 
 if __name__ == "__main__":

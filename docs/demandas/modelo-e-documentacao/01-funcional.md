@@ -19,7 +19,7 @@ Sessão e especialistas do fluxo; mantenedor do dev-flow; time que configura o p
 **Fora**: MCP próprio do dev-flow, RAG, fine-tuning, ligar MCP automaticamente ao instalar plugin.
 
 ## 5. Regras de negócio
-- RN-1: especialista só desce de modelo se, na medição, passar em todos os casos dele no modelo mais barato; sem caso de comportamento, fica `inherit`.
+- RN-1: especialista só desce para um modelo em que, na medição, passou em todos os casos dele em todas as execuções; sem caso de comportamento, fica `inherit`.
 - RN-2: modelo é escrito por família (apelido), nunca por versão; nome de versão é conhecimento volátil.
 - RN-3: MCP de documentação é opcional e ligado pelo humano (a sessão mostra a configuração; não grava sozinha), como as permissões no `iniciar`.
 - RN-4: catálogo de MCPs (URL, custo, chave) é conhecimento volátil: arquivo datado, com fonte, revisto pela revisão periódica.

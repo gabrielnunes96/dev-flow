@@ -642,7 +642,7 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
             <tr><td><code>arquiteto</code>, <code>seguranca</code>, <code>validador</code>, <code>designer</code>, <code>analista-de-logs</code></td><td><code>inherit</code></td><td>Decisão cara de desfazer, achado caro de perder, ou sem caso medido</td></tr>
           </tbody>
         </table></div>
-        <div class="callout info"><span class="ico">i</span><div><p>Para o time usar um só modelo em todos os especialistas: <code>"env": {"CLAUDE_CODE_SUBAGENT_MODEL": "&lt;modelo&gt;", "CLAUDE_CODE_SUBAGENT_MODEL_FORCE": "1"}</code> nas settings do Claude Code.</p></div></div>
+        <div class="callout info"><span class="ico">i</span><div><p>Para mudar um especialista no projeto, crie <code>.claude/agents/&lt;nome&gt;.md</code> com o mesmo nome (com revisão obrigatória nesse arquivo). Forçar um modelo em todos (<code>CLAUDE_CODE_SUBAGENT_MODEL_FORCE</code>) é recurso de medição: rebaixaria também <code>seguranca</code> e <code>arquiteto</code>.</p></div></div>
       </section>
 
       <section class="doc" id="problemas" data-titulo="Problemas comuns">

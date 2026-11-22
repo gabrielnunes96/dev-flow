@@ -36,12 +36,17 @@ def ler_catalogo(arq=CATALOGO):
     secao = texto.split("## Catálogo", 1)[1].split("\n## ", 1)[0]
     itens = []
     for linha in secao.splitlines():
-        cel = [c.strip() for c in linha.strip().strip("|").split("|")]
-        if len(cel) < 6 or not cel[0].startswith("`"):
+        if not linha.strip().startswith("|"):
             continue
+        cel = [c.strip() for c in linha.strip().strip("|").split("|")]
+        if cel[0] == "MCP" or set(cel[0]) <= {"-", ":"}:
+            continue  # cabeçalho e separador
         nome = cel[0].strip("`")
-        if not re.fullmatch(r"[a-z0-9-]+", nome) or not cel[1].startswith("https://"):
+        if (len(cel) < 6 or not cel[0].startswith("`") or not re.fullmatch(r"[a-z0-9-]+", nome)
+                or not cel[1].startswith("https://")):
             raise Erro(f"{arq}: linha mal formada: {linha.strip()}")
+        if any(i["nome"] == nome for i in itens):
+            raise Erro(f"{arq}: MCP repetido: {nome}")
         chave = re.search(r"`([A-Z][A-Z0-9_]*)`", cel[2])
         itens.append({"nome": nome, "url": cel[1], "chave": chave.group(1) if chave else None,
                       "stacks": {s.strip() for s in cel[4].split(",") if s.strip()}})
@@ -83,7 +88,13 @@ def main(argv=None):
                 raise Erro(str(e)) from e
             if not raiz:
                 raise Erro("sem .claude/projeto.json (rode a skill iniciar ou informe --stack)")
-            stacks = perfil.get("stacks") or []
+            if not isinstance(perfil, dict):
+                raise Erro("perfil inválido: .claude/projeto.json deve ser um objeto (rode perfil.py validar)")
+            stacks = perfil.get("stacks")
+            if stacks is None:
+                stacks = []
+            if not isinstance(stacks, list) or not all(isinstance(s, str) for s in stacks):
+                raise Erro("stacks do perfil inválido: deve ser lista de nomes (rode perfil.py validar)")
         saida = configurar(ler_catalogo(), stacks, args.host, args.com_chave)
     except (Erro, OSError) as e:
         print(f"erro: {e}", file=sys.stderr)

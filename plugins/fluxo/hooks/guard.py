@@ -84,6 +84,12 @@ def verificar(dados, raiz, perfil, obter_diff=diff_staged):
             if ferramenta in ("Grep", "Glob") and _dentro(d, alvo_abs) and _norm(d) != _norm(alvo_abs):
                 raise Bloqueio(f"busca a partir de um diretório que contém {os.path.relpath(d, base)}; busque dentro do projeto.")
 
+    if ferramenta.startswith("mcp__"):
+        # Consulta a MCP sai do ambiente (ex.: documentação remota): segredo não vai junto.
+        achado = segredo_em(texto, protecao.get("segredos_extras") or [])
+        if achado:
+            raise Bloqueio(f"a chamada a {ferramenta} levaria {achado} para um servidor externo. Tire o segredo da consulta.")
+
     if ferramenta in ("Edit", "Write", "NotebookEdit"):
         alvo = entrada.get("file_path") or entrada.get("notebook_path") or ""
         for item in protecao.get("gerados") or []:

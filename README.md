@@ -183,7 +183,7 @@ Cada especialista declara o modelo por família, escolhido pela suíte de compor
 | `revisor`, `depurador`, `testador` | `sonnet` | ≈ 54% do custo do opus; o `testador` falhou no haiku. |
 | `arquiteto`, `seguranca`, `validador`, `designer`, `analista-de-logs` | `inherit` (modelo da sessão) | Decisão cara de desfazer, achado caro de perder, ou sem caso medido. |
 
-Vale no Claude Code; outros hosts usam o modelo que escolherem. Para forçar um só modelo em todos sem editar o plugin: `CLAUDE_CODE_SUBAGENT_MODEL` + `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` nas settings (detalhes em [`hosts.md`](plugins/fluxo/referencias/hosts.md)). A suíte mostra o custo do agente e do juiz quando o CLI devolve JSON (`claude -p --output-format json`).
+Vale no Claude Code; outros hosts usam o modelo que escolherem. Para mudar um especialista no seu projeto, crie `.claude/agents/<nome>.md` com o mesmo nome (detalhes e cuidados em [`hosts.md`](plugins/fluxo/referencias/hosts.md)). A suíte mostra o custo do agente e do juiz quando o CLI devolve JSON (`claude -p --output-format json`).
 
 ### Documentação por MCP
 O passo "documentação daquela versão" fica melhor com um MCP de documentação. O catálogo [`plugins/fluxo/referencias/documentacao.md`](plugins/fluxo/referencias/documentacao.md) diz qual serve cada stack (Microsoft Learn para .NET, SQL Server e PowerShell; Context7 para bibliotecas em geral), custo e cuidados. A skill `iniciar` gera a configuração para o perfil e você grava:

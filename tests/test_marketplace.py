@@ -71,6 +71,10 @@ class MarketplaceTests(unittest.TestCase):
             modelo = _frontmatter(_ler(arq)).get("model")
             self.assertIn(modelo, {"haiku", "sonnet", "opus", "inherit"}, arq)
         medicao = _ler(os.path.join(RAIZ_REPO, "docs", "demandas", "modelo-e-documentacao", "medicao.md"))
+        self.assertRegex(medicao, r"^# Medição por modelo — \d{2}/\d{2}/\d{4}")
+        self.assertIn("scripts/avaliar_agentes.py", medicao)
+        self.assertIn("CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1", medicao)
+        self.assertIn("| Caso | haiku | sonnet | opus |", medicao)
         for agente in glob.glob(os.path.join(PLUGINS, "fluxo", "agents", "*.md")):
             self.assertIn(f"`{os.path.splitext(os.path.basename(agente))[0]}`", medicao, agente)
 
