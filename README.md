@@ -174,6 +174,25 @@ Linguagens, frameworks e modelos mudam; o dev-flow separa o que envelhece do que
 
 A skill `aprender` fecha o ciclo: aprendizado de um projeto que vale para toda a stack vira proposta (PR) no `atual.md` ou na skill da stack.
 
+### Custo e modelos
+Cada especialista declara o modelo por família, escolhido pela suíte de comportamento medindo acerto e custo ([medição](docs/demandas/modelo-e-documentacao/medicao.md)):
+
+| Especialista | Modelo | Por quê |
+| --- | --- | --- |
+| `analista` | `haiku` | Leitura e levantamento; ≈ 15% do custo do opus sem perder caso. |
+| `revisor`, `depurador`, `testador` | `sonnet` | ≈ 54% do custo do opus; o `testador` falhou no haiku. |
+| `arquiteto`, `seguranca`, `validador`, `designer`, `analista-de-logs` | `inherit` (modelo da sessão) | Decisão cara de desfazer, achado caro de perder, ou sem caso medido. |
+
+Vale no Claude Code; outros hosts usam o modelo que escolherem. Para forçar um só modelo em todos sem editar o plugin: `CLAUDE_CODE_SUBAGENT_MODEL` + `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` nas settings (detalhes em [`hosts.md`](plugins/fluxo/referencias/hosts.md)). A suíte mostra o custo do agente e do juiz quando o CLI devolve JSON (`claude -p --output-format json`).
+
+### Documentação por MCP
+O passo "documentação daquela versão" fica melhor com um MCP de documentação. O catálogo [`plugins/fluxo/referencias/documentacao.md`](plugins/fluxo/referencias/documentacao.md) diz qual serve cada stack (Microsoft Learn para .NET, SQL Server e PowerShell; Context7 para bibliotecas em geral), custo e cuidados. A skill `iniciar` gera a configuração para o perfil e você grava:
+
+```bash
+python -I plugins/fluxo/scripts/mcp_documentacao.py --host claude   # .mcp.json
+python -I plugins/fluxo/scripts/mcp_documentacao.py --host cursor   # .cursor/mcp.json
+```
+
 ## Comandos do dia a dia
 
 | Você quer… | Comando |

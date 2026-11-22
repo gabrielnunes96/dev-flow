@@ -256,7 +256,7 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
           <path d="M8 10h8M8 15h5M8 20h10" stroke="var(--bg)" stroke-width="2.2" stroke-linecap="round"/>
           <rect x="18.5" y="12.5" width="5" height="5" transform="rotate(45 21 15)" fill="var(--gate)"/>
         </svg>
-        <div><strong>dev-flow</strong><span>Manual do fluxo · v0.4</span></div>
+        <div><strong>dev-flow</strong><span>Manual do fluxo · v0.5</span></div>
       </a>
       <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="toc">Menu</button>
     </div>
@@ -628,9 +628,21 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
             <tr><td>Conhecimento por stack</td><td><code>plugins/stack-*/referencias/atual.md</code></td><td>Fontes oficiais, versões com suporte/LTS/fim de suporte (tabela gerada), mudanças a observar, data de revisão</td></tr>
             <tr><td>Levantamento</td><td><code>scripts/atualizar_conhecimento.py</code></td><td>Regenera as tabelas pela endoflife.date e aponta ciclo novo, LTS novo, fim de suporte e versão sem suporte citada nos plugins</td></tr>
             <tr><td>Revisão mensal</td><td>pipelines agendadas + skill <code>atualizar-conhecimento</code></td><td>Relatório, curadoria pelas fontes oficiais e branch com <code>pr.md</code> — aprovação humana, sem merge automático</td></tr>
-            <tr><td>Testes de comportamento</td><td><code>plugins/fluxo/evals/</code></td><td><code>claude plugin eval plugins/fluxo</code> ou <code>python -I scripts/avaliar_agentes.py --comando "&lt;cli do agente&gt;"</code> em qualquer host</td></tr>
+            <tr><td>Testes de comportamento</td><td><code>plugins/fluxo/evals/</code></td><td><code>claude plugin eval plugins/fluxo</code> ou <code>python -I scripts/avaliar_agentes.py --comando "&lt;cli do agente&gt;"</code> em qualquer host; com saída JSON mostra o custo do agente e do juiz</td></tr>
+            <tr><td>Documentação por MCP</td><td><code>plugins/fluxo/referencias/documentacao.md</code> + <code>scripts/mcp_documentacao.py</code></td><td>Qual MCP serve cada stack (Microsoft Learn, Context7), custo e cuidados; a skill <code>iniciar</code> gera a configuração e você grava</td></tr>
           </tbody>
         </table></div>
+        <h3>Custo e modelos</h3>
+        <p>Cada especialista declara o modelo por família, escolhido medindo acerto e custo com a suíte de comportamento. Vale no Claude Code; outros hosts usam o modelo que escolherem.</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Especialista</th><th>Modelo</th><th>Por quê</th></tr></thead>
+          <tbody>
+            <tr><td><code>analista</code></td><td><code>haiku</code></td><td>Leitura e levantamento; ≈ 15% do custo do opus sem perder caso</td></tr>
+            <tr><td><code>revisor</code>, <code>depurador</code>, <code>testador</code></td><td><code>sonnet</code></td><td>≈ 54% do custo do opus; o testador falhou no haiku</td></tr>
+            <tr><td><code>arquiteto</code>, <code>seguranca</code>, <code>validador</code>, <code>designer</code>, <code>analista-de-logs</code></td><td><code>inherit</code></td><td>Decisão cara de desfazer, achado caro de perder, ou sem caso medido</td></tr>
+          </tbody>
+        </table></div>
+        <div class="callout info"><span class="ico">i</span><div><p>Para o time usar um só modelo em todos os especialistas: <code>"env": {"CLAUDE_CODE_SUBAGENT_MODEL": "&lt;modelo&gt;", "CLAUDE_CODE_SUBAGENT_MODEL_FORCE": "1"}</code> nas settings do Claude Code.</p></div></div>
       </section>
 
       <section class="doc" id="problemas" data-titulo="Problemas comuns">
@@ -663,7 +675,7 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
             <tr><td><b>STRIDE</b></td><td>Roteiro de ameaças: falsificação, adulteração, repúdio, vazamento, negação de serviço, elevação de privilégio.</td></tr>
             <tr><td><b>Tarefa pronta</b></td><td>A fazer, não protegida e com todas as dependências feitas.</td></tr>
           </tbody></table></div>
-        <footer class="end">Manual do marketplace dev-flow v0.4. Fonte: <code>docs/manual/index.html</code> no repositório; atualize junto com o README ao mudar skills, agentes ou plugins.</footer>
+        <footer class="end">Manual do marketplace dev-flow v0.5. Fonte: <code>docs/manual/index.html</code> no repositório; atualize junto com o README ao mudar skills, agentes ou plugins.</footer>
       </section>
 
     </div>
@@ -674,7 +686,7 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
 (function () {
   "use strict";
   var PLUGINS = [
-    { n: "fluxo", v: "0.4.2", c: "nucleo", d: "Processo completo: demanda, técnica, plano, tarefas, PR, depuração e arquitetura. Agentes, hooks, scripts e método de raciocínio.", s: "/fluxo:*" },
+    { n: "fluxo", v: "0.5.0", c: "nucleo", d: "Processo completo: demanda, técnica, plano, tarefas, PR, depuração e arquitetura. Agentes, hooks, scripts e método de raciocínio.", s: "/fluxo:*" },
     { n: "azure-boards", v: "0.1.0", c: "ci", d: "Item raiz e tasks no Azure Boards a partir de tarefas.json, estados e descrição do card.", s: "/azure-boards:boards" },
     { n: "azure-pipelines", v: "0.2.0", c: "ci", d: "YAML do Azure DevOps para dotnet, node, python, java, go, sql, Docker e Terraform; diagnóstico.", s: "/azure-pipelines:pipeline" },
     { n: "github-actions", v: "0.1.0", c: "ci", d: "Workflows de CI, imagem no GHCR com varredura e deploy por environment com OIDC.", s: "/github-actions:actions" },
@@ -697,9 +709,9 @@ footer.end { color: var(--muted); font-size: .85rem; padding-top: 30px; }
     { n: "stack-terraform", v: "0.2.0", c: "infra", k: "terraform", r: "Terraform", d: "Estado remoto, plan revisado, prevent_destroy, moved/import, menor privilégio.", s: "stack-terraform:terraform" },
     { n: "stack-git", v: "0.1.0", c: "infra", k: "git", r: "Git", d: "Commits atômicos, conflitos com teste, histórico publicado intocável, .gitattributes, segredos fora do histórico.", s: "stack-git:git" },
     { n: "stack-linux", v: "0.1.0", c: "infra", k: "linux", r: "Linux", d: "systemd endurecido, permissões mínimas, SSH por chave, firewall, journald e timers.", s: "stack-linux:linux" },
-    { n: "design", v: "0.1.1", c: "extra", d: "Direção visual, tema claro/escuro com tokens, telas, animações, acessibilidade.", s: "/design:design" },
+    { n: "design", v: "0.1.2", c: "extra", d: "Direção visual, tema claro/escuro com tokens, telas, animações, acessibilidade.", s: "/design:design" },
     { n: "video", v: "0.1.0", c: "extra", d: "Vídeo-resumo narrado de uma entrega a partir de um roteiro JSON.", s: "/video:video" },
-    { n: "logs", v: "0.1.9", c: "extra", d: "Analisa arquivos, zips e tars de log numa interface local: erros, avisos, retornos HTTP e painel exportável.", s: "/logs:logs" }
+    { n: "logs", v: "0.1.10", c: "extra", d: "Analisa arquivos, zips e tars de log numa interface local: erros, avisos, retornos HTTP e painel exportável.", s: "/logs:logs" }
   ];
   var CATS = [["todos", "Todos"], ["nucleo", "Núcleo"], ["ci", "Rastreador e CI/CD"], ["linguagem", "Linguagens"], ["banco", "Bancos"], ["infra", "Infraestrutura e sistema"], ["extra", "Extras"]];
   var AGENTES = [
